@@ -1,8 +1,16 @@
 {
   "sections": {
     "list": {
-      "type": "main-list-collections"
+      "type": "main-list-collections",
+      "settings": {
+        "heading": "Coleções",
+        "texto": "<p>Peças feitas à mão em ouro reciclado e diamantes cultivados.</p>",
+        "modo": "todas",
+        "colunas": 3
+      }
     }
   },
-  "order": ["list"]
+  "order": [
+    "list"
+  ]
 }

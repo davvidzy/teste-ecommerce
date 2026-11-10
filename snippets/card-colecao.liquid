@@ -1,0 +1,80 @@
+{%- comment -%}
+  ============================================================
+  card-colecao — card de uma coleção (foto + nome + nº de peças)
+  ============================================================
+
+  O QUE FAZ:
+  Card vertical com a foto da coleção, o nome sobreposto embaixo e
+  a contagem de peças. Na passagem do mouse a foto aproxima de leve
+  e a seta desliza.
+
+  DE ONDE VEM A FOTO (primeira que existir):
+  1. imagem passada pelo parâmetro (escolhida no editor de temas);
+  2. imagem da própria coleção (admin › Produtos › Coleções);
+  3. foto principal do primeiro produto da coleção;
+  4. placeholder do Shopify (a coleção ainda não existe ou está vazia).
+  → Por isso a seção nunca "quebra": dá para montar a home antes de
+    cadastrar os produtos e ela se preenche sozinha depois.
+
+  COMO USAR:
+  {% render 'card-colecao', colecao: collection, imagem: block.settings.imagem,
+     rotulo: 'Anéis', indice: forloop.index0, tamanhos: '(min-width: 1000px) 33vw, 80vw' %}
+
+  PARÂMETROS:
+  - colecao:  objeto collection (pode ser nil/vazio).
+  - imagem:   (opcional) imagem que substitui a da coleção.
+  - rotulo:   (opcional) texto no lugar do nome da coleção.
+  - indice:   posição (escolhe o desenho do placeholder).
+  - tamanhos: (opcional) atributo sizes da imagem.
+{%- endcomment -%}
+{%- liquid
+  assign foto = imagem
+  if foto == blank
+    assign foto = colecao.featured_image
+  endif
+  if foto == blank
+    assign foto = colecao.products.first.featured_image
+  endif
+
+  assign nome = rotulo
+  if nome == blank
+    assign nome = colecao.title
+  endif
+
+  assign link = colecao.url
+  if link == blank
+    assign link = routes.collections_url
+  endif
+
+  assign numero_placeholder = indice | default: 0 | modulo: 6 | plus: 1
+  assign nome_placeholder = 'collection-' | append: numero_placeholder
+-%}
+<a href="{{ link }}" class="card-colecao">
+  <div class="card-colecao__midia">
+    {%- if foto != blank -%}
+      {{
+        foto
+        | image_url: width: 1200
+        | image_tag:
+          loading: 'lazy',
+          widths: '360, 540, 720, 900, 1200',
+          sizes: tamanhos | default: '(min-width: 1000px) 33vw, 80vw',
+          class: 'card-colecao__imagem',
+          alt: nome | escape
+      }}
+    {%- else -%}
+      {{ nome_placeholder | placeholder_svg_tag: 'card-colecao__imagem placeholder-svg' }}
+    {%- endif -%}
+  </div>
+  <div class="card-colecao__legenda">
+    <span class="card-colecao__nome">{{ nome | escape }}</span>
+    <span class="card-colecao__info">
+      {%- if colecao.products_count > 0 -%}
+        {{ 'sections.categorias.pieces' | t: count: colecao.products_count }}
+      {%- else -%}
+        {{ 'sections.categorias.coming_soon' | t }}
+      {%- endif -%}
+      {% render 'icon', name: 'seta' %}
+    </span>
+  </div>
+</a>

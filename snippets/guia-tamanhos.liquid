@@ -1,0 +1,88 @@
+{%- comment -%}
+  ============================================================
+  guia-tamanhos — calculadora de aro + tabela + medidas de colar
+  ============================================================
+
+  O QUE FAZ:
+  1. Calculadora: o cliente digita a circunferência (ou o diâmetro
+     de um anel que já tem) e descobre o aro. A linha correspondente
+     da tabela acende. Lógica em assets/guia-tamanhos.js.
+  2. Tabela de aros brasileiros (10 a 30), gerada em Liquid:
+     circunferência = aro + 40 mm; diâmetro = circunferência ÷ π.
+  3. Passo a passo de como medir com um barbante.
+  4. (opcional) Comprimentos de colar.
+
+  ONDE É USADO:
+  - sections/guia-tamanhos.liquid (página "Guia de tamanhos");
+  - sections/main-product.liquid, bloco "Guia de tamanhos" (dentro
+    de um <dialog> aberto pelo link ao lado das opções).
+
+  PARÂMETROS:
+  - id:      sufixo único (evita ids repetidos se houver dois guias).
+  - colares: true para mostrar a lista de comprimentos de colar.
+{%- endcomment -%}
+<calcula-aro class="guia">
+  <div class="guia__calculadora">
+    <p class="guia__subtitulo">{{ 'sections.guia.calculator_title' | t }}</p>
+    <div class="guia__campos">
+      <div class="guia__modo" role="radiogroup" aria-label="{{ 'sections.guia.mode_label' | t }}">
+        <label><input type="radio" name="modo-{{ id }}" value="circunferencia" checked data-modo> {{ 'sections.guia.circumference' | t }}</label>
+        <label><input type="radio" name="modo-{{ id }}" value="diametro" data-modo> {{ 'sections.guia.diameter' | t }}</label>
+      </div>
+      <label class="guia__entrada">
+        <span class="visually-hidden">{{ 'sections.guia.measure_label' | t }}</span>
+        <input type="number" inputmode="decimal" min="10" max="80" step="0.1" placeholder="{{ 'sections.guia.placeholder' | t }}" data-medida>
+        <span aria-hidden="true">mm</span>
+      </label>
+    </div>
+    <p class="guia__resultado" aria-live="polite" data-resultado>{{ 'sections.guia.result_empty' | t }}</p>
+  </div>
+
+  <div class="guia__tabela-wrapper">
+    <table class="guia__tabela">
+      <caption class="visually-hidden">{{ 'sections.guia.table_caption' | t }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'sections.guia.ring_size' | t }}</th>
+          <th scope="col">{{ 'sections.guia.circumference' | t }}</th>
+          <th scope="col">{{ 'sections.guia.diameter' | t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {%- for aro in (10..30) -%}
+          {%- liquid
+            assign circ = aro | plus: 40
+            assign diam = circ | times: 1.0 | divided_by: 3.14159 | round: 1 | append: '' | replace: '.', ','
+          -%}
+          <tr data-aro="{{ aro }}">
+            <th scope="row">{{ aro }}</th>
+            <td>{{ circ }} mm</td>
+            <td>{{ diam }} mm</td>
+          </tr>
+        {%- endfor -%}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="guia__como">
+    <p class="guia__subtitulo">{{ 'sections.guia.how_title' | t }}</p>
+    <ol class="guia__passos">
+      <li>{{ 'sections.guia.step_1' | t }}</li>
+      <li>{{ 'sections.guia.step_2' | t }}</li>
+      <li>{{ 'sections.guia.step_3' | t }}</li>
+    </ol>
+    <p class="guia__dica">{{ 'sections.guia.tip' | t }}</p>
+  </div>
+
+  {%- if colares -%}
+    <div class="guia__colares">
+      <p class="guia__subtitulo">{{ 'sections.guia.necklace_title' | t }}</p>
+      <ul class="guia__lista-colares" role="list">
+        <li><strong>40 cm</strong> {{ 'sections.guia.necklace_40' | t }}</li>
+        <li><strong>45 cm</strong> {{ 'sections.guia.necklace_45' | t }}</li>
+        <li><strong>50 cm</strong> {{ 'sections.guia.necklace_50' | t }}</li>
+        <li><strong>60 cm</strong> {{ 'sections.guia.necklace_60' | t }}</li>
+      </ul>
+    </div>
+  {%- endif -%}
+</calcula-aro>

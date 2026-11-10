@@ -1,0 +1,63 @@
+{%- comment -%}
+  ============================================================
+  GUIA DE TAMANHOS — página dedicada (template page.guia-de-tamanhos)
+  ============================================================
+
+  O QUE FAZ:
+  Versão de página inteira do guia: calculadora + tabela à esquerda,
+  "como medir" e comprimentos de colar à direita. O conteúdo vem do
+  snippet guia-tamanhos (o mesmo do pop-up da página de produto),
+  então a tabela é uma só — mudou lá, muda nos dois lugares.
+
+  SETTINGS: sobrelinha, título, texto, mostrar colares.
+{%- endcomment -%}
+
+<div class="guia-secao secao">
+  <div class="page-width">
+    <div class="secao-topo" data-reveal>
+      <div>
+        {%- if section.settings.sobrelinha != blank -%}
+          <p class="secao-sobrelinha">{{ section.settings.sobrelinha | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.titulo != blank -%}
+          <h2 class="secao-titulo">{{ section.settings.titulo | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.texto != blank -%}
+          <div class="secao-descricao rte">{{ section.settings.texto }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+    <div data-reveal style="--reveal-index: 1;">
+      {% render 'guia-tamanhos', id: section.id, colares: section.settings.colares %}
+    </div>
+  </div>
+</div>
+
+{{ 'guia-tamanhos.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'guia-tamanhos.js' | asset_url }}" defer="defer"></script>
+
+<style>
+  @media screen and (min-width: 1001px) {
+    .guia-secao .guia { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: clamp(40px, 6vw, 96px); align-items: start; }
+    .guia-secao .guia__calculadora,
+    .guia-secao .guia__tabela-wrapper { grid-column: 1; }
+    .guia-secao .guia__como { grid-column: 2; grid-row: 1; }
+    .guia-secao .guia__colares { grid-column: 2; grid-row: 2; }
+    .guia-secao .guia__tabela-wrapper { max-height: 520px; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Guia de tamanhos",
+  "tag": "section",
+  "class": "section-guia-tamanhos",
+  "settings": [
+    { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Medidas" },
+    { "type": "text", "id": "titulo", "label": "Título", "default": "Descubra seu aro" },
+    { "type": "richtext", "id": "texto", "label": "Texto", "default": "<p>Digite a medida do seu dedo ou de um anel que você já usa. Se ficar entre dois aros, escolha o maior.</p>" },
+    { "type": "checkbox", "id": "colares", "label": "Mostrar comprimentos de colar", "default": true }
+  ],
+  "presets": [{ "name": "Guia de tamanhos" }]
+}
+{% endschema %}

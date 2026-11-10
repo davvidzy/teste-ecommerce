@@ -1,0 +1,62 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "guia": {
+      "type": "guia-tamanhos",
+      "settings": {
+        "sobrelinha": "Medidas",
+        "titulo": "Descubra seu aro",
+        "texto": "<p>Digite a medida do seu dedo ou de um anel que você já usa. Se ficar entre dois aros, escolha o maior.</p>",
+        "colares": true
+      }
+    },
+    "duvidas": {
+      "type": "perguntas-frequentes",
+      "blocks": {
+        "q1": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "E se eu errar o tamanho?",
+            "resposta": "<p>A primeira troca de tamanho é grátis em até 30 dias.</p>"
+          }
+        },
+        "q2": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Posso pedir um kit medidor?",
+            "resposta": "<p>Sim. Enviamos um medidor de aros gratuito: é só pedir pelo WhatsApp ou e-mail.</p>"
+          }
+        },
+        "q3": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Vou dar de presente e não sei o tamanho.",
+            "resposta": "<p>Escolha o tamanho mais comum (aro 14 a 16) e a pessoa troca depois sem custo.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3"
+      ],
+      "settings": {
+        "sobrelinha": "Ainda em dúvida?",
+        "titulo": "Sobre tamanhos",
+        "texto": "<p>Não encontrou o que procurava? Nosso time responde em até 1 dia útil.</p>",
+        "rotulo_contato": "Fale com a gente",
+        "link_contato": "",
+        "abrir_primeira": true,
+        "dados_estruturados": true,
+        "fundo": "contraste"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "guia",
+    "duvidas"
+  ]
+}

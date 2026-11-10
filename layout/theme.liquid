@@ -78,7 +78,11 @@
         addedToCart: {{ 'sections.cart.added_to_cart' | t | json }},
         cartError: {{ 'sections.cart.cart_error' | t | json }},
         viewCart: {{ 'sections.cart.view_cart' | t | json }},
-        cartUrl: {{ routes.cart_url | json }}
+        cartUrl: {{ routes.cart_url | json }},
+        guia: {
+          resultado: {{ 'sections.guia.result_html' | t | json }},
+          foraDaTabela: {{ 'sections.guia.out_of_range' | t | json }}
+        }
       };
     </script>
     <script src="{{ 'carrinho.js' | asset_url }}" defer="defer"></script>
@@ -102,5 +106,7 @@
     </main>
 
     {% sections 'footer-group' %}
+
+    {% render 'whatsapp-flutuante' %}
   </body>
 </html>

@@ -37,6 +37,15 @@
       "email_placeholder": "Email",
       "confirmation": "Thanks for subscribing.",
       "button_label": "Subscribe"
+    },
+    "slider": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "whatsapp": {
+      "label": "Chat with us on WhatsApp",
+      "cta": "Chat with us",
+      "product_message": "Hi! I have a question about {{ produto }}:"
     }
   },
   "accessibility": {
@@ -167,7 +176,9 @@
   "sections": {
     "main_collection": {
       "empty": "No products found",
-      "use_fewer_filters": "Use fewer filters or remove all"
+      "use_fewer_filters": "Use fewer filters or remove all",
+      "coming_soon_title": "Pieces on the way",
+      "coming_soon_text": "This collection is being prepared in our studio. Come back soon or sign up in the footer to hear first."
     },
     "header": {
       "announcement": "Announcement",
@@ -245,6 +256,50 @@
       "email": "Email",
       "copy_link": "Copy link",
       "copied": "Link copied!"
+    },
+    "categorias": {
+      "pieces": {
+        "one": "{{ count }} piece",
+        "other": "{{ count }} pieces"
+      },
+      "coming_soon": "Coming soon",
+      "empty": "No collections published yet."
+    },
+    "depoimentos": {
+      "rating": "{{ nota }} out of 5",
+      "reviews": {
+        "one": "{{ count }} review",
+        "other": "{{ count }} reviews"
+      },
+      "stars": {
+        "one": "{{ count }} star out of 5",
+        "other": "{{ count }} stars out of 5"
+      },
+      "verified": "Verified purchase"
+    },
+    "guia": {
+      "open": "Size guide",
+      "calculator_title": "Find your ring size",
+      "mode_label": "What did you measure",
+      "circumference": "Circumference",
+      "diameter": "Diameter",
+      "measure_label": "Measurement in millimeters",
+      "placeholder": "e.g. 54",
+      "result_empty": "Enter your measurement in millimeters.",
+      "result_html": "Your size is <strong>[aro]</strong>",
+      "out_of_range": "Measurement out of range. Get in touch and we will help.",
+      "table_caption": "Brazilian ring size chart with inner circumference and diameter",
+      "ring_size": "Size",
+      "how_title": "How to measure",
+      "step_1": "Wrap a string or a strip of paper around the base of your finger, without tightening.",
+      "step_2": "Mark where the ends meet and measure it with a ruler, in millimeters.",
+      "step_3": "Type the measurement into the calculator. For a ring you already own, measure its inner diameter.",
+      "tip": "Tip: measure at the end of the day, when fingers are slightly larger. Between two sizes, pick the bigger one.",
+      "necklace_title": "Necklace lengths",
+      "necklace_40": "Choker: sits at the base of the neck",
+      "necklace_45": "Princess: at the collarbone (best seller)",
+      "necklace_50": "Matinee: just below the collarbone",
+      "necklace_60": "Opera: mid-chest, great for layering"
     }
   },
   "customer": {

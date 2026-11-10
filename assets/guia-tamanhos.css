@@ -1,0 +1,83 @@
+/*
+  guia-tamanhos.css — estilos do snippets/guia-tamanhos.liquid
+  e do pop-up (<dialog class="guia-dialogo">) da página de produto.
+*/
+.guia { display: grid; gap: 32px; }
+.guia__subtitulo { margin: 0 0 14px; font-family: var(--font-heading-family); font-size: 1.35rem; line-height: 1.2; }
+
+/* ---------- Calculadora ---------- */
+.guia__calculadora { padding: 24px; border-radius: var(--media-radius); background: var(--color-background-contrast); }
+.guia__campos { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.guia__modo { display: flex; gap: 6px; padding: 4px; border-radius: 999px; background: var(--color-background); }
+.guia__modo label { position: relative; padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: var(--f1); transition: background-color 200ms ease, color 200ms ease; }
+.guia__modo input { position: absolute; opacity: 0; pointer-events: none; }
+.guia__modo label:has(input:checked) { background: var(--color-accent); color: var(--color-accent-text); }
+.guia__modo label:has(input:focus-visible) { outline: 2px solid var(--color-text); outline-offset: 2px; }
+.guia__entrada { display: inline-flex; align-items: center; gap: 8px; }
+.guia__entrada input {
+  width: 120px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--inputs-radius);
+  background: var(--color-background);
+  color: inherit;
+  font: inherit;
+}
+.guia__entrada input:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+.guia__resultado { margin: 16px 0 0; font-size: var(--f2); }
+.guia__resultado strong { font-family: var(--font-heading-family); font-size: 1.6em; font-weight: var(--font-heading-weight); color: var(--color-accent); }
+
+/* ---------- Tabela ---------- */
+.guia__tabela-wrapper { max-height: 360px; overflow-y: auto; border: 1px solid var(--color-border); border-radius: var(--media-radius); }
+.guia__tabela { width: 100%; border-collapse: collapse; font-size: var(--f1); font-variant-numeric: tabular-nums; }
+.guia__tabela thead th { position: sticky; top: 0; z-index: 1; background: var(--color-background); font-weight: 500; text-align: left; }
+.guia__tabela th, .guia__tabela td { padding: 11px 16px; border-bottom: 1px solid var(--color-border); text-align: left; }
+.guia__tabela tbody th { font-weight: 500; }
+.guia__tabela tbody tr:last-child > * { border-bottom: 0; }
+.guia__tabela tbody tr { transition: background-color 300ms ease; }
+.guia__tabela tbody tr.is-ativo { background: var(--color-accent); color: var(--color-accent-text); }
+
+/* ---------- Como medir / colares ---------- */
+.guia__passos { display: grid; gap: 10px; margin: 0; padding-left: 1.3em; line-height: 1.6; }
+.guia__dica { margin: 14px 0 0; font-size: var(--f1); opacity: 0.75; }
+.guia__lista-colares { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; line-height: 1.5; }
+.guia__lista-colares strong { display: inline-block; min-width: 56px; font-weight: 500; }
+
+/* ---------- Pop-up da página de produto ---------- */
+.guia-dialogo {
+  width: min(560px, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  overscroll-behavior: contain;
+}
+.guia-dialogo::backdrop { background: rgb(18 22 20 / 0.45); }
+.guia-dialogo__topo {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+}
+.guia-dialogo__titulo { margin: 0; font-size: 1.5rem; }
+.guia-dialogo__fechar { display: inline-grid; place-items: center; width: 44px; height: 44px; margin-right: -10px; background: none; color: inherit; cursor: pointer; }
+.guia-dialogo__fechar svg { width: 18px; height: 18px; }
+.guia-dialogo__corpo { padding: 24px; }
+
+/* Entrada pela direita (mesma linguagem do alerta "Ver sacola") */
+@media (prefers-reduced-motion: no-preference) {
+  .guia-dialogo[open] { animation: guia-entra 520ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+  .guia-dialogo[open]::backdrop { animation: guia-fundo 400ms ease; }
+}
+@keyframes guia-entra { from { transform: translate3d(100%, 0, 0); } to { transform: none; } }
+@keyframes guia-fundo { from { opacity: 0; } to { opacity: 1; } }

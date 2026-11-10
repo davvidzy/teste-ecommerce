@@ -1,0 +1,141 @@
+{%- comment -%}
+  ============================================================
+  PERGUNTAS FREQUENTES — acordeão de dúvidas
+  ============================================================
+
+  O QUE FAZ:
+  Duas colunas: à esquerda o título e um convite para falar com o
+  atendimento (fixo enquanto a lista rola); à direita as perguntas
+  em acordeão (<details> nativo — abre sem JS, acessível por teclado).
+
+  POR QUE IMPORTA:
+  Responder antes que o cliente pergunte reduz abandono (prazo,
+  troca, garantia, tamanho são as dúvidas que travam uma compra de
+  joia). As mesmas perguntas vão para o Google como dados
+  estruturados FAQPage (JSON-LD no fim da seção).
+
+  ONDE É USADA:
+  Home (versão curta), página FAQ (completa), Guia de tamanhos.
+
+  SETTINGS: sobrelinha, título, texto e link do contato, abrir a
+  primeira, dados estruturados, fundo.
+  BLOCKS: pergunta (pergunta, resposta).
+{%- endcomment -%}
+
+<div class="faq secao secao--{{ section.settings.fundo }}">
+  <div class="faq__grade page-width">
+    <div class="faq__lateral" data-reveal>
+      {%- if section.settings.sobrelinha != blank -%}
+        <p class="secao-sobrelinha">{{ section.settings.sobrelinha | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.titulo != blank -%}
+        <h2 class="secao-titulo">{{ section.settings.titulo | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.texto != blank -%}
+        <div class="secao-descricao rte">{{ section.settings.texto }}</div>
+      {%- endif -%}
+      {%- if section.settings.rotulo_contato != blank -%}
+        <a href="{{ section.settings.link_contato | default: '/pages/contact' }}" class="button button--secondary faq__contato">
+          {{- section.settings.rotulo_contato | escape -}}
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="faq__lista" data-reveal style="--reveal-index: 1;">
+      {%- for block in section.blocks -%}
+        <details class="acordeao" {{ block.shopify_attributes }} {% if forloop.first and section.settings.abrir_primeira %}open{% endif %}>
+          <summary class="acordeao__titulo">
+            {{ block.settings.pergunta | escape }}
+            <span class="acordeao__icone" aria-hidden="true"></span>
+          </summary>
+          <div class="acordeao__conteudo rte">{{ block.settings.resposta }}</div>
+        </details>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{%- if section.settings.dados_estruturados and section.blocks.size > 0 -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {%- for block in section.blocks -%}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.pergunta | json }},
+            "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.resposta | strip_html | json }} }
+          }{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+{%- endif -%}
+
+<style>
+  .faq__grade {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(32px, 6vw, 112px);
+    align-items: start;
+  }
+  .faq__lateral { position: sticky; top: calc(var(--header-altura) + 32px); }
+  .faq__contato { margin-top: 28px; }
+  .faq__lista .acordeao__titulo { font-family: var(--font-heading-family); font-weight: var(--font-heading-weight); font-size: clamp(1.1rem, 1.6vw, 1.35rem); }
+  .faq__lista .acordeao__conteudo { max-width: 62ch; }
+  .secao--acento .acordeao, .secao--acento .acordeao:first-child { border-color: color-mix(in srgb, var(--color-accent-text) 25%, transparent); }
+
+  @media screen and (max-width: 1000px) {
+    .faq__grade { grid-template-columns: 1fr; gap: 28px; }
+    .faq__lateral { position: static; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Perguntas frequentes",
+  "tag": "section",
+  "class": "section-faq",
+  "settings": [
+    { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Dúvidas" },
+    { "type": "text", "id": "titulo", "label": "Título", "default": "Perguntas frequentes" },
+    { "type": "richtext", "id": "texto", "label": "Texto", "default": "<p>Não encontrou o que procurava? Nosso time responde em até 1 dia útil.</p>" },
+    { "type": "text", "id": "rotulo_contato", "label": "Texto do botão de contato", "default": "Fale com a gente" },
+    { "type": "url", "id": "link_contato", "label": "Link do contato", "info": "Vazio = página de contato." },
+    { "type": "checkbox", "id": "abrir_primeira", "label": "Abrir a primeira pergunta", "default": true },
+    { "type": "checkbox", "id": "dados_estruturados", "label": "Enviar ao Google como FAQ (dados estruturados)", "default": true, "info": "Desligue se esta seção aparecer duas vezes na mesma página." },
+    {
+      "type": "select",
+      "id": "fundo",
+      "label": "Fundo",
+      "options": [
+        { "value": "padrao", "label": "Padrão (creme)" },
+        { "value": "contraste", "label": "Contraste (bege)" },
+        { "value": "acento", "label": "Acento (verde)" }
+      ],
+      "default": "padrao"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "pergunta",
+      "name": "Pergunta",
+      "settings": [
+        { "type": "text", "id": "pergunta", "label": "Pergunta", "default": "Qual o prazo de entrega?" },
+        { "type": "richtext", "id": "resposta", "label": "Resposta", "default": "<p>Peças a pronta-entrega saem em até 2 dias úteis. Peças feitas sob medida levam até 15 dias úteis.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Perguntas frequentes",
+      "blocks": [
+        { "type": "pergunta" },
+        { "type": "pergunta", "settings": { "pergunta": "Posso trocar se o tamanho não servir?", "resposta": "<p>Sim. A primeira troca de tamanho é grátis em até 30 dias.</p>" } },
+        { "type": "pergunta", "settings": { "pergunta": "As joias têm garantia?", "resposta": "<p>Garantia vitalícia contra defeitos de fabricação, com certificado.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

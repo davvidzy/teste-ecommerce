@@ -37,6 +37,15 @@
       "email_placeholder": "E-mail",
       "confirmation": "Obrigado por se inscrever!",
       "button_label": "Inscrever"
+    },
+    "slider": {
+      "previous": "Anterior",
+      "next": "Próximo"
+    },
+    "whatsapp": {
+      "label": "Falar com o atendimento pelo WhatsApp",
+      "cta": "Fale conosco",
+      "product_message": "Olá! Tenho uma dúvida sobre a peça {{ produto }}:"
     }
   },
   "accessibility": {
@@ -167,7 +176,9 @@
   "sections": {
     "main_collection": {
       "empty": "Nenhum produto encontrado",
-      "use_fewer_filters": "Use menos filtros ou remova todos"
+      "use_fewer_filters": "Use menos filtros ou remova todos",
+      "coming_soon_title": "Peças a caminho",
+      "coming_soon_text": "Esta coleção está sendo preparada no ateliê. Volte em breve ou cadastre seu e-mail no rodapé para saber primeiro."
     },
     "header": {
       "announcement": "Anúncio",
@@ -245,6 +256,50 @@
       "email": "E-mail",
       "copy_link": "Copiar link",
       "copied": "Link copiado!"
+    },
+    "categorias": {
+      "pieces": {
+        "one": "{{ count }} peça",
+        "other": "{{ count }} peças"
+      },
+      "coming_soon": "Em breve",
+      "empty": "Nenhuma coleção publicada ainda."
+    },
+    "depoimentos": {
+      "rating": "{{ nota }} de 5",
+      "reviews": {
+        "one": "{{ count }} avaliação",
+        "other": "{{ count }} avaliações"
+      },
+      "stars": {
+        "one": "{{ count }} estrela de 5",
+        "other": "{{ count }} estrelas de 5"
+      },
+      "verified": "Compra verificada"
+    },
+    "guia": {
+      "open": "Guia de tamanhos",
+      "calculator_title": "Calcule seu aro",
+      "mode_label": "O que você mediu",
+      "circumference": "Circunferência",
+      "diameter": "Diâmetro",
+      "measure_label": "Medida em milímetros",
+      "placeholder": "Ex.: 54",
+      "result_empty": "Digite a medida em milímetros.",
+      "result_html": "Seu aro é <strong>[aro]</strong>",
+      "out_of_range": "Medida fora da tabela. Fale com a gente que ajudamos.",
+      "table_caption": "Tabela de aros brasileiros com circunferência e diâmetro interno",
+      "ring_size": "Aro",
+      "how_title": "Como medir",
+      "step_1": "Enrole um barbante ou uma tira de papel na base do dedo, sem apertar.",
+      "step_2": "Marque onde as pontas se encontram e meça com uma régua, em milímetros.",
+      "step_3": "Digite a medida na calculadora. Para um anel que você já tem, meça o diâmetro interno.",
+      "tip": "Dica: meça no fim do dia, quando os dedos estão um pouco mais inchados. Entre dois aros, escolha o maior.",
+      "necklace_title": "Comprimentos de colar",
+      "necklace_40": "Gargantilha: rente à base do pescoço",
+      "necklace_45": "Princesa: na altura da clavícula (o mais vendido)",
+      "necklace_50": "Matinê: um pouco abaixo da clavícula",
+      "necklace_60": "Ópera: no meio do colo, ótimo para sobrepor"
     }
   },
   "customer": {

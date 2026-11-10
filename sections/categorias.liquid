@@ -1,0 +1,145 @@
+{%- comment -%}
+  ============================================================
+  CATEGORIAS — "Compre por categoria" (home)
+  ============================================================
+
+  O QUE FAZ:
+  Mostra as coleções principais (Anéis, Brincos, Colares…) como cards
+  grandes com foto. É o atalho mais usado numa loja de joias: quem já
+  sabe o que quer pula direto para a categoria.
+
+  COMPORTAMENTO:
+  - Desktop: grade de 3 ou 4 colunas.
+  - Celular: vira um trilho com swipe (scroll-snap), mostrando um
+    pedaço do próximo card para indicar que dá para arrastar.
+  - Setas no topo aparecem só quando há mais cards do que cabem.
+
+  PREPARADA PARA A LOJA VAZIA:
+  Cada bloco aponta para uma coleção. Se a coleção ainda não existir
+  ou não tiver produtos, o card mostra um placeholder e "Em breve".
+  Quando você criar a coleção (com o mesmo handle) e adicionar
+  produtos, a foto e a contagem aparecem sozinhas — sem mexer aqui.
+  Detalhes da foto em snippets/card-colecao.liquid.
+
+  SETTINGS: sobrelinha, titulo, texto do link, colunas, proporção.
+  BLOCKS: categoria (coleção, imagem opcional, rótulo opcional).
+{%- endcomment -%}
+
+<trilho-carrossel class="categorias secao page-width" style="--colunas: {{ section.settings.colunas }}; --proporcao: {{ section.settings.proporcao }};">
+  <div class="secao-topo">
+    <div data-reveal>
+      {%- if section.settings.sobrelinha != blank -%}
+        <p class="secao-sobrelinha">{{ section.settings.sobrelinha | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.titulo != blank -%}
+        <h2 class="secao-titulo">{{ section.settings.titulo | escape }}</h2>
+      {%- endif -%}
+    </div>
+    <div class="categorias__acoes" data-reveal="fade" style="--reveal-index: 1;">
+      {%- if section.settings.rotulo_link != blank -%}
+        <a href="{{ section.settings.link | default: routes.collections_url }}" class="button button--tertiary">
+          {{- section.settings.rotulo_link | escape -}}
+        </a>
+      {%- endif -%}
+      <div class="setas categorias__setas">
+        <button type="button" class="seta-botao seta-botao--voltar" data-voltar aria-label="{{ 'general.slider.previous' | t }}">{% render 'icon', name: 'seta' %}</button>
+        <button type="button" class="seta-botao" data-avancar aria-label="{{ 'general.slider.next' | t }}">{% render 'icon', name: 'seta' %}</button>
+      </div>
+    </div>
+  </div>
+
+  <ul class="categorias__trilho" role="list" data-trilho>
+    {%- for block in section.blocks -%}
+      <li class="categorias__item" data-reveal style="--reveal-index: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+        {% render 'card-colecao',
+          colecao: block.settings.colecao,
+          imagem: block.settings.imagem,
+          rotulo: block.settings.rotulo,
+          indice: forloop.index0,
+          tamanhos: '(min-width: 1000px) 33vw, 78vw'
+        %}
+      </li>
+    {%- endfor -%}
+  </ul>
+</trilho-carrossel>
+
+{{ 'card-colecao.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'carrossel.js' | asset_url }}" defer="defer"></script>
+
+<style>
+  .categorias { display: block; }
+  .categorias__acoes { display: flex; align-items: center; gap: 24px; }
+  .categorias[data-cabe] .categorias__setas { display: none; }
+
+  .categorias__trilho {
+    display: grid;
+    grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 28px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media screen and (max-width: 1000px) {
+    .categorias__trilho {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      /* o trilho "vaza" até a borda da tela; o primeiro card continua alinhado à margem */
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+    .categorias__trilho::-webkit-scrollbar { display: none; }
+    .categorias__item { flex: 0 0 min(78%, 340px); scroll-snap-align: start; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Categorias",
+  "tag": "section",
+  "class": "section-categorias",
+  "settings": [
+    { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Explore" },
+    { "type": "text", "id": "titulo", "label": "Título", "default": "Compre por categoria" },
+    { "type": "text", "id": "rotulo_link", "label": "Texto do link", "default": "Todas as coleções" },
+    { "type": "url", "id": "link", "label": "Link", "info": "Vazio = página com todas as coleções." },
+    { "type": "range", "id": "colunas", "label": "Colunas no desktop", "min": 2, "max": 5, "step": 1, "default": 3 },
+    {
+      "type": "select",
+      "id": "proporcao",
+      "label": "Formato da foto",
+      "options": [
+        { "value": "4 / 5", "label": "Retrato (4:5)" },
+        { "value": "1 / 1", "label": "Quadrado" },
+        { "value": "2 / 3", "label": "Retrato alto (2:3)" }
+      ],
+      "default": "4 / 5"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "categoria",
+      "name": "Categoria",
+      "limit": 8,
+      "settings": [
+        { "type": "collection", "id": "colecao", "label": "Coleção" },
+        { "type": "image_picker", "id": "imagem", "label": "Foto", "info": "Opcional. Vazio = foto da coleção ou do primeiro produto." },
+        { "type": "text", "id": "rotulo", "label": "Nome", "info": "Opcional. Vazio = nome da coleção." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Categorias",
+      "blocks": [
+        { "type": "categoria", "settings": { "rotulo": "Anéis" } },
+        { "type": "categoria", "settings": { "rotulo": "Brincos" } },
+        { "type": "categoria", "settings": { "rotulo": "Colares" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

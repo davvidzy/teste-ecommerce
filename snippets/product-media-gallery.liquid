@@ -192,6 +192,39 @@
   .product__description { padding-bottom: 20px; font-size: 0.9375rem; line-height: 1.7; opacity: 0.85; }
   .product__acordeao[open] .product__description { animation: pdp-abre 450ms var(--ease-out); }
 
+  /* Vários acordeões seguidos (Descrição, Entrega, Cuidados…) formam uma lista só: sem espaço nem borda dupla */
+  .product__acordeao + .product__acordeao { margin-top: 0; border-top: 0; }
+  .product__acordeao-rotulo { display: inline-flex; align-items: center; gap: 10px; }
+  .product__acordeao-rotulo svg { width: 18px; height: 18px; }
+
+  /* ---------- Guia de tamanhos (link que abre o pop-up) ---------- */
+  .product__guia { margin: -8px 0 20px; }
+  .product__guia .button { gap: 8px; }
+  .product__guia svg { width: 16px; height: 16px; }
+
+  /* ---------- Benefícios (selos curtos abaixo do botão) ---------- */
+  .product__beneficios {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .product__beneficios li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 6px;
+    border-radius: var(--media-radius);
+    background: var(--color-background-contrast);
+    font-size: 0.75rem;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .product__beneficios svg { width: 20px; height: 20px; }
+
   .product__share { margin-top: 12px; }
 
   @keyframes pdp-destaque { from { opacity: 0.2; transform: scale(0.985); } to { opacity: 1; transform: none; } }

@@ -1,0 +1,205 @@
+{%- comment -%}
+  ============================================================
+  DEPOIMENTOS — prova social em carrossel
+  ============================================================
+
+  O QUE FAZ:
+  Cartões com nota (estrelas), citação, nome e a peça comprada.
+  Topo com a nota média da loja ("4,9 de 5") e setas.
+
+  COMPORTAMENTO:
+  - Trilho com scroll-snap: arrasta com dedo/trackpad e funciona
+    sem JS. As setas vêm de assets/carrossel.js (<trilho-carrossel>)
+    e somem quando todos os cartões cabem na tela.
+  - Desktop mostra 3 cartões; celular mostra 1 + uma "pontinha" do
+    próximo, que é a dica visual de que dá para arrastar.
+
+  DE ONDE VÊM OS DEPOIMENTOS:
+  Aqui são blocos editados à mão no editor de temas (bom para
+  começar). Numa loja de verdade, com volume, o normal é trocar por
+  um app de avaliações (Judge.me, Yotpo…) que coleta as notas por
+  e-mail depois da entrega e injeta um bloco próprio na página.
+
+  SETTINGS: sobrelinha, título, nota média, total de avaliações, fundo.
+  BLOCKS: depoimento (estrelas, texto, nome, detalhe).
+{%- endcomment -%}
+
+<trilho-carrossel class="depoimentos secao secao--{{ section.settings.fundo }}">
+  <div class="page-width">
+    <div class="secao-topo">
+      <div data-reveal>
+        {%- if section.settings.sobrelinha != blank -%}
+          <p class="secao-sobrelinha">{{ section.settings.sobrelinha | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.titulo != blank -%}
+          <h2 class="secao-titulo">{{ section.settings.titulo | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.nota != blank -%}
+          <p class="depoimentos__media">
+            <span class="depoimentos__estrelas" aria-hidden="true">
+              {%- for i in (1..5) -%}{% render 'icon', name: 'estrela' %}{%- endfor -%}
+            </span>
+            <span>
+              {{- 'sections.depoimentos.rating' | t: nota: section.settings.nota -}}
+              {%- if section.settings.total != blank %} · {{ 'sections.depoimentos.reviews' | t: count: section.settings.total }}{% endif -%}
+            </span>
+          </p>
+        {%- endif -%}
+      </div>
+      <div class="setas" data-reveal="fade" style="--reveal-index: 1;">
+        <button type="button" class="seta-botao seta-botao--voltar" data-voltar aria-label="{{ 'general.slider.previous' | t }}">{% render 'icon', name: 'seta' %}</button>
+        <button type="button" class="seta-botao" data-avancar aria-label="{{ 'general.slider.next' | t }}">{% render 'icon', name: 'seta' %}</button>
+      </div>
+    </div>
+
+    <ul class="depoimentos__trilho" role="list" data-trilho>
+      {%- for block in section.blocks -%}
+        <li class="depoimentos__item" data-reveal style="--reveal-index: {{ forloop.index0 | at_most: 3 }};" {{ block.shopify_attributes }}>
+          <figure class="depoimento">
+            <p class="depoimentos__estrelas" role="img" aria-label="{{ 'sections.depoimentos.stars' | t: count: block.settings.estrelas }}">
+              {%- for i in (1..5) -%}
+                <span class="depoimentos__estrela{% if i > block.settings.estrelas %} is-vazia{% endif %}">{% render 'icon', name: 'estrela' %}</span>
+              {%- endfor -%}
+            </p>
+            <blockquote class="depoimento__texto">{{ block.settings.texto }}</blockquote>
+            <figcaption class="depoimento__autor">
+              <span class="depoimento__inicial" aria-hidden="true">{{ block.settings.nome | slice: 0 }}</span>
+              <span>
+                <strong>{{ block.settings.nome | escape }}</strong>
+                {%- if block.settings.detalhe != blank -%}
+                  <span class="depoimento__detalhe">{{ block.settings.detalhe | escape }}</span>
+                {%- endif -%}
+              </span>
+              {%- if block.settings.verificado -%}
+                <span class="depoimento__verificado">{% render 'icon', name: 'check' %}{{ 'sections.depoimentos.verified' | t }}</span>
+              {%- endif -%}
+            </figcaption>
+          </figure>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</trilho-carrossel>
+
+<script src="{{ 'carrossel.js' | asset_url }}" defer="defer"></script>
+
+<style>
+  .depoimentos { display: block; overflow: hidden; }
+  .depoimentos[data-cabe] .setas { visibility: hidden; }
+
+  .depoimentos__media { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0 0; font-size: var(--f1); opacity: 0.85; }
+  .depoimentos__estrelas { display: inline-flex; gap: 2px; margin: 0; color: var(--color-sale); }
+  .secao--acento .depoimentos__estrelas { color: currentColor; }
+  .depoimentos__estrelas svg { width: 15px; height: 15px; }
+  .depoimentos__estrela.is-vazia { opacity: 0.25; }
+
+  .depoimentos__trilho {
+    display: flex;
+    gap: clamp(16px, 2vw, 28px);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    scrollbar-width: none;
+  }
+  .depoimentos__trilho::-webkit-scrollbar { display: none; }
+  /* 3 por tela no desktop: (100% − 2 gaps) / 3 */
+  .depoimentos__item { flex: 0 0 calc((100% - 2 * clamp(16px, 2vw, 28px)) / 3); scroll-snap-align: start; display: flex; }
+
+  .depoimento {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+    margin: 0;
+    padding: clamp(24px, 3vw, 36px);
+    border-radius: var(--media-radius);
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+  }
+  .secao--contraste .depoimento { border-color: transparent; }
+  .secao--acento .depoimento { background: color-mix(in srgb, var(--color-accent-text) 8%, transparent); border-color: color-mix(in srgb, var(--color-accent-text) 18%, transparent); }
+
+  .depoimento__texto {
+    flex: 1;
+    margin: 0;
+    font-family: var(--font-heading-family);
+    font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+    line-height: 1.45;
+  }
+  .depoimento__texto p { margin: 0; }
+  .depoimento__autor { display: flex; align-items: center; gap: 12px; font-size: var(--f1); line-height: 1.35; }
+  .depoimento__autor strong { display: block; font-weight: 500; }
+  .depoimento__inicial {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+    font-family: var(--font-heading-family);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+  }
+  .secao--acento .depoimento__inicial { background: var(--color-accent-text); color: var(--color-accent); }
+  .depoimento__detalhe { display: block; opacity: 0.65; }
+  .depoimento__verificado { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; font-size: 0.75rem; opacity: 0.65; white-space: nowrap; }
+  .depoimento__verificado svg { width: 14px; height: 14px; }
+
+  @media screen and (max-width: 1000px) {
+    .depoimentos__trilho { margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); }
+    .depoimentos__item { flex-basis: min(84%, 380px); }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Depoimentos",
+  "tag": "section",
+  "class": "section-depoimentos",
+  "settings": [
+    { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Quem usa" },
+    { "type": "text", "id": "titulo", "label": "Título", "default": "Histórias que brilham" },
+    { "type": "text", "id": "nota", "label": "Nota média", "default": "4,9", "info": "Vazio = esconde a linha de nota." },
+    { "type": "number", "id": "total", "label": "Total de avaliações", "default": 1280 },
+    {
+      "type": "select",
+      "id": "fundo",
+      "label": "Fundo",
+      "options": [
+        { "value": "padrao", "label": "Padrão (creme)" },
+        { "value": "contraste", "label": "Contraste (bege)" },
+        { "value": "acento", "label": "Acento (verde)" }
+      ],
+      "default": "padrao"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "depoimento",
+      "name": "Depoimento",
+      "limit": 12,
+      "settings": [
+        { "type": "range", "id": "estrelas", "label": "Estrelas", "min": 1, "max": 5, "step": 1, "default": 5 },
+        { "type": "richtext", "id": "texto", "label": "Depoimento", "default": "<p>Chegou numa caixa linda, com certificado e um bilhete escrito à mão. O anel é ainda mais delicado ao vivo.</p>" },
+        { "type": "text", "id": "nome", "label": "Nome", "default": "Marina S." },
+        { "type": "text", "id": "detalhe", "label": "Detalhe", "default": "São Paulo · Anel Orvalho Solitário" },
+        { "type": "checkbox", "id": "verificado", "label": "Mostrar \"Compra verificada\"", "default": true }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Depoimentos",
+      "blocks": [
+        { "type": "depoimento" },
+        { "type": "depoimento", "settings": { "nome": "Rafael M.", "detalhe": "Curitiba · Aliança Raiz" } },
+        { "type": "depoimento", "settings": { "nome": "Beatriz L.", "detalhe": "Recife · Brinco Gota" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

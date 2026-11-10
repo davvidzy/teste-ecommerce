@@ -3,14 +3,57 @@
     "hero": {
       "type": "hero",
       "blocks": {
-        "titulo": { "type": "titulo", "settings": { "titulo": "Joias que nascem da natureza" } },
-        "texto": { "type": "texto", "settings": { "texto": "<p>Diamantes cultivados em laboratório, ouro 18k reciclado e formas inspiradas no que floresce. Feitas para durar gerações.</p>" } },
-        "botoes": { "type": "botoes", "settings": { "rotulo_1": "Ver catálogo", "link_1": "", "rotulo_2": "Nossas coleções", "link_2": "" } },
-        "selo_entrega": { "type": "selo", "settings": { "icone": "entrega", "texto": "Frete grátis e seguro para todo o Brasil" } },
-        "selo_garantia": { "type": "selo", "settings": { "icone": "escudo", "texto": "Certificado e garantia vitalícia" } },
-        "selo_arvore": { "type": "selo", "settings": { "icone": "folha", "texto": "Uma árvore plantada a cada pedido" } }
+        "titulo": {
+          "type": "titulo",
+          "settings": {
+            "titulo": "Joias que nascem da natureza"
+          }
+        },
+        "texto": {
+          "type": "texto",
+          "settings": {
+            "texto": "<p>Diamantes cultivados em laboratório, ouro 18k reciclado e formas inspiradas no que floresce. Feitas para durar gerações.</p>"
+          }
+        },
+        "botoes": {
+          "type": "botoes",
+          "settings": {
+            "rotulo_1": "Ver catálogo",
+            "link_1": "",
+            "rotulo_2": "Nossas coleções",
+            "link_2": ""
+          }
+        },
+        "selo_entrega": {
+          "type": "selo",
+          "settings": {
+            "icone": "entrega",
+            "texto": "Frete grátis e seguro para todo o Brasil"
+          }
+        },
+        "selo_garantia": {
+          "type": "selo",
+          "settings": {
+            "icone": "escudo",
+            "texto": "Certificado e garantia vitalícia"
+          }
+        },
+        "selo_arvore": {
+          "type": "selo",
+          "settings": {
+            "icone": "folha",
+            "texto": "Uma árvore plantada a cada pedido"
+          }
+        }
       },
-      "block_order": ["titulo", "texto", "botoes", "selo_entrega", "selo_garantia", "selo_arvore"],
+      "block_order": [
+        "titulo",
+        "texto",
+        "botoes",
+        "selo_entrega",
+        "selo_garantia",
+        "selo_arvore"
+      ],
       "settings": {
         "imagem_exemplo": true,
         "altura": "tela",
@@ -22,12 +65,41 @@
     "catalogo": {
       "type": "catalogo",
       "blocks": {
-        "aba_todas": { "type": "aba", "settings": { "colecao": "", "rotulo": "Todas" } },
-        "aba_aneis": { "type": "aba", "settings": { "colecao": "aneis", "rotulo": "Anéis" } },
-        "aba_brincos": { "type": "aba", "settings": { "colecao": "brincos", "rotulo": "Brincos" } },
-        "aba_colares": { "type": "aba", "settings": { "colecao": "colares", "rotulo": "Colares" } }
+        "aba_todas": {
+          "type": "aba",
+          "settings": {
+            "colecao": "",
+            "rotulo": "Todas"
+          }
+        },
+        "aba_aneis": {
+          "type": "aba",
+          "settings": {
+            "colecao": "aneis",
+            "rotulo": "Anéis"
+          }
+        },
+        "aba_brincos": {
+          "type": "aba",
+          "settings": {
+            "colecao": "brincos",
+            "rotulo": "Brincos"
+          }
+        },
+        "aba_colares": {
+          "type": "aba",
+          "settings": {
+            "colecao": "colares",
+            "rotulo": "Colares"
+          }
+        }
       },
-      "block_order": ["aba_todas", "aba_aneis", "aba_brincos", "aba_colares"],
+      "block_order": [
+        "aba_todas",
+        "aba_aneis",
+        "aba_brincos",
+        "aba_colares"
+      ],
       "settings": {
         "sobrelinha": "Curadoria",
         "titulo": "As mais desejadas",
@@ -37,7 +109,286 @@
         "opcoes_swatch": "metal, cor, color",
         "mapa_cores": "Ouro amarelo: #E3C77A\nOuro branco: #E4E4E0\nOuro rosé: #E8B4A0\nPrata: #C8CBCF"
       }
+    },
+    "categorias": {
+      "type": "categorias",
+      "blocks": {
+        "cat_aneis": {
+          "type": "categoria",
+          "settings": {
+            "colecao": "aneis",
+            "rotulo": "Anéis"
+          }
+        },
+        "cat_brincos": {
+          "type": "categoria",
+          "settings": {
+            "colecao": "brincos",
+            "rotulo": "Brincos"
+          }
+        },
+        "cat_colares": {
+          "type": "categoria",
+          "settings": {
+            "colecao": "colares",
+            "rotulo": "Colares"
+          }
+        }
+      },
+      "block_order": [
+        "cat_aneis",
+        "cat_brincos",
+        "cat_colares"
+      ],
+      "settings": {
+        "sobrelinha": "Explore",
+        "titulo": "Compre por categoria",
+        "rotulo_link": "Todas as coleções",
+        "link": "",
+        "colunas": 3,
+        "proporcao": "4 / 5"
+      }
+    },
+    "historia": {
+      "type": "imagem-texto",
+      "blocks": {
+        "n1": {
+          "type": "numero",
+          "settings": {
+            "valor": "100%",
+            "legenda": "ouro 18k reciclado"
+          }
+        },
+        "n2": {
+          "type": "numero",
+          "settings": {
+            "valor": "12 anos",
+            "legenda": "de ateliê em São Paulo"
+          }
+        },
+        "n3": {
+          "type": "numero",
+          "settings": {
+            "valor": "+8 mil",
+            "legenda": "árvores plantadas"
+          }
+        }
+      },
+      "block_order": [
+        "n1",
+        "n2",
+        "n3"
+      ],
+      "settings": {
+        "imagem_exemplo": "atelie",
+        "posicao_imagem": "esquerda",
+        "fundo": "padrao",
+        "sobrelinha": "Nosso ateliê",
+        "titulo": "Feitas à mão, uma a uma",
+        "texto": "<p>Cada peça Orvalho nasce na bancada do nosso ateliê em São Paulo. Fundimos ouro reciclado, cravamos diamantes cultivados em laboratório e polimos tudo à mão.</p><p>O resultado são joias com a mesma química e o mesmo brilho de sempre, sem o custo da mineração.</p>",
+        "rotulo_botao": "Conheça nossa história",
+        "link_botao": "/pages/sobre",
+        "estilo_botao": "secundario"
+      }
+    },
+    "diferenciais": {
+      "type": "diferenciais",
+      "blocks": {
+        "d1": {
+          "type": "item",
+          "settings": {
+            "icone": "diamante",
+            "titulo": "Diamantes cultivados",
+            "texto": "<p>Mesma química e brilho do diamante extraído, com origem rastreável.</p>"
+          }
+        },
+        "d2": {
+          "type": "item",
+          "settings": {
+            "icone": "folha",
+            "titulo": "Ouro 18k reciclado",
+            "texto": "<p>Refinado a partir de joias e eletrônicos antigos. Nada de mina nova.</p>"
+          }
+        },
+        "d3": {
+          "type": "item",
+          "settings": {
+            "icone": "escudo",
+            "titulo": "Garantia vitalícia",
+            "texto": "<p>Certificado de autenticidade e reparo grátis contra defeitos.</p>"
+          }
+        },
+        "d4": {
+          "type": "item",
+          "settings": {
+            "icone": "troca",
+            "titulo": "30 dias para trocar",
+            "texto": "<p>A primeira troca de tamanho é por nossa conta, com frete grátis.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "d1",
+        "d2",
+        "d3",
+        "d4"
+      ],
+      "settings": {
+        "sobrelinha": "Por que Orvalho",
+        "titulo": "Beleza que não custa ao planeta",
+        "fundo": "contraste",
+        "colunas_mobile": "2"
+      }
+    },
+    "presentes": {
+      "type": "imagem-texto",
+      "settings": {
+        "imagem_exemplo": "presentes",
+        "posicao_imagem": "direita",
+        "fundo": "acento",
+        "sobrelinha": "Presentes",
+        "titulo": "Para quem merece brilhar",
+        "texto": "<p>Toda peça vai numa caixa de madeira certificada, com cartão escrito à mão e nota fiscal sem valor — é só pedir no checkout.</p>",
+        "rotulo_botao": "Ver presentes",
+        "link_botao": "/collections/presentes",
+        "estilo_botao": "primario"
+      }
+    },
+    "depoimentos": {
+      "type": "depoimentos",
+      "blocks": {
+        "r1": {
+          "type": "depoimento",
+          "settings": {
+            "estrelas": 5,
+            "texto": "<p>Chegou numa caixa linda, com certificado e um bilhete escrito à mão. O anel é ainda mais delicado ao vivo.</p>",
+            "nome": "Marina S.",
+            "detalhe": "São Paulo · Anel Orvalho Solitário",
+            "verificado": true
+          }
+        },
+        "r2": {
+          "type": "depoimento",
+          "settings": {
+            "estrelas": 5,
+            "texto": "<p>Comprei nossas alianças pensando no impacto ambiental e me surpreendi com o acabamento. Atendimento impecável pelo WhatsApp.</p>",
+            "nome": "Rafael M.",
+            "detalhe": "Curitiba · Aliança Raiz",
+            "verificado": true
+          }
+        },
+        "r3": {
+          "type": "depoimento",
+          "settings": {
+            "estrelas": 5,
+            "texto": "<p>Uso o brinco todos os dias há um ano e continua perfeito. Já virou o presente que dou para as amigas.</p>",
+            "nome": "Beatriz L.",
+            "detalhe": "Recife · Brinco Gota",
+            "verificado": true
+          }
+        },
+        "r4": {
+          "type": "depoimento",
+          "settings": {
+            "estrelas": 4,
+            "texto": "<p>O aro veio um pouco grande, mas a troca foi rápida e sem custo. Recomendo usar a calculadora do guia de tamanhos.</p>",
+            "nome": "Juliana C.",
+            "detalhe": "Belo Horizonte · Anel Broto",
+            "verificado": true
+          }
+        },
+        "r5": {
+          "type": "depoimento",
+          "settings": {
+            "estrelas": 5,
+            "texto": "<p>O colar é leve, delicado e combina com tudo. Dá para sentir o cuidado em cada detalhe.</p>",
+            "nome": "Camila R.",
+            "detalhe": "Porto Alegre · Colar Semente",
+            "verificado": true
+          }
+        }
+      },
+      "block_order": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5"
+      ],
+      "settings": {
+        "sobrelinha": "Quem usa",
+        "titulo": "Histórias que brilham",
+        "nota": "4,9",
+        "total": 1280,
+        "fundo": "padrao"
+      }
+    },
+    "faq": {
+      "type": "perguntas-frequentes",
+      "blocks": {
+        "q1": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Qual o prazo de entrega?",
+            "resposta": "<p>Peças a pronta-entrega saem em até 2 dias úteis e chegam em 3 a 8 dias úteis, com seguro e rastreio. Peças sob medida levam até 15 dias úteis para ficar prontas.</p>"
+          }
+        },
+        "q2": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Como descubro o tamanho do meu anel?",
+            "resposta": "<p>Use a calculadora do nosso <a href=\"/pages/guia-de-tamanhos\">guia de tamanhos</a>: basta medir o dedo com um barbante ou um anel que você já usa.</p>"
+          }
+        },
+        "q3": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Posso trocar se não servir?",
+            "resposta": "<p>Sim. A primeira troca de tamanho é grátis em até 30 dias após o recebimento. Devoluções por arrependimento seguem o prazo de 7 dias do Código de Defesa do Consumidor.</p>"
+          }
+        },
+        "q4": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Diamante cultivado é diamante de verdade?",
+            "resposta": "<p>Sim. Tem a mesma composição química, dureza e brilho do diamante extraído. A diferença é a origem: ele é formado em laboratório, sem mineração.</p>"
+          }
+        },
+        "q5": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Quais as formas de pagamento?",
+            "resposta": "<p>Pix com 5% de desconto, cartão de crédito em até 10x sem juros e boleto.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5"
+      ],
+      "settings": {
+        "sobrelinha": "Dúvidas",
+        "titulo": "Perguntas frequentes",
+        "texto": "<p>Não encontrou o que procurava? Nosso time responde em até 1 dia útil.</p>",
+        "rotulo_contato": "Fale com a gente",
+        "link_contato": "",
+        "abrir_primeira": true,
+        "dados_estruturados": true,
+        "fundo": "padrao"
+      }
     }
   },
-  "order": ["hero", "catalogo"]
+  "order": [
+    "hero",
+    "categorias",
+    "catalogo",
+    "historia",
+    "diferenciais",
+    "presentes",
+    "depoimentos",
+    "faq"
+  ]
 }

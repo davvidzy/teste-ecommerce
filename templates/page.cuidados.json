@@ -1,0 +1,94 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "dicas": {
+      "type": "diferenciais",
+      "blocks": {
+        "d1": {
+          "type": "item",
+          "settings": {
+            "icone": "check",
+            "titulo": "Limpe com suavidade",
+            "texto": "<p>Água morna, sabão neutro e escova de dentes macia. Seque com pano sem fiapos.</p>"
+          }
+        },
+        "d2": {
+          "type": "item",
+          "settings": {
+            "icone": "folha",
+            "titulo": "Longe de químicos",
+            "texto": "<p>Tire as joias antes de piscina, mar, perfume e produtos de limpeza.</p>"
+          }
+        },
+        "d3": {
+          "type": "item",
+          "settings": {
+            "icone": "presente",
+            "titulo": "Guarde separado",
+            "texto": "<p>Cada peça no seu saquinho, para uma não riscar a outra.</p>"
+          }
+        },
+        "d4": {
+          "type": "item",
+          "settings": {
+            "icone": "escudo",
+            "titulo": "Revisão anual",
+            "texto": "<p>Traga ao ateliê uma vez por ano para conferir as garras e polir — grátis.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "d1",
+        "d2",
+        "d3",
+        "d4"
+      ],
+      "settings": {
+        "sobrelinha": "Cuidados",
+        "titulo": "Para durar gerações",
+        "fundo": "contraste",
+        "colunas_mobile": "1"
+      }
+    },
+    "duvidas": {
+      "type": "perguntas-frequentes",
+      "blocks": {
+        "q1": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Posso tomar banho com a joia?",
+            "resposta": "<p>Pode, mas o sabonete forma uma película que tira o brilho. O ideal é retirar.</p>"
+          }
+        },
+        "q2": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Como limpar diamantes?",
+            "resposta": "<p>Deixe de molho em água morna com sabão neutro por 10 minutos e escove por baixo da pedra.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2"
+      ],
+      "settings": {
+        "sobrelinha": "Cuidados",
+        "titulo": "Dúvidas comuns",
+        "texto": "<p>Não encontrou o que procurava? Nosso time responde em até 1 dia útil.</p>",
+        "rotulo_contato": "Fale com a gente",
+        "link_contato": "",
+        "abrir_primeira": true,
+        "dados_estruturados": true,
+        "fundo": "padrao"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "dicas",
+    "duvidas"
+  ]
+}

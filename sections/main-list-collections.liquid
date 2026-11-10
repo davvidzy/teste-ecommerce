@@ -1,137 +1,79 @@
 {%- comment -%}
   ============================================================
-  MAIN LIST COLLECTIONS — grade com todas as coleções da loja
+  MAIN LIST COLLECTIONS — página /collections ("Todas as coleções")
   ============================================================
 
   O QUE FAZ:
-  Renderiza um grid com TODAS as coleções da loja, cada uma como
-  card (imagem + título) linkando para a página da coleção.
-  Usa paginação nativa de 12 itens por página.
+  Lista as coleções da loja com o mesmo card da seção Categorias
+  (snippets/card-colecao.liquid): foto, nome e número de peças.
 
-  ONDE É USADA:
-  Template list-collections (página /collections que lista as coleções).
+  QUAIS COLEÇÕES APARECEM:
+  - "Todas" (padrão): todas as coleções publicadas, em ordem
+    alfabética (é o que o objeto collections do Shopify devolve).
+  - "Escolhidas": só as marcadas no editor, na ordem escolhida —
+    útil para esconder coleções técnicas (ex.: "Página inicial").
+  Coleções sem produtos continuam aparecendo com "Em breve" se você
+  quiser anunciar algo antes de cadastrar as peças; para esconder,
+  use o modo "Escolhidas" ou despublique a coleção no admin.
 
-  PRINCIPAIS PARTES:
-  - {%- paginate collections by 12 -%}: paginação da lista de coleções
-  - Imagem: usa featured_image da coleção; se não houver, cai para
-    a imagem do primeiro produto; e se nada, placeholder SVG
-  - render 'pagination': snippet de navegação entre páginas
-  - Setting: heading (título da página)
-
-  OBSERVAÇÕES:
-  O CSS é escopado por #shopify-section-{{ section.id }} para não vazar.
+  SETTINGS: título, texto, modo, coleções escolhidas, colunas.
 {%- endcomment -%}
 
-<div class="list-collections page-width" data-section-id="{{ section.id }}">
-  {%- if section.settings.heading != blank -%}
-    <h1 class="list-collections__heading">{{ section.settings.heading | escape }}</h1>
-  {%- endif -%}
+<div class="lista-colecoes secao page-width" style="--colunas: {{ section.settings.colunas }};">
+  <div class="secao-topo secao-topo--centro" data-reveal>
+    <div>
+      {%- if section.settings.heading != blank -%}
+        <h1 class="secao-titulo">{{ section.settings.heading | escape }}</h1>
+      {%- endif -%}
+      {%- if section.settings.texto != blank -%}
+        <div class="secao-descricao rte">{{ section.settings.texto }}</div>
+      {%- endif -%}
+    </div>
+  </div>
 
-  {%- paginate collections by 12 -%}
-    <ul class="list-collections__grid product-grid" role="list">
-      {%- for collection in collections -%}
-        {%- liquid
-          assign collection_image = collection.featured_image
-          unless collection_image
-            assign collection_image = collection.products.first.featured_image
-          endunless
-        -%}
-        <li class="list-collections__item">
-          <a href="{{ collection.url }}" class="list-collections__link">
-            <div class="list-collections__media">
-              {%- if collection_image -%}
-                {{
-                  collection_image
-                  | image_url: width: 720
-                  | image_tag:
-                    loading: 'lazy',
-                    widths: '180, 360, 540, 720',
-                    sizes: '(min-width: 1000px) 25vw, 50vw',
-                    class: 'list-collections__image',
-                    alt: collection.title | escape
-                }}
-              {%- else -%}
-                {{ 'collection-1' | placeholder_svg_tag: 'list-collections__image placeholder-svg' }}
-              {%- endif -%}
-            </div>
-            <h2 class="list-collections__title">{{ collection.title }}</h2>
-          </a>
+  {%- if section.settings.modo == 'escolhidas' and section.settings.colecoes != blank -%}
+    <ul class="lista-colecoes__grade" role="list">
+      {%- for colecao in section.settings.colecoes -%}
+        <li data-reveal style="--reveal-index: {{ forloop.index0 | modulo: section.settings.colunas }};">
+          {% render 'card-colecao', colecao: colecao, indice: forloop.index0, tamanhos: '(min-width: 1000px) 33vw, 50vw' %}
         </li>
       {%- endfor -%}
     </ul>
-
-    {% render 'pagination', paginate: paginate %}
-  {%- endpaginate -%}
+  {%- else -%}
+    {%- paginate collections by 12 -%}
+      {%- if collections.size == 0 -%}
+        <p class="lista-colecoes__vazio">{{ 'sections.categorias.empty' | t }}</p>
+      {%- else -%}
+        <ul class="lista-colecoes__grade" role="list">
+          {%- for colecao in collections -%}
+            <li data-reveal style="--reveal-index: {{ forloop.index0 | modulo: section.settings.colunas }};">
+              {% render 'card-colecao', colecao: colecao, indice: forloop.index0, tamanhos: '(min-width: 1000px) 33vw, 50vw' %}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+      {% render 'pagination', paginate: paginate %}
+    {%- endpaginate -%}
+  {%- endif -%}
 </div>
 
+{{ 'card-colecao.css' | asset_url | stylesheet_tag }}
+
 <style>
-  #shopify-section-{{ section.id }} .list-collections {
-    margin-top: 24px;
-    margin-bottom: var(--spacing-sections, 40px);
-  }
-  #shopify-section-{{ section.id }} .list-collections__heading {
-    font-size: var(--f6);
-    text-align: center;
-    margin: 0 0 32px;
-  }
-  #shopify-section-{{ section.id }} .list-collections__link {
-    display: block;
-    text-decoration: none;
-    color: inherit;
-  }
-  #shopify-section-{{ section.id }} .list-collections__media {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    border-radius: var(--media-radius, 8px);
-    background-color: var(--color-background-contrast, #f2f3f8);
-  }
-  #shopify-section-{{ section.id }} .list-collections__image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  #shopify-section-{{ section.id }} .list-collections__title {
-    font-size: var(--f3);
-    font-weight: normal;
-    text-align: center;
-    margin: 12px 0 0;
-  }
-  #shopify-section-{{ section.id }} .pagination {
-    margin-top: 40px;
-  }
-  #shopify-section-{{ section.id }} .pagination__list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    list-style: none;
+  .lista-colecoes__grade {
+    display: grid;
+    grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
+    gap: 44px clamp(16px, 2vw, 28px);
     margin: 0;
     padding: 0;
+    list-style: none;
   }
-  #shopify-section-{{ section.id }} .pagination__item {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    min-height: 40px;
-    padding: 0 8px;
-    font-size: var(--f2);
-    color: var(--color-text, #000);
-    text-decoration: none;
-    border: 1px solid transparent;
-    border-radius: var(--inputs-radius, 4px);
-  }
-  #shopify-section-{{ section.id }} a.pagination__item:hover {
-    border-color: var(--color-border, #c2c2c2);
-  }
-  #shopify-section-{{ section.id }} .pagination__item--current {
-    border-color: var(--color-accent, #000);
-    font-weight: bold;
+  .lista-colecoes__vazio { padding: 48px 0; text-align: center; opacity: 0.7; }
+  .lista-colecoes .pagination { margin-top: 48px; }
+
+  @media screen and (max-width: 1000px) {
+    .lista-colecoes__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 12px; }
+    .lista-colecoes .card-colecao__legenda { flex-direction: column; gap: 4px; padding-top: 12px; }
   }
 </style>
 
@@ -141,12 +83,20 @@
   "tag": "section",
   "class": "section-main-list-collections",
   "settings": [
+    { "type": "text", "id": "heading", "default": "Coleções", "label": "t:sections.main_list_collections.settings.heading.label" },
+    { "type": "richtext", "id": "texto", "label": "Texto" },
     {
-      "type": "text",
-      "id": "heading",
-      "default": "Collections",
-      "label": "t:sections.main_list_collections.settings.heading.label"
-    }
+      "type": "select",
+      "id": "modo",
+      "label": "Quais coleções mostrar",
+      "options": [
+        { "value": "todas", "label": "Todas as publicadas" },
+        { "value": "escolhidas", "label": "Só as escolhidas abaixo" }
+      ],
+      "default": "todas"
+    },
+    { "type": "collection_list", "id": "colecoes", "label": "Coleções escolhidas", "limit": 24 },
+    { "type": "range", "id": "colunas", "label": "Colunas no desktop", "min": 2, "max": 4, "step": 1, "default": 3 }
   ]
 }
 {% endschema %}

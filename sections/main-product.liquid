@@ -295,11 +295,88 @@
                 %}
               </div>
 
+            {%- when 'informacao' -%}
+              {%- liquid
+                # Conteúdo: página escolhida (reaproveita o texto da política/página) OU texto do bloco
+                assign conteudo = block.settings.conteudo
+                if block.settings.pagina != blank
+                  assign conteudo = block.settings.pagina.content
+                endif
+              -%}
+              {%- if block.settings.titulo != blank and conteudo != blank -%}
+                <details class="product__acordeao" {{ block.shopify_attributes }}>
+                  <summary class="product__acordeao-titulo">
+                    <span class="product__acordeao-rotulo">
+                      {%- if block.settings.icone != 'nenhum' -%}{% render 'icon', name: block.settings.icone %}{%- endif -%}
+                      {{ block.settings.titulo | escape }}
+                    </span>
+                    <span class="product__acordeao-icone" aria-hidden="true"></span>
+                  </summary>
+                  <div class="product__description rte">{{ conteudo }}</div>
+                </details>
+              {%- endif -%}
+
+            {%- when 'guia_tamanhos' -%}
+              {%- liquid
+                # Só aparece em produtos que têm uma opção de tamanho (ex.: anéis com "Aro").
+                # Setting vazia = aparece em todos.
+                assign opcoes_guia = block.settings.opcoes | downcase | replace: ', ', ',' | split: ','
+                assign mostrar_guia = false
+                if block.settings.opcoes == blank
+                  assign mostrar_guia = true
+                else
+                  for opcao in product.options
+                    assign nome_opcao_guia = opcao | downcase | strip
+                    if opcoes_guia contains nome_opcao_guia
+                      assign mostrar_guia = true
+                      break
+                    endif
+                  endfor
+                endif
+                assign id_guia = 'GuiaTamanhos-' | append: block.id
+              -%}
+              {%- if mostrar_guia -%}
+                <div class="product__guia" {{ block.shopify_attributes }}>
+                  {%- comment -%} Sem JS, o link leva à página do guia; com JS, abre o pop-up {%- endcomment -%}
+                  <a href="{{ block.settings.pagina.url | default: '/pages/guia-de-tamanhos' }}" class="button button--tertiary button--pequeno" data-abrir-guia aria-controls="{{ id_guia }}" aria-haspopup="dialog">
+                    {% render 'icon', name: 'regua' %}
+                    {{ 'sections.guia.open' | t }}
+                  </a>
+                </div>
+              {%- endif -%}
+
+            {%- when 'beneficios' -%}
+              <ul class="product__beneficios" role="list" {{ block.shopify_attributes }}>
+                {%- if block.settings.texto_1 != blank -%}<li>{% render 'icon', name: 'entrega' %}<span>{{ block.settings.texto_1 | escape }}</span></li>{%- endif -%}
+                {%- if block.settings.texto_2 != blank -%}<li>{% render 'icon', name: 'troca' %}<span>{{ block.settings.texto_2 | escape }}</span></li>{%- endif -%}
+                {%- if block.settings.texto_3 != blank -%}<li>{% render 'icon', name: 'escudo' %}<span>{{ block.settings.texto_3 | escape }}</span></li>{%- endif -%}
+              </ul>
+
             {%- when 'custom_liquid' -%}
               <div {{ block.shopify_attributes }}>{{ block.settings.custom_liquid }}</div>
           {%- endcase -%}
         {%- endfor -%}
       {%- endform -%}
+
+      {%- comment -%}
+        Pop-up do guia de tamanhos: fica FORA do form de compra — senão os
+        campos da calculadora seriam enviados junto com o "Adicionar à sacola".
+      {%- endcomment -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'guia_tamanhos' -%}
+          <dialog class="guia-dialogo" id="GuiaTamanhos-{{ block.id }}" aria-labelledby="GuiaTamanhosTitulo-{{ block.id }}">
+            <div class="guia-dialogo__topo">
+              <h2 class="guia-dialogo__titulo" id="GuiaTamanhosTitulo-{{ block.id }}">{{ 'sections.guia.open' | t }}</h2>
+              <button type="button" class="guia-dialogo__fechar" data-fechar-guia aria-label="{{ 'accessibility.close' | t }}">{% render 'icon', name: 'close' %}</button>
+            </div>
+            <div class="guia-dialogo__corpo">
+              {% render 'guia-tamanhos', id: block.id, colares: block.settings.colares %}
+            </div>
+          </dialog>
+          {{ 'guia-tamanhos.css' | asset_url | stylesheet_tag }}
+          <script src="{{ 'guia-tamanhos.js' | asset_url }}" defer="defer"></script>
+        {%- endif -%}
+      {%- endfor -%}
     </div>
   </div>
 </section>
@@ -342,6 +419,50 @@
       ]
     },
     { "type": "share", "name": "t:sections.main_product.blocks.share.name", "limit": 1 },
+    {
+      "type": "informacao",
+      "name": "Informação (acordeão)",
+      "settings": [
+        { "type": "text", "id": "titulo", "label": "Título", "default": "Entrega e trocas" },
+        {
+          "type": "select",
+          "id": "icone",
+          "label": "Ícone",
+          "options": [
+            { "value": "nenhum", "label": "Nenhum" },
+            { "value": "entrega", "label": "Entrega" },
+            { "value": "troca", "label": "Troca" },
+            { "value": "escudo", "label": "Garantia" },
+            { "value": "folha", "label": "Folha" },
+            { "value": "diamante", "label": "Diamante" },
+            { "value": "presente", "label": "Presente" }
+          ],
+          "default": "nenhum"
+        },
+        { "type": "richtext", "id": "conteudo", "label": "Conteúdo", "default": "<p>Frete grátis e seguro para todo o Brasil. Primeira troca de tamanho grátis em até 30 dias.</p>" },
+        { "type": "page", "id": "pagina", "label": "Ou: usar o texto de uma página", "info": "Se escolher uma página, o texto dela substitui o conteúdo acima (ex.: página \"Trocas e devoluções\")." }
+      ]
+    },
+    {
+      "type": "guia_tamanhos",
+      "name": "Guia de tamanhos",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "opcoes", "label": "Mostrar em produtos com a opção", "default": "aro, tamanho, size", "info": "Nomes de opção separados por vírgula. Vazio = mostra em todos os produtos." },
+        { "type": "page", "id": "pagina", "label": "Página do guia (sem JavaScript)", "info": "Padrão: /pages/guia-de-tamanhos" },
+        { "type": "checkbox", "id": "colares", "label": "Incluir comprimentos de colar", "default": false }
+      ]
+    },
+    {
+      "type": "beneficios",
+      "name": "Benefícios",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "texto_1", "label": "Entrega", "default": "Frete grátis e seguro" },
+        { "type": "text", "id": "texto_2", "label": "Troca", "default": "30 dias para trocar" },
+        { "type": "text", "id": "texto_3", "label": "Garantia", "default": "Garantia vitalícia" }
+      ]
+    },
     {
       "type": "custom_liquid",
       "name": "t:sections.main_product.blocks.custom_liquid.name",

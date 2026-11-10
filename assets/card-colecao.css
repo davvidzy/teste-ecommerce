@@ -1,0 +1,56 @@
+/*
+  card-colecao.css — estilos do snippets/card-colecao.liquid
+  Carregado por sections/categorias.liquid e sections/main-list-collections.liquid.
+*/
+.card-colecao { display: block; color: inherit; text-decoration: none; }
+
+.card-colecao__midia {
+  position: relative;
+  aspect-ratio: var(--proporcao, 4 / 5);
+  overflow: hidden;
+  border-radius: var(--media-radius);
+  background: var(--color-background-contrast);
+}
+.card-colecao__imagem {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease-out, ease);
+}
+.card-colecao__midia .placeholder-svg { fill: color-mix(in srgb, var(--color-text) 22%, transparent); padding: 18%; }
+
+.card-colecao__legenda {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+}
+.card-colecao__nome {
+  font-family: var(--font-heading-family);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  line-height: 1.1;
+}
+.card-colecao__info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  font-size: var(--f1);
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+.card-colecao__info svg { width: 16px; height: 16px; transition: transform var(--dur-base, 450ms) var(--ease-out, ease); }
+
+@media (hover: hover) {
+  .card-colecao:hover .card-colecao__imagem { transform: scale(1.04); }
+  .card-colecao:hover .card-colecao__info { opacity: 1; }
+  .card-colecao:hover .card-colecao__info svg { transform: translateX(4px); }
+}
+.card-colecao:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-colecao__imagem, .card-colecao__info svg { transition: none; }
+}

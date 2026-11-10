@@ -1,0 +1,155 @@
+{%- comment -%}
+  ============================================================
+  DIFERENCIAIS — "Por que Orvalho" em colunas com ícone
+  ============================================================
+
+  O QUE FAZ:
+  Lista curta de motivos para confiar na loja (material, garantia,
+  entrega, troca). Em joalheria, confiança vende tanto quanto a foto:
+  é uma compra cara, feita sem pegar na peça.
+
+  LAYOUT:
+  - Desktop: 3 ou 4 colunas, separadas por linhas finas verticais.
+  - Celular: 2 colunas (ou 1, se o texto for longo — setting).
+  Reutilizada na página "Cuidados" (com outros textos/ícones).
+
+  SETTINGS: sobrelinha, título, alinhamento, fundo, colunas no celular.
+  BLOCKS: item (ícone, título, texto).
+{%- endcomment -%}
+
+<div class="diferenciais secao secao--{{ section.settings.fundo }}">
+  <div class="page-width">
+    {%- if section.settings.titulo != blank or section.settings.sobrelinha != blank -%}
+      <div class="secao-topo secao-topo--centro" data-reveal>
+        <div>
+          {%- if section.settings.sobrelinha != blank -%}
+            <p class="secao-sobrelinha">{{ section.settings.sobrelinha | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.titulo != blank -%}
+            <h2 class="secao-titulo">{{ section.settings.titulo | escape }}</h2>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    <ul class="diferenciais__lista diferenciais__lista--mobile-{{ section.settings.colunas_mobile }}" role="list" style="--itens: {{ section.blocks.size | at_least: 1 | at_most: 4 }};">
+      {%- for block in section.blocks -%}
+        <li class="diferenciais__item" data-reveal style="--reveal-index: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+          <span class="diferenciais__icone">{% render 'icon', name: block.settings.icone %}</span>
+          {%- if block.settings.titulo != blank -%}
+            <h3 class="diferenciais__titulo">{{ block.settings.titulo | escape }}</h3>
+          {%- endif -%}
+          {%- if block.settings.texto != blank -%}
+            <div class="diferenciais__texto">{{ block.settings.texto }}</div>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .diferenciais__lista {
+    display: grid;
+    grid-template-columns: repeat(var(--itens), minmax(0, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .diferenciais__item { padding: 8px clamp(16px, 2.5vw, 40px); text-align: center; }
+  .diferenciais__item + .diferenciais__item { border-left: 1px solid color-mix(in srgb, currentColor 16%, transparent); }
+
+  .diferenciais__icone {
+    display: inline-grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 18px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  }
+  .diferenciais__icone svg { width: 22px; height: 22px; }
+  .diferenciais__titulo { margin: 0 0 8px; font-size: clamp(1.15rem, 1.6vw, 1.35rem); }
+  .diferenciais__texto { font-size: var(--f1); line-height: 1.6; opacity: 0.75; max-width: 30ch; margin-inline: auto; }
+  .diferenciais__texto p { margin: 0; }
+
+  @media screen and (max-width: 1000px) {
+    .diferenciais__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; }
+    .diferenciais__lista--mobile-1 { grid-template-columns: 1fr; }
+    .diferenciais__item { padding: 0 12px; }
+    /* no celular as linhas verticais confundem (a grade quebra em linhas) */
+    .diferenciais__item + .diferenciais__item { border-left: 0; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Diferenciais",
+  "tag": "section",
+  "class": "section-diferenciais",
+  "settings": [
+    { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Por que Orvalho" },
+    { "type": "text", "id": "titulo", "label": "Título", "default": "Beleza que não custa ao planeta" },
+    {
+      "type": "select",
+      "id": "fundo",
+      "label": "Fundo",
+      "options": [
+        { "value": "padrao", "label": "Padrão (creme)" },
+        { "value": "contraste", "label": "Contraste (bege)" },
+        { "value": "acento", "label": "Acento (verde)" }
+      ],
+      "default": "contraste"
+    },
+    {
+      "type": "select",
+      "id": "colunas_mobile",
+      "label": "Colunas no celular",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Diferencial",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icone",
+          "label": "Ícone",
+          "options": [
+            { "value": "diamante", "label": "Diamante" },
+            { "value": "folha", "label": "Folha" },
+            { "value": "escudo", "label": "Escudo" },
+            { "value": "entrega", "label": "Entrega" },
+            { "value": "troca", "label": "Troca" },
+            { "value": "presente", "label": "Presente" },
+            { "value": "coracao", "label": "Coração" },
+            { "value": "regua", "label": "Régua" },
+            { "value": "check", "label": "Check" }
+          ],
+          "default": "diamante"
+        },
+        { "type": "text", "id": "titulo", "label": "Título", "default": "Diamantes cultivados" },
+        { "type": "richtext", "id": "texto", "label": "Texto", "default": "<p>Mesma química e brilho do diamante extraído, sem mineração.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Diferenciais",
+      "blocks": [
+        { "type": "item", "settings": { "icone": "diamante", "titulo": "Diamantes cultivados" } },
+        { "type": "item", "settings": { "icone": "folha", "titulo": "Ouro 18k reciclado" } },
+        { "type": "item", "settings": { "icone": "escudo", "titulo": "Garantia vitalícia" } },
+        { "type": "item", "settings": { "icone": "troca", "titulo": "30 dias para trocar" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

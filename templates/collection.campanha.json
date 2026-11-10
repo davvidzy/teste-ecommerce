@@ -1,0 +1,82 @@
+{
+  "sections": {
+    "banner": {
+      "type": "collection-banner",
+      "settings": {
+        "show_description": true,
+        "show_image": true
+      }
+    },
+    "product-grid": {
+      "type": "main-collection",
+      "settings": {
+        "products_per_page": 12,
+        "columns_desktop": 3,
+        "enable_sorting": true,
+        "enable_filtering": true,
+        "opcoes_swatch": "metal, cor, color",
+        "mapa_cores": "Ouro amarelo: #E3C77A\nOuro branco: #E4E4E0\nOuro rosé: #E8B4A0\nPrata: #C8CBCF"
+      }
+    },
+    "destaque": {
+      "type": "imagem-texto",
+      "settings": {
+        "imagem_exemplo": "presentes",
+        "posicao_imagem": "direita",
+        "fundo": "contraste",
+        "sobrelinha": "Campanha",
+        "titulo": "Feita para este momento",
+        "texto": "<p>Edite este texto no editor de temas para contar a história da campanha (Dia das Mães, Noivas, Natal…).</p>",
+        "rotulo_botao": "",
+        "link_botao": "",
+        "estilo_botao": "secundario"
+      }
+    },
+    "beneficios": {
+      "type": "diferenciais",
+      "blocks": {
+        "d1": {
+          "type": "item",
+          "settings": {
+            "icone": "presente",
+            "titulo": "Embalagem presente",
+            "texto": "<p>Caixa de madeira e cartão escrito à mão.</p>"
+          }
+        },
+        "d2": {
+          "type": "item",
+          "settings": {
+            "icone": "troca",
+            "titulo": "Troca garantida",
+            "texto": "<p>Quem ganha troca o tamanho sem custo.</p>"
+          }
+        },
+        "d3": {
+          "type": "item",
+          "settings": {
+            "icone": "entrega",
+            "titulo": "Frete grátis",
+            "texto": "<p>Com seguro para todo o Brasil.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "d1",
+        "d2",
+        "d3"
+      ],
+      "settings": {
+        "sobrelinha": "",
+        "titulo": "",
+        "fundo": "padrao",
+        "colunas_mobile": "1"
+      }
+    }
+  },
+  "order": [
+    "banner",
+    "product-grid",
+    "destaque",
+    "beneficios"
+  ]
+}

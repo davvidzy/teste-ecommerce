@@ -1,0 +1,236 @@
+{%- comment -%}
+  ============================================================
+  IMAGEM + TEXTO — bloco editorial em duas colunas
+  ============================================================
+
+  O QUE FAZ:
+  Foto grande de um lado, texto do outro. É a seção "de marca":
+  conta a história do ateliê, apresenta uma campanha (Presentes,
+  Noivas) ou explica um diferencial. Reutilizável na home, na página
+  Sobre e em coleções de campanha.
+
+  PRINCIPAIS PARTES:
+  - Foto: imagem escolhida no editor; se vazia, uma das fotos de
+    exemplo que vêm com o tema (assets/atelie-orvalho-*.jpg e
+    assets/presentes-orvalho-*.jpg, banco Magnific/Freepik).
+  - Texto: sobrelinha, título, parágrafo e botão (estilo escolhível
+    para respeitar a hierarquia: um primário por área visível).
+  - Blocks "numero": números de destaque embaixo do texto
+    (ex.: "100% · ouro reciclado"). Opcionais.
+  - Fundo: padrão (creme), contraste (bege) ou acento (verde).
+
+  ANIMAÇÃO:
+  A foto revela de baixo para cima (clip-path) quando entra na tela,
+  junto com o reveal do texto. Sem JS/sem movimento: aparece pronta.
+{%- endcomment -%}
+{%- liquid
+  assign exemplo = section.settings.imagem_exemplo
+  assign classe_botao = 'button'
+  case section.settings.estilo_botao
+    when 'secundario'
+      assign classe_botao = 'button button--secondary'
+    when 'terciario'
+      assign classe_botao = 'button button--tertiary'
+  endcase
+-%}
+
+<div class="imagem-texto secao secao--{{ section.settings.fundo }}">
+  <div class="imagem-texto__grade page-width imagem-texto--{{ section.settings.posicao_imagem }}">
+    <div class="imagem-texto__midia" data-reveal="fade">
+      {%- if section.settings.imagem != blank -%}
+        {{
+          section.settings.imagem
+          | image_url: width: 1800
+          | image_tag:
+            loading: 'lazy',
+            widths: '600, 900, 1200, 1800',
+            sizes: '(min-width: 1000px) 50vw, 100vw',
+            class: 'imagem-texto__imagem',
+            alt: section.settings.imagem.alt | default: section.settings.titulo | escape
+        }}
+      {%- elsif exemplo != 'nenhuma' -%}
+        {%- assign arquivo = exemplo | append: '-orvalho-' -%}
+        <img
+          class="imagem-texto__imagem"
+          src="{{ arquivo | append: '1400.jpg' | asset_url }}"
+          srcset="{{ arquivo | append: '800.jpg' | asset_url }} 800w, {{ arquivo | append: '1400.jpg' | asset_url }} 1400w"
+          sizes="(min-width: 1000px) 50vw, 100vw"
+          width="1400"
+          height="2100"
+          loading="lazy"
+          alt="{{ section.settings.titulo | escape }}"
+        >
+      {%- else -%}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'imagem-texto__imagem placeholder-svg' }}
+      {%- endif -%}
+    </div>
+
+    <div class="imagem-texto__conteudo">
+      {%- if section.settings.sobrelinha != blank -%}
+        <p class="secao-sobrelinha" data-reveal>{{ section.settings.sobrelinha | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.titulo != blank -%}
+        <h2 class="secao-titulo" data-reveal style="--reveal-index: 1;">{{ section.settings.titulo | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.texto != blank -%}
+        <div class="imagem-texto__texto rte" data-reveal style="--reveal-index: 2;">{{ section.settings.texto }}</div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <dl class="imagem-texto__numeros" data-reveal style="--reveal-index: 3;">
+          {%- for block in section.blocks -%}
+            <div class="imagem-texto__numero" {{ block.shopify_attributes }}>
+              <dt>{{ block.settings.valor | escape }}</dt>
+              <dd>{{ block.settings.legenda | escape }}</dd>
+            </div>
+          {%- endfor -%}
+        </dl>
+      {%- endif -%}
+
+      {%- if section.settings.rotulo_botao != blank -%}
+        <div data-reveal style="--reveal-index: 4;">
+          <a href="{{ section.settings.link_botao | default: routes.all_products_collection_url }}" class="{{ classe_botao }} imagem-texto__botao">
+            {{- section.settings.rotulo_botao | escape -}}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+<style>
+  .imagem-texto__grade {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(32px, 6vw, 112px);
+  }
+  .imagem-texto--direita .imagem-texto__midia { order: 2; }
+
+  .imagem-texto__midia {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--media-radius);
+    background: var(--color-background-contrast);
+  }
+  .imagem-texto__imagem { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .imagem-texto__midia .placeholder-svg { fill: color-mix(in srgb, currentColor 25%, transparent); }
+
+  /* Revelação da foto: a "cortina" sobe quando a seção entra na tela */
+  .js .imagem-texto__midia[data-reveal] { opacity: 1; transform: none; clip-path: inset(12% 0 0 0); transition: clip-path 1.2s var(--ease-out); }
+  .js .imagem-texto__midia[data-reveal].is-visible { clip-path: inset(0 0 0 0); }
+  .js .imagem-texto__midia[data-reveal] .imagem-texto__imagem { transform: scale(1.08); transition: transform 1.6s var(--ease-out); }
+  .js .imagem-texto__midia[data-reveal].is-visible .imagem-texto__imagem { transform: none; }
+
+  .imagem-texto__conteudo { max-width: 540px; }
+  .imagem-texto--direita .imagem-texto__conteudo { justify-self: end; }
+  .imagem-texto__texto { margin-top: 20px; font-size: var(--f2); line-height: 1.7; opacity: 0.85; }
+  .imagem-texto__texto p + p { margin-top: 1em; }
+
+  .imagem-texto__numeros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 20px;
+    margin: 36px 0 0;
+    padding-top: 28px;
+    border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  }
+  .imagem-texto__numero dt { font-family: var(--font-heading-family); font-size: clamp(1.75rem, 3vw, 2.4rem); line-height: 1; }
+  .imagem-texto__numero dd { margin: 8px 0 0; font-size: var(--f1); opacity: 0.7; line-height: 1.4; }
+
+  .imagem-texto__botao { margin-top: 36px; }
+
+  @media screen and (max-width: 1000px) {
+    .imagem-texto__grade { grid-template-columns: 1fr; gap: 32px; }
+    .imagem-texto--direita .imagem-texto__midia { order: 0; }
+    .imagem-texto__midia { aspect-ratio: 4 / 4.4; }
+    .imagem-texto__conteudo, .imagem-texto--direita .imagem-texto__conteudo { max-width: none; justify-self: stretch; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js .imagem-texto__midia[data-reveal], .js .imagem-texto__midia[data-reveal] .imagem-texto__imagem { clip-path: none; transform: none; transition: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Imagem com texto",
+  "tag": "section",
+  "class": "section-imagem-texto",
+  "settings": [
+    { "type": "image_picker", "id": "imagem", "label": "Imagem" },
+    {
+      "type": "select",
+      "id": "imagem_exemplo",
+      "label": "Foto de exemplo (sem imagem escolhida)",
+      "options": [
+        { "value": "atelie", "label": "Ateliê (mãos trabalhando)" },
+        { "value": "presentes", "label": "Brincos dourados" },
+        { "value": "nenhuma", "label": "Nenhuma (placeholder)" }
+      ],
+      "default": "atelie"
+    },
+    {
+      "type": "select",
+      "id": "posicao_imagem",
+      "label": "Posição da imagem",
+      "options": [
+        { "value": "esquerda", "label": "Esquerda" },
+        { "value": "direita", "label": "Direita" }
+      ],
+      "default": "esquerda"
+    },
+    {
+      "type": "select",
+      "id": "fundo",
+      "label": "Fundo",
+      "options": [
+        { "value": "padrao", "label": "Padrão (creme)" },
+        { "value": "contraste", "label": "Contraste (bege)" },
+        { "value": "acento", "label": "Acento (verde)" }
+      ],
+      "default": "padrao"
+    },
+    { "type": "header", "content": "Texto" },
+    { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Nosso ateliê" },
+    { "type": "text", "id": "titulo", "label": "Título", "default": "Feitas à mão, uma a uma" },
+    { "type": "richtext", "id": "texto", "label": "Texto", "default": "<p>Cada peça nasce na bancada do nosso ateliê em São Paulo: fundida em ouro reciclado, cravejada e polida à mão.</p>" },
+    { "type": "header", "content": "Botão" },
+    { "type": "text", "id": "rotulo_botao", "label": "Texto do botão", "default": "Conheça a Orvalho" },
+    { "type": "url", "id": "link_botao", "label": "Link do botão" },
+    {
+      "type": "select",
+      "id": "estilo_botao",
+      "label": "Estilo do botão",
+      "options": [
+        { "value": "primario", "label": "Primário (ação principal da área)" },
+        { "value": "secundario", "label": "Secundário" },
+        { "value": "terciario", "label": "Terciário (link)" }
+      ],
+      "default": "secundario",
+      "info": "Regra do tema: um único primário por área visível."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "numero",
+      "name": "Número de destaque",
+      "limit": 4,
+      "settings": [
+        { "type": "text", "id": "valor", "label": "Valor", "default": "100%" },
+        { "type": "text", "id": "legenda", "label": "Legenda", "default": "ouro reciclado" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Imagem com texto",
+      "blocks": [
+        { "type": "numero", "settings": { "valor": "100%", "legenda": "ouro reciclado" } },
+        { "type": "numero", "settings": { "valor": "12 anos", "legenda": "de ateliê" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

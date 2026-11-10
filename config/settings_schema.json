@@ -292,6 +292,33 @@
     ]
   },
   {
+    "name": "WhatsApp",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Botão flutuante de atendimento no canto da tela. Deixe o número vazio para esconder."
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_numero",
+        "label": "Número",
+        "info": "Com DDI e DDD, só números. Ex.: 5511999999999"
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_mensagem",
+        "label": "Mensagem padrão",
+        "default": "Olá! Vim pelo site da Orvalho e queria tirar uma dúvida."
+      },
+      {
+        "type": "checkbox",
+        "id": "whatsapp_so_produto",
+        "label": "Mostrar só na página de produto",
+        "default": false
+      }
+    ]
+  },
+  {
     "name": "t:settings_schema.social_sharing.name",
     "settings": [
       {

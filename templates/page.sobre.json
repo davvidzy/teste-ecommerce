@@ -1,0 +1,110 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "historia": {
+      "type": "imagem-texto",
+      "blocks": {
+        "n1": {
+          "type": "numero",
+          "settings": {
+            "valor": "2014",
+            "legenda": "primeira peça, numa mesa de cozinha"
+          }
+        },
+        "n2": {
+          "type": "numero",
+          "settings": {
+            "valor": "12",
+            "legenda": "ourives no ateliê"
+          }
+        }
+      },
+      "block_order": [
+        "n1",
+        "n2"
+      ],
+      "settings": {
+        "imagem_exemplo": "atelie",
+        "posicao_imagem": "esquerda",
+        "fundo": "padrao",
+        "sobrelinha": "Como começou",
+        "titulo": "Do orvalho, a forma",
+        "texto": "<p>A Orvalho nasceu da vontade de fazer joias que durassem gerações sem cobrar um preço do planeta. Começamos com um único anel — uma gota de diamante suspensa, como o orvalho numa folha.</p><p>Hoje somos um ateliê de doze ourives em São Paulo, trabalhando só com ouro reciclado e diamantes cultivados.</p>",
+        "rotulo_botao": "",
+        "link_botao": "",
+        "estilo_botao": "secundario"
+      }
+    },
+    "valores": {
+      "type": "diferenciais",
+      "blocks": {
+        "d1": {
+          "type": "item",
+          "settings": {
+            "icone": "diamante",
+            "titulo": "Diamantes cultivados",
+            "texto": "<p>Mesma química e brilho, com origem rastreável.</p>"
+          }
+        },
+        "d2": {
+          "type": "item",
+          "settings": {
+            "icone": "folha",
+            "titulo": "Ouro 18k reciclado",
+            "texto": "<p>Refinado de joias e eletrônicos antigos.</p>"
+          }
+        },
+        "d3": {
+          "type": "item",
+          "settings": {
+            "icone": "coracao",
+            "titulo": "Feito à mão",
+            "texto": "<p>Cada peça passa por cinco pares de mãos.</p>"
+          }
+        },
+        "d4": {
+          "type": "item",
+          "settings": {
+            "icone": "presente",
+            "titulo": "Uma árvore por pedido",
+            "texto": "<p>Em parceria com projetos de reflorestamento da Mata Atlântica.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "d1",
+        "d2",
+        "d3",
+        "d4"
+      ],
+      "settings": {
+        "sobrelinha": "No que acreditamos",
+        "titulo": "Joias com consciência",
+        "fundo": "contraste",
+        "colunas_mobile": "2"
+      }
+    },
+    "processo": {
+      "type": "imagem-texto",
+      "settings": {
+        "imagem_exemplo": "presentes",
+        "posicao_imagem": "direita",
+        "fundo": "padrao",
+        "sobrelinha": "Processo",
+        "titulo": "Do desenho à sua caixa",
+        "texto": "<p>Desenhamos à mão, modelamos em cera, fundimos em ouro reciclado e cravamos cada pedra sob lupa. O polimento final é feito peça a peça, antes de embalar em madeira certificada.</p>",
+        "rotulo_botao": "Ver o catálogo",
+        "link_botao": "/collections/all",
+        "estilo_botao": "primario"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "historia",
+    "valores",
+    "processo"
+  ]
+}

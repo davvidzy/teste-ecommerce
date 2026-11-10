@@ -270,12 +270,27 @@
       <div class="colecao__resultados" data-resultados>
         {%- if collection.products.size == 0 -%}
           <div class="colecao__vazio">
-            <p class="colecao__vazio-titulo">{{ 'sections.main_collection.empty' | t }}</p>
+            {%- comment -%}
+              Dois vazios diferentes: (1) a coleção existe mas ainda não tem peças
+              (loja em montagem / lançamento) e (2) os filtros não acharam nada.
+            {%- endcomment -%}
+            {%- if collection.all_products_count == 0 and total_ativos == 0 -%}
+              <span class="colecao__vazio-icone" aria-hidden="true">{% render 'icon', name: 'diamante' %}</span>
+              <p class="colecao__vazio-titulo">{{ 'sections.main_collection.coming_soon_title' | t }}</p>
+              <p class="colecao__vazio-texto">{{ 'sections.main_collection.coming_soon_text' | t }}</p>
+            {%- else -%}
+              <p class="colecao__vazio-titulo">{{ 'sections.main_collection.empty' | t }}</p>
+            {%- endif -%}
             {%- if total_ativos > 0 -%}
               <p>{{ 'sections.main_collection.use_fewer_filters' | t }}</p>
               <a href="{{ url_limpar }}" class="button button--secondary" data-link-filtro>{{ 'products.facets.clear_all' | t }}</a>
             {%- else -%}
-              <a href="{{ routes.all_products_collection_url }}" class="button button--secondary">{{ 'general.continue_shopping' | t }}</a>
+              {%- comment -%} Na própria /collections/all, mandar para "todos os produtos" seria um laço: volta à home {%- endcomment -%}
+              {%- if collection.handle == 'all' -%}
+                <a href="{{ routes.root_url }}" class="button button--secondary">{{ 'general.continue_shopping' | t }}</a>
+              {%- else -%}
+                <a href="{{ routes.all_products_collection_url }}" class="button button--secondary">{{ 'general.continue_shopping' | t }}</a>
+              {%- endif -%}
             {%- endif -%}
           </div>
         {%- else -%}
@@ -384,24 +399,12 @@
   }
   .colecao__vazio { display: grid; justify-items: center; gap: 12px; padding: 80px 0; text-align: center; }
   .colecao__vazio-titulo { font-family: var(--font-heading-family); font-size: 1.75rem; }
+  .colecao__vazio-texto { max-width: 44ch; opacity: 0.75; line-height: 1.6; }
+  .colecao__vazio-icone { display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--color-border); }
+  .colecao__vazio-icone svg { width: 26px; height: 26px; }
 
-  /* Paginação */
+  /* Paginação: estilo global em assets/base.css */
   .colecao .pagination { margin-top: 56px; }
-  .colecao .pagination__list { display: flex; justify-content: center; align-items: center; gap: 6px; list-style: none; }
-  .colecao .pagination__item {
-    display: inline-grid;
-    place-items: center;
-    min-width: 44px;
-    height: 44px;
-    padding: 0 10px;
-    font-size: 0.9375rem;
-    color: inherit;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    transition: border-color var(--dur-fast) ease;
-  }
-  .colecao a.pagination__item:hover { border-color: var(--color-text); }
-  .colecao .pagination__item--current { color: var(--color-accent-text); background: var(--color-accent); }
 
   /* ---------- Gaveta de filtros ---------- */
   /* Sem JS: painel normal acima da grade (o form ainda funciona por GET) */

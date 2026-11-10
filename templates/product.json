@@ -3,26 +3,80 @@
     "main": {
       "type": "main-product",
       "blocks": {
-        "vendor": { "type": "vendor" },
-        "title": { "type": "title" },
-        "price": { "type": "price" },
-        "variant_picker": { "type": "variant_picker" },
-        "quantity": { "type": "quantity" },
+        "vendor": {
+          "type": "vendor"
+        },
+        "title": {
+          "type": "title"
+        },
+        "price": {
+          "type": "price"
+        },
+        "variant_picker": {
+          "type": "variant_picker"
+        },
+        "quantity": {
+          "type": "quantity"
+        },
         "buy_buttons": {
           "type": "buy_buttons",
-          "settings": { "show_dynamic_checkout": false }
+          "settings": {
+            "show_dynamic_checkout": false
+          }
         },
-        "description": { "type": "description", "settings": { "aberto": false } },
-        "share": { "type": "share" }
+        "description": {
+          "type": "description",
+          "settings": {
+            "aberto": false
+          }
+        },
+        "share": {
+          "type": "share"
+        },
+        "guia_tamanhos": {
+          "type": "guia_tamanhos",
+          "settings": {
+            "opcoes": "aro, tamanho, size",
+            "colares": false
+          }
+        },
+        "beneficios": {
+          "type": "beneficios",
+          "settings": {
+            "texto_1": "Frete grátis e seguro",
+            "texto_2": "30 dias para trocar",
+            "texto_3": "Garantia vitalícia"
+          }
+        },
+        "entrega": {
+          "type": "informacao",
+          "settings": {
+            "titulo": "Entrega e trocas",
+            "icone": "entrega",
+            "conteudo": "<p>Frete grátis e com seguro para todo o Brasil. Peças a pronta-entrega saem em até 2 dias úteis; sob medida, em até 15 dias úteis.</p><p>A primeira troca de tamanho é grátis em até 30 dias após o recebimento.</p>"
+          }
+        },
+        "cuidados": {
+          "type": "informacao",
+          "settings": {
+            "titulo": "Garantia e cuidados",
+            "icone": "escudo",
+            "conteudo": "<p>Garantia vitalícia contra defeitos de fabricação, com certificado de autenticidade do ouro e da pedra.</p><p>Guarde cada peça separada, longe de perfumes e cloro. Limpe com água morna, sabão neutro e uma escova macia.</p>"
+          }
+        }
       },
       "block_order": [
         "vendor",
         "title",
         "price",
         "variant_picker",
+        "guia_tamanhos",
         "quantity",
         "buy_buttons",
+        "beneficios",
         "description",
+        "entrega",
+        "cuidados",
         "share"
       ],
       "settings": {
@@ -32,8 +86,14 @@
     },
     "related": {
       "type": "related-products",
-      "settings": { "heading": "Você também pode gostar", "products_to_show": 3 }
+      "settings": {
+        "heading": "Você também pode gostar",
+        "products_to_show": 3
+      }
     }
   },
-  "order": ["main", "related"]
+  "order": [
+    "main",
+    "related"
+  ]
 }

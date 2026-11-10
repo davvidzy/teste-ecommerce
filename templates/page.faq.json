@@ -1,0 +1,152 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "pedidos": {
+      "type": "perguntas-frequentes",
+      "blocks": {
+        "q1": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Qual o prazo de entrega?",
+            "resposta": "<p>Peças a pronta-entrega saem em até 2 dias úteis e chegam em 3 a 8 dias úteis. Peças sob medida levam até 15 dias úteis para ficar prontas.</p>"
+          }
+        },
+        "q2": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "O frete é grátis?",
+            "resposta": "<p>Sim, para todo o Brasil, com seguro contra extravio e código de rastreio.</p>"
+          }
+        },
+        "q3": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Quais as formas de pagamento?",
+            "resposta": "<p>Pix com 5% de desconto, cartão de crédito em até 10x sem juros e boleto.</p>"
+          }
+        },
+        "q4": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Como acompanho meu pedido?",
+            "resposta": "<p>Você recebe o código de rastreio por e-mail assim que o pedido é despachado. Também dá para acompanhar pela sua conta.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4"
+      ],
+      "settings": {
+        "sobrelinha": "Pedidos e entrega",
+        "titulo": "Comprando na Orvalho",
+        "texto": "<p>Não encontrou o que procurava? Nosso time responde em até 1 dia útil.</p>",
+        "rotulo_contato": "Fale com a gente",
+        "link_contato": "",
+        "abrir_primeira": true,
+        "dados_estruturados": true,
+        "fundo": "padrao"
+      }
+    },
+    "trocas": {
+      "type": "perguntas-frequentes",
+      "blocks": {
+        "q1": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Posso trocar se não servir?",
+            "resposta": "<p>Sim. A primeira troca de tamanho é grátis em até 30 dias após o recebimento.</p>"
+          }
+        },
+        "q2": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Como devolvo uma peça?",
+            "resposta": "<p>Pelo Código de Defesa do Consumidor você tem 7 dias corridos para desistir da compra. Fale com a gente e enviamos a etiqueta de postagem.</p>"
+          }
+        },
+        "q3": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "As peças têm garantia?",
+            "resposta": "<p>Garantia vitalícia contra defeitos de fabricação, com certificado de autenticidade.</p>"
+          }
+        },
+        "q4": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Vocês fazem ajuste e polimento?",
+            "resposta": "<p>Sim, o primeiro polimento é por nossa conta. Ajustes de tamanho após 30 dias têm custo a partir de R$ 90.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4"
+      ],
+      "settings": {
+        "sobrelinha": "Trocas e garantia",
+        "titulo": "Depois da compra",
+        "texto": "<p>Não encontrou o que procurava? Nosso time responde em até 1 dia útil.</p>",
+        "rotulo_contato": "Fale com a gente",
+        "link_contato": "",
+        "abrir_primeira": false,
+        "dados_estruturados": false,
+        "fundo": "contraste"
+      }
+    },
+    "materiais": {
+      "type": "perguntas-frequentes",
+      "blocks": {
+        "q1": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "Diamante cultivado é diamante de verdade?",
+            "resposta": "<p>Sim. Tem a mesma composição química, dureza e brilho. A diferença é a origem: formado em laboratório, sem mineração.</p>"
+          }
+        },
+        "q2": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "O que é ouro reciclado?",
+            "resposta": "<p>Ouro refinado a partir de joias antigas e componentes eletrônicos. É quimicamente idêntico ao ouro novo.</p>"
+          }
+        },
+        "q3": {
+          "type": "pergunta",
+          "settings": {
+            "pergunta": "As peças escurecem?",
+            "resposta": "<p>Ouro 18k não oxida. Com o tempo pode perder um pouco do brilho; uma limpeza simples resolve.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3"
+      ],
+      "settings": {
+        "sobrelinha": "Materiais",
+        "titulo": "Sobre as joias",
+        "texto": "<p>Não encontrou o que procurava? Nosso time responde em até 1 dia útil.</p>",
+        "rotulo_contato": "Fale com a gente",
+        "link_contato": "",
+        "abrir_primeira": false,
+        "dados_estruturados": false,
+        "fundo": "padrao"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "pedidos",
+    "trocas",
+    "materiais"
+  ]
+}
