@@ -4,7 +4,7 @@
   ============================================================
 
   O QUE FAZ:
-  Primeira dobra da home: foto em tela cheia (100svh − barra − header),
+  Primeira dobra da home: foto em tela cheia (100dvh − barra − header),
   título, texto curto e dois botões CENTRALIZADOS, e uma faixa de
   selos de confiança na base.
 
@@ -140,7 +140,15 @@
     background: var(--color-accent);
   }
   /* "Tela cheia" = altura visível MENOS barra de anúncio + header (medidas pelo JS do header) */
-  .hero--tela { min-height: calc(100svh - var(--topo-altura, 108px)); }
+  /* Tela cheia descontando barra + header fixos.
+     svh = altura com as barras do navegador VISÍVEIS (reserva p/ navegadores antigos);
+     dvh = altura DINÂMICA: no celular, quando as barras do Safari/Chrome se recolhem ao
+     rolar, o hero acompanha e continua ocupando a tela inteira (com svh sobrava um vão
+     embaixo mostrando a próxima seção). Navegador sem dvh ignora a 2ª linha. */
+  .hero--tela {
+    min-height: calc(100svh - var(--topo-altura, 108px));
+    min-height: calc(100dvh - var(--topo-altura, 108px));
+  }
   .hero--grande { min-height: 75svh; }
   .hero--media { min-height: 60svh; }
   .hero--texto-claro { --hero-texto: #ffffff; }
