@@ -1,0 +1,67 @@
+{%- comment -%}
+  ============================================================
+  catalogo-painel — um painel (aba) da seção Catálogo
+  ============================================================
+
+  O QUE FAZ:
+  Renderiza a grade de produtos de UMA coleção + o link "Ver todos"
+  quando a coleção tem mais produtos que o limite da seção.
+  Se a coleção estiver vazia, mostra cards placeholder (útil logo
+  após instalar o tema, antes de cadastrar produtos).
+
+  COMO USAR:
+  {% render 'catalogo-painel',
+    colecao: collection,
+    id_painel: 'Painel-abc',
+    id_aba: 'Aba-abc',        ← nil quando a seção não tem abas
+    ativo: true,
+    secao: section
+  %}
+
+  PARÂMETROS:
+  - colecao:   objeto collection.
+  - id_painel: id HTML do painel (a aba aponta para ele com aria-controls).
+  - id_aba:    id HTML da aba (o painel aponta de volta com aria-labelledby).
+  - ativo:     se false, o painel nasce com [hidden].
+  - secao:     section pai (limite, colunas, settings do card).
+
+  OBSERVAÇÕES:
+  Cada item recebe data-reveal + --reveal-index (posição na linha),
+  então os cards de uma mesma linha entram em "cascata".
+{%- endcomment -%}
+{%- liquid
+  assign limite = secao.settings.produtos_por_aba
+  assign colunas = secao.settings.colunas
+-%}
+<div
+  class="catalogo__painel"
+  id="{{ id_painel }}"
+  data-painel
+  {% if id_aba %}role="tabpanel" aria-labelledby="{{ id_aba }}" tabindex="0"{% endif %}
+  {% unless ativo %}hidden{% endunless %}
+>
+  <ul class="catalogo__grade" role="list">
+    {%- if colecao.products_count > 0 -%}
+      {%- for produto in colecao.products limit: limite -%}
+        <li class="catalogo__item" data-reveal style="--reveal-index: {{ forloop.index0 | modulo: colunas }};">
+          {% render 'card-catalogo', produto: produto, secao: secao %}
+        </li>
+      {%- endfor -%}
+    {%- else -%}
+      {%- for i in (1..colunas) -%}
+        <li class="catalogo__item" data-reveal style="--reveal-index: {{ forloop.index0 }};">
+          {% render 'card-catalogo', produto: nil, indice: forloop.index0 %}
+        </li>
+      {%- endfor -%}
+    {%- endif -%}
+  </ul>
+
+  {%- if colecao.products_count > limite -%}
+    <div class="catalogo__rodape">
+      <a href="{{ colecao.url }}" class="catalogo__ver-todos">
+        <span class="link-anim">{{ 'sections.catalogo.view_all' | t: count: colecao.products_count }}</span>
+        {% render 'icon', name: 'seta' %}
+      </a>
+    </div>
+  {%- endif -%}
+</div>

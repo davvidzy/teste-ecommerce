@@ -19,9 +19,17 @@
   Cada seletor só aparece se houver mais de uma opção disponível
   (available_countries / available_languages > 1). Traz seu próprio <style>.
 {%- endcomment -%}
+{%- comment -%}
+  A tag {% form %} não aceita filtros nos parâmetros (ex: `id: 'X' | append: y`
+  é erro de sintaxe). Por isso os ids são montados antes, com assign.
+{%- endcomment -%}
+{%- liquid
+  assign id_form_pais = 'CountryForm-' | append: section_id
+  assign id_form_idioma = 'LanguageForm-' | append: section_id
+-%}
 <div class="localization">
   {%- if show_country and localization.available_countries.size > 1 -%}
-    {%- form 'localization', id: 'CountryForm-' | append: section_id, class: 'localization__form' -%}
+    {%- form 'localization', id: id_form_pais, class: 'localization__form' -%}
       <label class="visually-hidden" for="Country-{{ section_id }}">{{ 'localization.country_label' | t }}</label>
       <select
         class="localization__select"
@@ -43,7 +51,7 @@
   {%- endif -%}
 
   {%- if show_language and localization.available_languages.size > 1 -%}
-    {%- form 'localization', id: 'LanguageForm-' | append: section_id, class: 'localization__form' -%}
+    {%- form 'localization', id: id_form_idioma, class: 'localization__form' -%}
       <label class="visually-hidden" for="Language-{{ section_id }}">{{ 'localization.language_label' | t }}</label>
       <select
         class="localization__select"

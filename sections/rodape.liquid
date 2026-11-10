@@ -1,0 +1,380 @@
+{%- comment -%}
+  ============================================================
+  RODAPÉ — newsletter, colunas de links e assinatura da marca
+  ============================================================
+
+  O QUE FAZ:
+  Rodapé em 4 faixas:
+  1. Newsletter: título + campo de e-mail com rótulo flutuante e
+     linha que "desenha" ao focar. Usa o form nativo 'customer'
+     (o e-mail vira cliente com a tag "newsletter" no admin).
+  2. Colunas (blocks): menu, texto livre e redes sociais — entram
+     em cascata ao rolar ([data-reveal] + --reveal-index).
+  3. Assinatura: o nome da marca em tamanho gigante; as letras
+     sobem uma a uma quando a faixa entra na tela.
+  4. Base: copyright, ícones de pagamento, seletor de país/idioma
+     e "Voltar ao topo".
+
+  ONDE É USADA:
+  sections/footer-group.json (grupo de rodapé do layout). Aparece em
+  todas as páginas. O footer.liquid antigo continua no tema como
+  referência — basta trocar o "type" no footer-group.json.
+
+  PRINCIPAIS PARTES:
+  - Settings: esquema (escuro/claro), textos da newsletter, texto da
+    assinatura, toggles de pagamento/localização.
+  - Blocks: menu (link_list), texto (richtext), social (links das
+    redes em Theme settings → Social media).
+
+  OBSERVAÇÕES:
+  - O tamanho da assinatura é calculado pelo número de letras
+    (--letras), para qualquer nome caber em uma linha.
+  - Depois de enviar a newsletter, o Shopify recarrega a página com
+    form.posted_successfully? = true e mostramos a confirmação no
+    lugar do campo. O `id` único do form evita conflito caso exista
+    outro formulário de newsletter na mesma página.
+{%- endcomment -%}
+{%- liquid
+  assign marca = section.settings.marca | default: shop.name
+  assign letras = marca | split: ''
+  assign id_form = 'RodapeNewsletter-' | append: section.id
+-%}
+<footer class="rodape rodape--{{ section.settings.esquema }}" data-section-id="{{ section.id }}">
+  {%- if section.settings.mostrar_newsletter -%}
+    <div class="rodape__newsletter page-width">
+      <div class="rodape__news-texto" data-reveal>
+        {%- if section.settings.titulo_newsletter != blank -%}
+          <h2 class="rodape__news-titulo">{{ section.settings.titulo_newsletter | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.texto_newsletter != blank -%}
+          <p class="rodape__news-descricao">{{ section.settings.texto_newsletter | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="rodape__news-form" data-reveal style="--reveal-index: 1;">
+        {%- form 'customer', id: id_form, class: 'rodape__form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          {%- if form.posted_successfully? -%}
+            <p class="rodape__form-ok" role="status">
+              {% render 'icon', name: 'check' %}
+              {{ 'general.newsletter_form.confirmation' | t }}
+            </p>
+          {%- else -%}
+            <div class="rodape__campo">
+              <input
+                id="RodapeEmail-{{ section.id }}"
+                class="rodape__input"
+                type="email"
+                name="contact[email]"
+                value="{{ form.email }}"
+                placeholder=" "
+                autocomplete="email"
+                autocapitalize="off"
+                autocorrect="off"
+                required
+                {% if form.errors %}aria-invalid="true" aria-describedby="RodapeErro-{{ section.id }}"{% endif %}
+              >
+              <label class="rodape__label" for="RodapeEmail-{{ section.id }}">{{ 'sections.rodape.email_label' | t }}</label>
+              <button type="submit" class="rodape__enviar tap-target" aria-label="{{ 'general.newsletter_form.button_label' | t }}">
+                {% render 'icon', name: 'seta' %}
+              </button>
+              <span class="rodape__linha" aria-hidden="true"></span>
+            </div>
+            {%- if form.errors -%}
+              <p class="rodape__form-erro" id="RodapeErro-{{ section.id }}" role="alert">
+                {{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}
+              </p>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if section.blocks.size > 0 -%}
+    <div class="rodape__colunas page-width">
+      {%- for block in section.blocks -%}
+        <div class="rodape__coluna rodape__coluna--{{ block.type }}" data-reveal style="--reveal-index: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+          {%- if block.settings.titulo != blank -%}
+            <h2 class="rodape__titulo">{{ block.settings.titulo | escape }}</h2>
+          {%- endif -%}
+
+          {%- case block.type -%}
+            {%- when 'menu' -%}
+              {%- if block.settings.menu != blank -%}
+                <ul class="rodape__lista" role="list">
+                  {%- for link in block.settings.menu.links -%}
+                    <li><a href="{{ link.url }}" class="rodape__link link-anim">{{ link.title | escape }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+
+            {%- when 'texto' -%}
+              <div class="rodape__texto rte">{{ block.settings.texto }}</div>
+
+            {%- when 'social' -%}
+              <ul class="rodape__social" role="list">
+                {%- if settings.social_instagram_link != blank -%}
+                  <li><a href="{{ settings.social_instagram_link }}" class="rodape__social-link tap-target" aria-label="Instagram" rel="noopener" target="_blank">{% render 'icon', name: 'instagram' %}</a></li>
+                {%- endif -%}
+                {%- if settings.social_facebook_link != blank -%}
+                  <li><a href="{{ settings.social_facebook_link }}" class="rodape__social-link tap-target" aria-label="Facebook" rel="noopener" target="_blank">{% render 'icon', name: 'facebook' %}</a></li>
+                {%- endif -%}
+                {%- if settings.social_linkedin_link != blank -%}
+                  <li><a href="{{ settings.social_linkedin_link }}" class="rodape__social-link tap-target" aria-label="LinkedIn" rel="noopener" target="_blank">{% render 'icon', name: 'linkedin' %}</a></li>
+                {%- endif -%}
+              </ul>
+              {%- if block.settings.texto != blank -%}
+                <p class="rodape__texto">{{ block.settings.texto | escape }}</p>
+              {%- endif -%}
+          {%- endcase -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  {%- if marca != blank -%}
+    <div class="rodape__marca page-width" aria-hidden="true" data-reveal="fade" style="--letras: {{ letras.size }};">
+      {%- for letra in letras -%}
+        <span style="--i: {{ forloop.index0 }};">{% if letra == ' ' %}&nbsp;{% else %}{{ letra | escape }}{% endif %}</span>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <div class="rodape__base page-width">
+    <p class="rodape__copyright">
+      &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ 'sections.footer.rights' | t }}
+      <span class="rodape__credito">{{ 'sections.footer.base_by_html' | t: link: 'https://lecdt.com' }}</span>
+    </p>
+
+    <div class="rodape__base-direita">
+      {%- if section.settings.mostrar_localizacao -%}
+        {% render 'localization-form', section_id: section.id, show_country: true, show_language: true %}
+      {%- endif -%}
+
+      {%- if section.settings.mostrar_pagamentos and shop.enabled_payment_types.size > 0 -%}
+        <ul class="rodape__pagamentos" role="list" aria-label="{{ 'sections.footer.payment' | t }}">
+          {%- for tipo in shop.enabled_payment_types -%}
+            <li>{{ tipo | payment_type_svg_tag: class: 'rodape__pagamento' }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      <a href="#" class="rodape__topo" data-voltar-topo>
+        <span class="link-anim">{{ 'sections.rodape.back_to_top' | t }}</span>
+        {% render 'icon', name: 'seta-cima' %}
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    --rodape-fundo: var(--color-background-contrast);
+    --rodape-texto: var(--color-text-contrast);
+    margin-top: var(--spacing-sections);
+    color: var(--rodape-texto);
+    background-color: var(--rodape-fundo);
+    overflow: hidden;
+  }
+  .rodape--escuro { --rodape-fundo: var(--color-accent); --rodape-texto: var(--color-accent-text); }
+  .rodape a { color: inherit; }
+
+  /* ---------- Newsletter ---------- */
+  .rodape__newsletter {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+    gap: 32px 80px;
+    padding-top: 96px;
+    padding-bottom: 72px;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  }
+  .rodape__news-titulo { font-size: clamp(1.8rem, 3.4vw, 2.8rem); line-height: 1.1; letter-spacing: -0.01em; margin-bottom: 12px; }
+  .rodape__news-descricao { font-size: var(--f2); line-height: 1.6; opacity: 0.75; max-width: 440px; }
+
+  .rodape__campo { position: relative; }
+  .rodape__input {
+    width: 100%;
+    padding: 26px 56px 12px 0;
+    font-family: var(--font-body-family);
+    font-size: var(--f4);
+    color: inherit;
+    background: transparent;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    border-radius: 0;
+  }
+  .rodape__input:focus-visible { outline: none; } /* o foco é a linha animada abaixo */
+  .rodape__label {
+    position: absolute;
+    left: 0;
+    top: 26px;
+    font-size: var(--f4);
+    opacity: 0.6;
+    pointer-events: none;
+    transform-origin: 0 0;
+    transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+  }
+  /* Rótulo flutuante: sobe quando o campo tem foco OU já tem texto (placeholder=" " deixa de aparecer) */
+  .rodape__input:focus + .rodape__label,
+  .rodape__input:not(:placeholder-shown) + .rodape__label { transform: translateY(-22px) scale(0.62); opacity: 0.8; }
+  .rodape__linha {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 700ms var(--ease-out);
+  }
+  .rodape__campo:focus-within .rodape__linha { transform: scaleX(1); }
+  .rodape__enviar {
+    position: absolute;
+    right: 0;
+    bottom: 4px;
+    color: inherit;
+    background: none;
+    border-radius: 50%;
+    transition: transform var(--dur-base) var(--ease-out), background-color var(--dur-fast) ease;
+  }
+  .rodape__enviar:hover { transform: translateX(4px); background: color-mix(in srgb, currentColor 12%, transparent); }
+  .rodape__form-ok { display: flex; align-items: center; gap: 10px; font-size: var(--f3); animation: rodape-ok 700ms var(--ease-out) both; }
+  .rodape__form-erro { margin-top: 10px; font-size: var(--f1); }
+
+  /* ---------- Colunas ---------- */
+  .rodape__colunas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 40px;
+    padding-top: 64px;
+    padding-bottom: 48px;
+  }
+  .rodape__titulo { font-family: var(--font-body-family); font-size: var(--f1); letter-spacing: 0.18em; text-transform: uppercase; opacity: 0.6; margin-bottom: 20px; }
+  .rodape__lista { list-style: none; display: grid; gap: 4px; }
+  .rodape__link { display: inline-block; padding: 6px 0; font-size: var(--f2); }
+  .rodape__texto { font-size: var(--f2); line-height: 1.7; opacity: 0.85; }
+  .rodape__texto a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  .rodape__social { display: flex; gap: 4px; list-style: none; margin: -10px 0 8px -10px; }
+  .rodape__social-link { border-radius: 50%; transition: transform var(--dur-base) var(--ease-spring), background-color var(--dur-fast) ease; }
+  .rodape__social-link:hover { transform: translateY(-3px); background: color-mix(in srgb, currentColor 12%, transparent); }
+
+  /* ---------- Assinatura gigante ---------- */
+  .rodape__marca {
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+    line-height: 0.85;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    font-family: var(--font-heading-family);
+    /* largura útil ÷ nº de letras × fator médio de largura de glifo */
+    font-size: min(calc((min(100vw, var(--page-width)) - 40px) / var(--letras) * 1.55), 15rem);
+    letter-spacing: -0.03em;
+    opacity: 0.95;
+  }
+  .rodape__marca span { display: inline-block; }
+  .js .rodape__marca span {
+    transform: translate3d(0, 105%, 0);
+    transition: transform 1200ms var(--ease-out);
+    transition-delay: calc(var(--i) * 45ms);
+  }
+  .js .rodape__marca.is-visible span { transform: none; }
+
+  /* ---------- Base ---------- */
+  .rodape__base {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 32px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    font-size: var(--f1);
+    border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  }
+  .rodape__copyright { opacity: 0.75; }
+  .rodape__credito a { text-decoration: underline; }
+  .rodape__base-direita { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 28px; }
+  .rodape__pagamentos { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; }
+  .rodape__pagamento { width: 38px; height: 24px; }
+  .rodape__topo { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+  .rodape__topo svg { transition: transform var(--dur-base) var(--ease-out); }
+  .rodape__topo:hover svg { transform: translateY(-3px); }
+
+  @keyframes rodape-ok { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+
+  @media screen and (max-width: 1000px) {
+    .rodape__newsletter { grid-template-columns: 1fr; padding-top: 64px; padding-bottom: 48px; }
+    .rodape__colunas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 20px; padding-top: 48px; }
+    .rodape__base { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Rodapé animado",
+  "class": "section-rodape",
+  "settings": [
+    {
+      "type": "select",
+      "id": "esquema",
+      "label": "Esquema de cor",
+      "options": [
+        { "value": "escuro", "label": "Escuro (cor de destaque)" },
+        { "value": "claro", "label": "Claro (fundo secundário)" }
+      ],
+      "default": "escuro"
+    },
+    { "type": "header", "content": "Newsletter" },
+    { "type": "checkbox", "id": "mostrar_newsletter", "label": "Mostrar newsletter", "default": true },
+    { "type": "text", "id": "titulo_newsletter", "label": "Título", "default": "Receba as novidades primeiro" },
+    { "type": "text", "id": "texto_newsletter", "label": "Texto", "default": "Lançamentos, bastidores do ateliê e convites para eventos. Sem spam." },
+    { "type": "header", "content": "Assinatura" },
+    { "type": "text", "id": "marca", "label": "Texto da assinatura", "info": "Vazio = nome da loja. Palavras curtas ficam maiores." },
+    { "type": "header", "content": "Base" },
+    { "type": "checkbox", "id": "mostrar_pagamentos", "label": "Mostrar ícones de pagamento", "default": true },
+    { "type": "checkbox", "id": "mostrar_localizacao", "label": "Mostrar seletor de país/idioma", "default": false }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        { "type": "text", "id": "titulo", "label": "Título", "default": "Loja" },
+        { "type": "link_list", "id": "menu", "label": "Menu", "default": "footer" }
+      ]
+    },
+    {
+      "type": "texto",
+      "name": "Texto",
+      "settings": [
+        { "type": "text", "id": "titulo", "label": "Título", "default": "Atendimento" },
+        { "type": "richtext", "id": "texto", "label": "Texto", "default": "<p>Seg a sex, 9h às 18h<br>contato@exemplo.com</p>" }
+      ]
+    },
+    {
+      "type": "social",
+      "name": "Redes sociais",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "titulo", "label": "Título", "default": "Siga" },
+        { "type": "text", "id": "texto", "label": "Texto abaixo dos ícones" },
+        { "type": "paragraph", "content": "Os links vêm de Configurações do tema → Redes sociais." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rodapé animado",
+      "blocks": [
+        { "type": "menu" },
+        { "type": "texto" },
+        { "type": "social" }
+      ]
+    }
+  ]
+}
+{% endschema %}

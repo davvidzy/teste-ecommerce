@@ -9,6 +9,7 @@
   1. fontes.css     — carregamento de fontes / @font-face
   2. normalizar.css — reset e normalizacao entre navegadores
   3. base.css       — estilos base, utilitarios e componentes compartilhados
+  4. movimento.css  — tokens de animacao e o padrao [data-reveal]
 
   OBSERVACOES:
   A ordem dos @import importa: fontes primeiro, depois o reset e por
@@ -18,3 +19,4 @@
 @import url('./fontes.css');
 @import url('./normalizar.css');
 @import url('./base.css');
+@import url('./movimento.css');
