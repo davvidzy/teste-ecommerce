@@ -21,6 +21,12 @@
   Exemplo: assets/catalogo.js usa esses eventos para animar o
   botao "Adicionar" do card (carregando → adicionado).
 
+  ANIMACAO "+" → SACOLA:
+  Ao adicionar com sucesso, um "+" sai do botao clicado e voa em
+  arco ate o icone [data-carrinho-alvo] do header (voarParaCarrinho).
+  So depois do pouso o contador pula e o alerta lateral aparece,
+  com o botao "Ver sacola" (link para /cart).
+
   OBSERVACOES:
   Funciona sem JS: o formulario de produto ja envia nativamente
   para /cart/add. Se a REDE falhar, o script faz fallback e
@@ -50,6 +56,85 @@
       el.classList.add('is-bump');
     });
   }
+
+  /*
+    "+" voando do botão até o ícone da sacola no header.
+    O truque do ARCO: duas camadas animadas em eixos separados, cada
+    uma com uma curva de easing diferente.
+      - camada X: começa devagar e acelera  → vai para a direita
+      - camada Y: começa rápida e desacelera → sobe primeiro
+    Somadas, as duas retas viram uma curva natural (como um arremesso).
+    Uma terceira camada só faz o "pop" de escala no começo.
+    Tudo com Web Animations API (element.animate): transform/opacity,
+    sem bibliotecas, e devolve uma Promise que resolve ao pousar.
+  */
+  function voarParaCarrinho(origem) {
+    var alvo = document.querySelector('[data-carrinho-alvo]');
+    var reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!origem || !alvo || reduzir || !document.body.animate) return Promise.resolve();
+
+    var a = origem.getBoundingClientRect();
+    var b = alvo.getBoundingClientRect();
+    if (!a.width || !b.width) return Promise.resolve();
+
+    var dx = b.left + b.width / 2 - (a.left + a.width / 2);
+    var dy = b.top + b.height / 2 - (a.top + a.height / 2);
+    var duracao = Math.min(900, Math.max(550, Math.hypot(dx, dy) * 0.9));
+
+    var eixoX = document.createElement('div');
+    var eixoY = document.createElement('div');
+    var ponto = document.createElement('div');
+    eixoX.className = 'voo-carrinho';
+    eixoX.style.left = a.left + a.width / 2 + 'px';
+    eixoX.style.top = a.top + a.height / 2 + 'px';
+    ponto.className = 'voo-carrinho__ponto';
+    ponto.innerHTML = '<svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+    eixoY.appendChild(ponto);
+    eixoX.appendChild(eixoY);
+    document.body.appendChild(eixoX);
+
+    var opcoes = { duration: duracao, fill: 'forwards' };
+    var vooX = eixoX.animate(
+      [{ transform: 'translateX(0)' }, { transform: 'translateX(' + dx + 'px)' }],
+      Object.assign({ easing: 'cubic-bezier(0.45, 0, 0.85, 0.6)' }, opcoes)
+    );
+    eixoY.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(' + dy + 'px)' }],
+      Object.assign({ easing: 'cubic-bezier(0.15, 0.7, 0.35, 1)' }, opcoes)
+    );
+    ponto.animate(
+      [
+        { transform: 'scale(0.3)', opacity: 0 },
+        { transform: 'scale(1.15)', opacity: 1, offset: 0.18 },
+        { transform: 'scale(1)', opacity: 1, offset: 0.35 },
+        { transform: 'scale(0.5)', opacity: 0.85 }
+      ],
+      opcoes
+    );
+
+    // .catch: se a animação for cancelada, NÃO pode rejeitar — senão o
+    // handleSubmit entenderia como falha de rede e reenviaria o form.
+    return vooX.finished.catch(function () {}).then(function () {
+      eixoX.remove();
+      // O ícone da sacola "recebe" o item
+      alvo.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }],
+        { duration: 420, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
+      );
+    });
+  }
+
+  // Estilo do "+" voador — injetado uma vez (evita depender de um CSS a mais)
+  (function injetarEstiloVoo() {
+    var css =
+      '.voo-carrinho{position:fixed;z-index:10002;pointer-events:none;width:0;height:0}' +
+      '.voo-carrinho__ponto{position:absolute;left:-15px;top:-15px;width:30px;height:30px;display:grid;place-items:center;' +
+      'border-radius:50%;color:var(--color-accent-text,#fff);background:var(--color-accent,#000);' +
+      'box-shadow:0 8px 20px -6px rgb(0 0 0 / .35)}';
+    var tag = document.createElement('style');
+    tag.textContent = css;
+    document.head.appendChild(tag);
+  })();
 
   function refreshCartCount(animar) {
     return fetch(raiz + 'cart.js', { headers: { 'Accept': 'application/json' } })
@@ -87,10 +172,24 @@
         });
       })
       .then(function (item) {
-        return refreshCartCount(true).then(function (cart) {
+        // Voo do "+" e busca do carrinho atualizado acontecem EM PARALELO;
+        // quando os dois terminam, o contador pula e o alerta aparece.
+        var buscaCarrinho = fetch(raiz + 'cart.js', { headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .catch(function () { return null; });
+
+        return Promise.all([buscaCarrinho, voarParaCarrinho(button)]).then(function (resultado) {
+          var cart = resultado[0];
+          if (cart) updateCartCount(cart.item_count, true);
           emitir('carrinho:adicionado', { form: form, item: item, cart: cart });
           if (typeof window.mostrarAlerta === 'function') {
-            window.mostrarAlerta(textos.addedToCart || 'Added to cart', 'positivo');
+            var nome = item && item.product_title ? item.product_title + ' — ' : '';
+            window.mostrarAlerta(
+              nome + (textos.addedToCart || 'Added to cart'),
+              'positivo',
+              5000,
+              { texto: textos.viewCart || 'View cart', url: textos.cartUrl || raiz + 'cart' }
+            );
           }
         });
       })

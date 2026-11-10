@@ -2,9 +2,26 @@
   "type": "header",
   "name": "t:section_groups.header.name",
   "sections": {
+    "barra_anuncio": {
+      "type": "barra-anuncio",
+      "blocks": {
+        "promo": { "type": "mensagem", "settings": { "texto": "Semana Orvalho: 15% off em toda a loja com o cupom ORVALHO15", "link": "shopify://collections/all" } },
+        "frete": { "type": "mensagem", "settings": { "texto": "Frete grátis e seguro para todo o Brasil", "link": "" } },
+        "pix": { "type": "mensagem", "settings": { "texto": "5% de desconto extra no Pix · até 10x sem juros", "link": "" } }
+      },
+      "block_order": ["promo", "frete", "pix"],
+      "settings": { "esquema": "destaque", "intervalo": 5 }
+    },
     "nav": {
-      "type": "nav"
+      "type": "nav",
+      "settings": {
+        "menu": "main-menu",
+        "nome_logo": "Orvalho",
+        "termos_populares": "Anel, Brinco, Colar, Ouro rosé, Diamante",
+        "enable_country_selector": false,
+        "enable_language_selector": false
+      }
     }
   },
-  "order": ["nav"]
+  "order": ["barra_anuncio", "nav"]
 }

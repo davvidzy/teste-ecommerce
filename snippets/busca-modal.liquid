@@ -1,0 +1,211 @@
+{%- comment -%}
+  ============================================================
+  busca-modal — popup de busca com resultados enquanto digita
+  ============================================================
+
+  O QUE FAZ:
+  Um <dialog> que abre por cima da página ao clicar na lupa do
+  header. Antes de digitar: mostra "buscas populares". Ao digitar:
+  mostra produtos e sugestões vindos da Predictive Search API do
+  Shopify, renderizados pela section 'busca-preditiva'.
+
+  COMO USAR:
+  {% render 'busca-modal', termos_populares: 'Anel, Brinco' %}
+  (renderizado uma vez, dentro de sections/nav.liquid)
+
+  PARÂMETROS:
+  - termos_populares: string separada por vírgula.
+
+  COMO FUNCIONA (detalhes em assets/busca.js):
+  1. Usuário digita → espera 220ms sem digitar (debounce).
+  2. fetch em /search/suggest?q=…&section_id=busca-preditiva
+     → o Shopify devolve o HTML JÁ RENDERIZADO da section
+     sections/busca-preditiva.liquid (preço formatado, imagem
+     com srcset, etc.).
+  3. O JS injeta esse HTML em [data-busca-resultados].
+  Requisições antigas são canceladas (AbortController), então
+  resultados de "an" nunca sobrescrevem os de "anel".
+
+  POR QUE <dialog>:
+  showModal() já entrega: foco preso dentro do popup, Esc para
+  fechar, fundo inerte (não clicável) e ::backdrop estilizável.
+
+  SEM JAVASCRIPT:
+  O <form> envia para /search normalmente (e a lupa do header é um
+  link para /search).
+{%- endcomment -%}
+{%- assign termos = termos_populares | split: ',' -%}
+<busca-modal>
+  <dialog class="busca" aria-label="{{ 'general.search.search' | t }}" data-busca-dialog>
+    <div class="busca__painel">
+      <form action="{{ routes.search_url }}" method="get" role="search" class="busca__form page-width" id="BuscaForm" data-busca-form>
+        <input type="hidden" name="options[prefix]" value="last">
+        <label for="BuscaInput" class="visually-hidden">{{ 'general.search.search' | t }}</label>
+        <span class="busca__icone" aria-hidden="true">{% render 'icon', name: 'search' %}</span>
+        <input
+          id="BuscaInput"
+          class="busca__input"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ 'sections.busca.placeholder' | t }}"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="BuscaResultados"
+          aria-autocomplete="list"
+          data-busca-input
+        >
+        <span class="busca__carregando" aria-hidden="true" data-busca-carregando></span>
+        <button type="button" class="busca__fechar tap-target" aria-label="{{ 'accessibility.close' | t }}" data-busca-fechar>
+          {% render 'icon', name: 'close' %}
+        </button>
+      </form>
+
+      <div class="busca__corpo page-width">
+        <div class="busca__populares" data-busca-populares>
+          {%- if termos.size > 0 and termos_populares != blank -%}
+            <p class="busca__rotulo">{{ 'sections.busca.popular' | t }}</p>
+            <ul class="busca__chips" role="list">
+              {%- for termo in termos -%}
+                {%- assign termo_limpo = termo | strip -%}
+                {%- if termo_limpo != blank -%}
+                  <li>
+                    <button type="button" class="busca__chip" data-busca-termo="{{ termo_limpo | escape }}">{{ termo_limpo | escape }}</button>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </div>
+
+        <div id="BuscaResultados" class="busca__resultados" aria-live="polite" data-busca-resultados></div>
+      </div>
+    </div>
+  </dialog>
+</busca-modal>
+
+<script src="{{ 'busca.js' | asset_url }}" defer="defer"></script>
+
+<style>
+  .busca {
+    position: fixed;
+    inset: 0 0 auto 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: min(88svh, 760px);
+    margin: 0;
+    padding: 0;
+    color: var(--color-text);
+    background: var(--color-background);
+    border: 0;
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.35);
+    overflow: hidden;
+  }
+  .busca[open] { display: flex; animation: busca-abre 450ms var(--ease-out); }
+  .busca.is-fechando { animation: busca-fecha 220ms ease forwards; }
+  .busca::backdrop { background: rgb(20 24 22 / 0.42); backdrop-filter: blur(2px); animation: busca-fundo 450ms var(--ease-out); }
+  .busca.is-fechando::backdrop { animation: busca-fundo 220ms ease reverse forwards; }
+
+  .busca__painel { display: flex; flex-direction: column; width: 100%; min-height: 0; }
+  .busca__form {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 88px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .busca__icone svg { width: 22px; height: 22px; opacity: 0.6; }
+  .busca__input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 0;
+    font-family: var(--font-heading-family);
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    color: inherit;
+    background: transparent;
+  }
+  .busca__input::placeholder { color: color-mix(in srgb, currentColor 38%, transparent); }
+  .busca__input::-webkit-search-cancel-button { display: none; }
+  .busca__input:focus-visible { outline: none; }
+  .busca__fechar { color: inherit; background: none; border-radius: 50%; transition: transform var(--dur-base) var(--ease-out); }
+  .busca__fechar:hover { transform: rotate(90deg); }
+
+  /* Barra fina de "carregando" na base do campo */
+  .busca__carregando {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    opacity: 0;
+  }
+  .busca.is-carregando .busca__carregando { opacity: 1; animation: busca-progresso 900ms var(--ease-in-out) infinite; }
+
+  .busca__corpo { overflow-y: auto; padding-top: 28px; padding-bottom: 36px; }
+  .busca__rotulo { font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.6; margin-bottom: 14px; }
+  .busca__chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
+  .busca__chip {
+    min-height: 40px;
+    padding: 0 18px;
+    font-family: var(--font-body-family);
+    font-size: 0.9375rem;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease, color var(--dur-fast) ease;
+  }
+  .busca__chip:hover { color: var(--color-accent-text); background: var(--color-accent); border-color: var(--color-accent); }
+  .busca.tem-termo .busca__populares { display: none; }
+
+  /* ---------- Resultados (HTML vindo de sections/busca-preditiva.liquid) ---------- */
+  .busca-res__grade { display: grid; grid-template-columns: minmax(180px, 1fr) 3fr; gap: 24px 56px; }
+  .busca-res__grade:not(:has(.busca-res__sugestoes)) { grid-template-columns: 1fr; }
+  .busca-res__sugestoes ul { list-style: none; display: grid; gap: 2px; }
+  .busca-res__sugestao { display: block; padding: 8px 0; font-size: 1.0625rem; color: inherit; }
+  .busca-res__sugestao mark { background: none; color: inherit; font-weight: 500; }
+  .busca-res__sugestao:hover { color: var(--color-accent); }
+  .busca-res__lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; list-style: none; }
+  .busca-res__item { animation: busca-item 500ms var(--ease-out) both; animation-delay: calc(var(--i) * 45ms); }
+  .busca-res__produto { display: flex; align-items: center; gap: 14px; color: inherit; }
+  .busca-res__midia {
+    flex-shrink: 0;
+    width: 76px;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: var(--media-radius);
+    background: var(--color-background-contrast);
+  }
+  .busca-res__midia img, .busca-res__midia svg { width: 100%; height: 100%; object-fit: cover; transition: transform 900ms var(--ease-out); }
+  .busca-res__produto:hover .busca-res__midia img { transform: scale(1.06); }
+  .busca-res__info { display: grid; gap: 3px; }
+  .busca-res__titulo { font-size: 0.9375rem; line-height: 1.3; }
+  .busca-res__tipo { font-size: 0.8125rem; opacity: 0.6; }
+  .busca-res__preco { font-size: 0.875rem; font-weight: 500; }
+  .busca-res__todos { margin-top: 32px; }
+  .busca-res__vazio { font-size: 1.0625rem; opacity: 0.75; }
+  @keyframes busca-item { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  @media screen and (max-width: 1000px) {
+    .busca-res__grade { grid-template-columns: 1fr; }
+    .busca-res__lista { grid-template-columns: 1fr; gap: 14px; }
+  }
+
+  @keyframes busca-abre { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: none; } }
+  @keyframes busca-fecha { to { opacity: 0; transform: translateY(-16px); } }
+  @keyframes busca-fundo { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes busca-progresso { 0% { transform: scaleX(0); transform-origin: 0 50%; } 50% { transform: scaleX(1); transform-origin: 0 50%; } 51% { transform-origin: 100% 50%; } 100% { transform: scaleX(0); transform-origin: 100% 50%; } }
+
+  @media screen and (max-width: 749px) {
+    .busca { max-height: 100svh; height: 100svh; }
+    .busca__form { min-height: 68px; }
+  }
+</style>

@@ -1,20 +1,24 @@
 {%- comment -%}
   ============================================================
-  card-catalogo — card de produto com swatches e compra rápida
+  card-catalogo — card de produto com galeria, swatches e compra rápida
   ============================================================
 
   O QUE FAZ:
   Card usado pela seção "Catálogo" (sections/catalogo.liquid):
-  - Imagem principal + segunda imagem no hover (crossfade + zoom leve).
+  - Mini-galeria: até 6 imagens num trilho com scroll-snap.
+    Desktop → setas laterais aparecem no hover.
+    Celular → arrasta com o dedo (swipe nativo, sem JS).
+    Pontinhos embaixo mostram em qual imagem você está.
   - Badges: desconto (-X%), "Novo" (tag "novo") e "Esgotado".
   - Linha de ficha técnica (metafield custom.ficha, senão o tipo).
-  - Swatches de cor/metal: trocar o swatch troca imagem, preço,
-    desconto e a variante que vai para o carrinho — sem recarregar.
+  - Swatches de cor/metal: trocar o swatch rola a galeria até a
+    foto daquela variante e troca preço, desconto e a variante que
+    vai para o carrinho — sem recarregar.
   - Compra rápida: formulário nativo {% form 'product' %} que o
     assets/carrinho.js intercepta e envia via AJAX.
 
   COMO USAR:
-  {% render 'card-catalogo', produto: product, secao: section, indice: forloop.index0 %}
+  {% render 'card-catalogo', produto: product, secao: section %}
   {% render 'card-catalogo', produto: nil, indice: 2 %}  → card placeholder
 
   PARÂMETROS:
@@ -22,23 +26,20 @@
   - secao:   a section pai — lê dela opcoes_swatch e mapa_cores.
   - indice:  posição na grade (usado só no placeholder).
 
+  POR QUE SCROLL-SNAP (e não um slider em JS)?
+  O navegador já sabe deslizar com o dedo, com inércia e "encaixe"
+  (scroll-snap-type). O JS só faz as setas (scrollTo) e atualiza os
+  pontinhos — ~30 linhas em vez de uma biblioteca de carrossel.
+
   QUANDO A COMPRA RÁPIDA APARECE?
-  Só quando um clique basta para escolher a variante certa:
-  produto sem variantes OU com uma única opção (ex: só "Metal").
-  Com mais de uma opção (Metal + Tamanho), o botão vira "Escolher
-  opções" e leva à página do produto — evita adicionar o tamanho
-  errado sem a pessoa perceber.
+  Só quando um clique basta para escolher a variante: produto sem
+  variantes OU com uma única opção (ex: só "Metal"). Com Metal +
+  Tamanho, o botão vira "Escolher opções" e leva à página do produto.
 
   DE ONDE VEM A COR DO SWATCH (em ordem):
-  1. Swatch nativo do Shopify (valor.swatch.color — definido no
-     admin quando a opção está ligada a um metafield de categoria).
+  1. Swatch nativo do Shopify (valor.swatch.color).
   2. Mapa "nome: #hex" da setting mapa_cores da seção.
   3. Cinza neutro.
-
-  DADOS PARA O JS:
-  Cada swatch carrega em data-* tudo o que o card precisa mostrar
-  para aquela variante (id, preço formatado, imagem, disponibilidade).
-  Assim o JS não formata dinheiro nem chama API — só troca textos.
 {%- endcomment -%}
 {%- if produto == blank -%}
   {%- liquid
@@ -48,7 +49,7 @@
   -%}
   <article class="card-cat card-cat--placeholder">
     <div class="card-cat__media" style="--ratio: 0.75;">
-      {{ nome_placeholder | placeholder_svg_tag: 'card-cat__imagem card-cat__imagem--principal placeholder-svg' }}
+      {{ nome_placeholder | placeholder_svg_tag: 'card-cat__imagem placeholder-svg' }}
     </div>
     <div class="card-cat__info">
       <h3 class="card-cat__titulo">{{ 'onboarding.product_title' | t }}</h3>
@@ -59,8 +60,16 @@
 {%- else -%}
   {%- liquid
     assign variante = produto.selected_or_first_available_variant
+    assign url_produto = variante.url | default: produto.url
 
-    # ---- Proporção da imagem (mesma setting global do card-product) ----
+    # ---- Imagens da mini-galeria (só imagens; vídeo/3D ficam para a página do produto) ----
+    assign imagens = produto.media | where: 'media_type', 'image'
+    assign total_imagens = imagens.size
+    if total_imagens > 6
+      assign total_imagens = 6
+    endif
+
+    # ---- Proporção da imagem (setting global do tema) ----
     assign ratio = 0.75
     case settings.card_image_ratio
       when 'square'
@@ -100,38 +109,46 @@
     endif
 
     assign ficha = produto.metafields.custom.ficha.value | default: produto.type
-    assign tamanho_imagem = '(min-width: 1000px) calc((100vw - 120px) / 4), 50vw'
+    assign tamanho_imagem = '(min-width: 1000px) calc((100vw - 140px) / 3), 50vw'
   -%}
   <article class="card-cat{% if variante.available == false %} card-cat--esgotado{% endif %}" data-card style="--card-tint: transparent;">
     <div class="card-cat__media" style="--ratio: {{ ratio }};">
-      <a href="{{ variante.url | default: produto.url }}" class="card-cat__link-media" data-card-link tabindex="-1" aria-hidden="true">
-        {%- if produto.featured_media -%}
-          {{
-            produto.featured_media
-            | image_url: width: 900
-            | image_tag:
-              loading: 'lazy',
-              class: 'card-cat__imagem card-cat__imagem--principal',
-              widths: '300, 450, 600, 900',
-              sizes: tamanho_imagem,
-              alt: produto.featured_media.alt | default: produto.title | escape
-          }}
-          {%- if settings.card_show_second_image and produto.media[1] -%}
-            {{
-              produto.media[1]
-              | image_url: width: 900
-              | image_tag:
-                loading: 'lazy',
-                class: 'card-cat__imagem card-cat__imagem--secundaria',
-                widths: '300, 450, 600, 900',
-                sizes: tamanho_imagem,
-                alt: ''
-            }}
-          {%- endif -%}
-        {%- else -%}
-          {{ 'product-1' | placeholder_svg_tag: 'card-cat__imagem card-cat__imagem--principal placeholder-svg' }}
+      {%- if total_imagens > 0 -%}
+        <div class="card-cat__trilho" data-trilho>
+          {%- for midia in imagens limit: 6 -%}
+            <a href="{{ url_produto }}" class="card-cat__slide" data-card-link tabindex="-1" aria-hidden="true">
+              {{
+                midia
+                | image_url: width: 900
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'card-cat__imagem',
+                  widths: '300, 450, 600, 900',
+                  sizes: tamanho_imagem,
+                  alt: midia.alt | default: produto.title | escape
+              }}
+            </a>
+          {%- endfor -%}
+        </div>
+
+        {%- if total_imagens > 1 -%}
+          <button type="button" class="card-cat__seta card-cat__seta--anterior" data-seta="-1" aria-label="{{ 'sections.catalogo.previous_image' | t: product: produto.title | escape }}">
+            {% render 'icon', name: 'chevron' %}
+          </button>
+          <button type="button" class="card-cat__seta card-cat__seta--proxima" data-seta="1" aria-label="{{ 'sections.catalogo.next_image' | t: product: produto.title | escape }}">
+            {% render 'icon', name: 'chevron' %}
+          </button>
+          <div class="card-cat__pontos" aria-hidden="true">
+            {%- for i in (1..total_imagens) -%}
+              <span class="card-cat__ponto{% if forloop.first %} is-ativo{% endif %}"></span>
+            {%- endfor -%}
+          </div>
         {%- endif -%}
-      </a>
+      {%- else -%}
+        <a href="{{ url_produto }}" class="card-cat__slide card-cat__slide--unico" data-card-link tabindex="-1" aria-hidden="true">
+          {{ 'product-1' | placeholder_svg_tag: 'card-cat__imagem placeholder-svg' }}
+        </a>
+      {%- endif -%}
 
       <div class="card-cat__badges">
         <span class="card-cat__badge card-cat__badge--desconto" data-badge-desconto {% if desconto == 0 %}hidden{% endif %}>-{{ desconto }}%</span>
@@ -170,7 +187,7 @@
           </button>
         {%- endform -%}
       {%- else -%}
-        <a href="{{ variante.url | default: produto.url }}" class="card-cat__botao card-cat__botao--opcoes" data-card-link data-estado="padrao">
+        <a href="{{ url_produto }}" class="card-cat__botao card-cat__botao--opcoes" data-card-link data-estado="padrao">
           <span class="card-cat__estado card-cat__estado--padrao">
             {% render 'icon', name: 'seta' %}
             <span class="card-cat__rotulo">{{ 'products.product.choose_options' | t }}</span>
@@ -189,6 +206,17 @@
               assign variante_valor = valor.variant
               if variante_valor == blank
                 assign variante_valor = produto.variants | where: chave_opcao, valor.name | first
+              endif
+
+              # Em que posição da mini-galeria está a foto desta variante?
+              assign indice_midia = ''
+              if variante_valor.featured_media
+                for midia in imagens limit: 6
+                  if midia.id == variante_valor.featured_media.id
+                    assign indice_midia = forloop.index0
+                    break
+                  endif
+                endfor
               endif
 
               # Cor: swatch nativo → mapa da seção → cinza
@@ -214,7 +242,6 @@
                 assign desconto_valor = variante_valor.compare_at_price | minus: variante_valor.price | times: 100 | divided_by: variante_valor.compare_at_price
                 assign preco_de_valor = variante_valor.compare_at_price | money
               endif
-              assign midia = variante_valor.featured_media
             -%}
             {%- if forloop.index <= 5 -%}
               <button
@@ -232,10 +259,7 @@
                 data-preco="{{ variante_valor.price | money | escape }}"
                 data-preco-de="{{ preco_de_valor | escape }}"
                 data-desconto="{{ desconto_valor }}"
-                {%- if midia %}
-                  data-imagem="{{ midia | image_url: width: 600 }}"
-                  data-srcset="{{ midia | image_url: width: 300 }} 300w, {{ midia | image_url: width: 450 }} 450w, {{ midia | image_url: width: 600 }} 600w, {{ midia | image_url: width: 900 }} 900w"
-                {%- endif %}
+                data-indice-midia="{{ indice_midia }}"
               ></button>
             {%- elsif forloop.last -%}
               <a href="{{ produto.url }}" class="card-cat__swatch-mais">+{{ forloop.length | minus: 5 }}</a>
@@ -245,7 +269,7 @@
       {%- endif -%}
 
       <h3 class="card-cat__titulo">
-        <a href="{{ variante.url | default: produto.url }}" class="card-cat__titulo-link" data-card-link>{{ produto.title | escape }}</a>
+        <a href="{{ url_produto }}" class="card-cat__titulo-link" data-card-link>{{ produto.title | escape }}</a>
       </h3>
       {%- if ficha != blank -%}
         <p class="card-cat__ficha">{{ ficha | escape }}</p>

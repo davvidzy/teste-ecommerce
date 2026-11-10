@@ -409,11 +409,11 @@
             {{ 'sections.cart.checkout' | t }}
           </button>
 
-          {%- if additional_checkout_buttons -%}
-            <div class="cart__additional-checkout">
-              {{ content_for_additional_checkout_buttons }}
-            </div>
-          {%- endif -%}
+          {%- comment -%}
+            Botões de pagamento rápido (PayPal, Shop Pay…) removidos do carrinho de
+            propósito: eles aparecem no CHECKOUT do Shopify. Para reativar aqui:
+            {%- if additional_checkout_buttons -%}{{ content_for_additional_checkout_buttons }}{%- endif -%}
+          {%- endcomment -%}
         </div>
       </div>
     {%- endform -%}

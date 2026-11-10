@@ -39,6 +39,9 @@
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
       <link rel="apple-touch-icon" href="{{ settings.favicon | image_url: width: 180, height: 180 }}">
+    {%- else -%}
+      {%- comment -%} Sem favicon enviado no editor: usa o símbolo da marca em SVG {%- endcomment -%}
+      <link rel="icon" type="image/svg+xml" href="{{ 'favicon.svg' | asset_url }}">
     {%- endif -%}
 
     <title>
@@ -61,7 +64,9 @@
       document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
       window.themeStrings = {
         addedToCart: {{ 'sections.cart.added_to_cart' | t | json }},
-        cartError: {{ 'sections.cart.cart_error' | t | json }}
+        cartError: {{ 'sections.cart.cart_error' | t | json }},
+        viewCart: {{ 'sections.cart.view_cart' | t | json }},
+        cartUrl: {{ routes.cart_url | json }}
       };
     </script>
     <script src="{{ 'carrinho.js' | asset_url }}" defer="defer"></script>

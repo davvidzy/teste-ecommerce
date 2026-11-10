@@ -61,6 +61,22 @@
           sizes: '100vw',
           alt: section.settings.imagem.alt | escape
       }}
+    {%- elsif section.settings.imagem_exemplo -%}
+      {%- comment -%}
+        Imagem de exemplo que vem junto com o tema (assets/hero-orvalho-*.jpg,
+        banco de imagens Magnific/Freepik). Assets não passam pelo image_url,
+        então o srcset é montado à mão com 3 tamanhos gerados previamente.
+      {%- endcomment -%}
+      <img
+        class="hero__imagem"
+        src="{{ 'hero-orvalho-1500.jpg' | asset_url }}"
+        srcset="{{ 'hero-orvalho-900.jpg' | asset_url }} 900w, {{ 'hero-orvalho-1500.jpg' | asset_url }} 1500w, {{ 'hero-orvalho-2400.jpg' | asset_url }} 2400w"
+        sizes="100vw"
+        width="2400"
+        height="1558"
+        alt="{{ 'sections.hero.image_alt' | t }}"
+        fetchpriority="high"
+      >
     {%- else -%}
       <div class="hero__aurora" aria-hidden="true"><span></span><span></span><span></span></div>
     {%- endif -%}
@@ -100,13 +116,13 @@
           {%- when 'botoes' -%}
             <div class="hero__botoes hero__entra" style="--d: {{ atraso }}ms;" {{ block.shopify_attributes }}>
               {%- if block.settings.rotulo_1 != blank -%}
-                <a href="{{ block.settings.link_1 | default: routes.all_products_collection_url }}" class="button hero__botao">
+                <a href="{{ block.settings.link_1 | default: routes.all_products_collection_url }}" class="button button--grande hero__botao">
                   <span>{{ block.settings.rotulo_1 | escape }}</span>
                   {% render 'icon', name: 'seta' %}
                 </a>
               {%- endif -%}
               {%- if block.settings.rotulo_2 != blank -%}
-                <a href="{{ block.settings.link_2 | default: routes.collections_url }}" class="button hero__botao hero__botao--contorno">
+                <a href="{{ block.settings.link_2 | default: routes.collections_url }}" class="button button--secondary button--grande hero__botao hero__botao--contorno">
                   {{ block.settings.rotulo_2 | escape }}
                 </a>
               {%- endif -%}
@@ -143,8 +159,11 @@
     overflow: hidden;
     color: var(--hero-texto);
   }
-  .hero--tela { min-height: calc(100svh - 72px); }
-  .hero--grande { min-height: 80svh; }
+  /* "Tela cheia" = 100% da altura visível MENOS barra de anúncio + header
+     (--topo-altura é medida pelo JS de sections/nav.liquid). svh = altura
+     "pequena" do viewport no celular, sem pular quando a barra do navegador some. */
+  .hero--tela { min-height: calc(100svh - var(--topo-altura, 108px)); }
+  .hero--grande { min-height: calc(80svh - var(--topo-altura, 108px) / 2); }
   .hero--media { min-height: 60svh; }
   .hero--texto-claro { --hero-texto: #ffffff; }
   .hero--texto-escuro { --hero-texto: var(--color-text); }
@@ -176,7 +195,14 @@
     );
     pointer-events: none;
   }
-  .hero--texto-escuro::before { display: none; }
+  /* Texto escuro sobre foto clara: em vez de escurecer, "clareia" o canto do texto */
+  .hero--texto-escuro::before {
+    background: linear-gradient(
+      to top right,
+      color-mix(in srgb, var(--color-background) calc(var(--overlay) * 100%), transparent) 0%,
+      transparent 60%
+    );
+  }
 
   /* ---------- Placeholder "aurora" ---------- */
   .hero__aurora { position: absolute; inset: 0; background: var(--color-accent); overflow: hidden; }
@@ -217,9 +243,9 @@
     opacity: 0.85;
   }
   .hero__titulo {
-    font-size: clamp(2.6rem, 6.5vw, 5.8rem);
-    line-height: 1.02;
-    letter-spacing: -0.02em;
+    font-size: clamp(2.5rem, 5.6vw, 5.2rem);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
     margin-bottom: 24px;
   }
   .hero__palavra {
@@ -239,19 +265,17 @@
 
   .hero__entra { animation: hero-aparece 1s var(--ease-out) both; animation-delay: var(--d); }
 
-  /* ---------- Botões ---------- */
+  /* ---------- Botões (sistema global em base.css; aqui só o ajuste sobre imagem escura) ---------- */
   .hero__botoes { display: flex; flex-wrap: wrap; gap: 12px; }
-  .hero__botao {
-    gap: 10px;
-    padding: 14px 28px;
-    transition: transform var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), opacity var(--dur-fast);
+  .hero--texto-claro .hero__botao--contorno {
+    --btn-texto: #ffffff;
+    --btn-borda: rgb(255 255 255 / 0.65);
   }
-  .hero__botao:hover { opacity: 1; transform: translateY(-2px); }
-  .hero__botao svg { transition: transform var(--dur-base) var(--ease-out); }
-  .hero__botao:hover svg { transform: translateX(4px); }
-  .hero__botao--contorno { background: transparent; color: var(--hero-texto); border-color: currentColor; }
-  .hero__botao--contorno:hover { background: var(--hero-texto); color: var(--color-accent); }
-  .hero--texto-escuro .hero__botao--contorno:hover { color: var(--color-background); }
+  .hero--texto-claro .button.hero__botao--contorno:hover {
+    --btn-fundo: #ffffff;
+    --btn-texto: var(--color-text);
+    --btn-borda: #ffffff;
+  }
 
   /* ---------- Indicador de rolagem ---------- */
   .hero__rolar {
@@ -311,7 +335,8 @@
   "tag": "section",
   "class": "section-hero",
   "settings": [
-    { "type": "image_picker", "id": "imagem", "label": "Imagem de fundo", "info": "Sem imagem, a seção mostra um fundo animado com a cor de destaque do tema. Recomendado: 2400 × 1400 px." },
+    { "type": "image_picker", "id": "imagem", "label": "Imagem de fundo", "info": "Recomendado: 2400 × 1400 px." },
+    { "type": "checkbox", "id": "imagem_exemplo", "label": "Sem imagem escolhida: usar a foto de exemplo do tema", "default": true, "info": "Desmarcado (e sem imagem), aparece um fundo animado com as cores do tema." },
     {
       "type": "select",
       "id": "altura",

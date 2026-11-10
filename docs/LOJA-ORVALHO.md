@@ -27,6 +27,7 @@
 9. [Decisões e trade-offs](#9-decisões-e-trade-offs)
 10. [Exercícios para praticar](#10-exercícios-para-praticar)
 11. [Problemas comuns](#11-problemas-comuns)
+12. [Fase 2 — refinamento de design e UX](#12-fase-2--refinamento-de-design-e-ux)
 
 ---
 
@@ -406,3 +407,171 @@ Em ordem de dificuldade:
 | "Adicionar" leva para a página do carrinho | O JS falhou (veja o console) ou a rede caiu. É o fallback funcionando |
 | Textos em inglês | Idioma da loja ≠ português. Admin → Configurações → Idiomas → defina Português (Brasil) |
 | `theme check` acusa `gift_card.liquid` | Falso positivo do analisador do linter no gerador de QR minificado (código anterior a este projeto). O tema sobe normalmente |
+
+---
+
+## 12. Fase 2 — refinamento de design e UX
+
+### 12.1 Identidade
+
+| Item | Valor | Onde |
+|---|---|---|
+| Nome / logo | **Orvalho**: gota de orvalho com brilho + nome em caixa alta espaçada | [`snippets/logo.liquid`](../snippets/logo.liquid) (SVG, ~1 KB, herda a cor) |
+| Favicon | O mesmo símbolo sobre o verde da marca | [`assets/favicon.svg`](../assets/favicon.svg) (usado se nenhum favicon for enviado no editor) |
+| Títulos | **Fraunces 300**: serifada moderna, leve | `config/settings_data.json` → `type_header_font: fraunces_n3` |
+| Texto, botões e menu | **DM Sans 400/500** | `type_body_font: dm_sans_n4` (o 500 é carregado em `css-variables`) |
+| Cores | Marfim `#f7f4ee` · texto verde-quase-preto `#1f2421` · destaque floresta `#2e4a42` · ouro envelhecido `#9c7240` (descontos) · borda `#dcd5c8` | `settings_data.json` |
+
+> Os handles de fonte (`fraunces_n3`, `dm_sans_n4`) precisam existir na
+> [biblioteca de fontes da Shopify](https://shopify.dev/docs/storefronts/themes/architecture/settings/fonts#available-fonts).
+> Um handle inexistente quebra o `theme push`.
+
+> **Nome da loja:** o título da aba do navegador e os e-mails usam o nome
+> cadastrado em *Admin → Configurações → Detalhes da loja*. Troque para "Orvalho" lá.
+
+### 12.2 Margens e respiro (tokens)
+
+Definidos uma vez em `snippets/css-variables.liquid` e usados no site todo:
+
+```css
+--gutter: clamp(16px, 3.5vw, 48px);             /* margem lateral: .page-width usa esta */
+--espaco-secao: clamp(40px, 6vw, <setting>px);  /* respiro vertical entre seções */
+--header-altura / --topo-altura                 /* medidos por JS (ver 12.3) */
+```
+
+O "padrão de margem" pedido na página de produto é o `--gutter`. A imagem do
+produto vai até ele, e nenhuma seção tem margem lateral diferente.
+
+### 12.3 Header fixo + barra de promoção
+
+- **Barra de anúncio** ([`sections/barra-anuncio.liquid`](../sections/barra-anuncio.liquid)):
+  até 5 mensagens, que se alternam a cada X segundos. Passar o mouse pausa a troca.
+  Ela não é fixa: some ao rolar a página.
+- **Header fixo:** `position: sticky` no **wrapper** `.section-header` que o
+  Shopify gera em volta da section. Se o sticky ficasse no `<header>`, ele só
+  grudaria dentro do próprio wrapper, que tem a mesma altura, ou seja, nunca.
+- Ao rolar mais de 8px, ganha sombra e borda (`.is-rolado`). A **altura não muda**,
+  para não empurrar o conteúdo.
+- **Alturas em CSS:** o JS do header mede o header e a barra e grava
+  `--header-altura` e `--topo-altura` no `<html>`. Assim:
+  - **Hero** = `calc(100svh - var(--topo-altura))`: ocupa exatamente o resto da primeira tela.
+  - **Página de produto:** as informações grudam em `top: var(--header-altura)`.
+  - **Alerta lateral:** aparece logo abaixo do header.
+
+### 12.4 Busca em popup (Predictive Search)
+
+```
+lupa (link /search) ──JS──► <dialog>.showModal()
+digita "an"  ─┐
+digita "ane" ─┤ debounce 220ms (só a última conta)
+digita "anel"─┘
+   └─► GET /search/suggest?q=anel&resources[type]=product,query&section_id=busca-preditiva
+         └─► Shopify roda a busca + renderiza sections/busca-preditiva.liquid
+               └─► o JS cola o HTML no popup (preço já formatado em R$)
+```
+
+- `AbortController` cancela a requisição anterior se você continua digitando.
+- Há cache por termo, então apagar e redigitar não chama a API de novo.
+- O `<dialog>` com `showModal()` já entrega foco preso no popup, Esc e fundo inerte.
+- **Atalho:** a tecla `/` abre a busca.
+- As **buscas populares** são editáveis em *Header → Buscas populares*.
+
+### 12.5 "+" voando até a sacola + alerta sólido
+
+1. O `carrinho.js` envia o `/cart/add.js`.
+2. Com o OK, **ao mesmo tempo**: busca o `/cart.js` e anima o "+".
+3. O "+" faz um **arco**: duas camadas, uma move o X (acelerando) e outra o Y
+   (desacelerando). Somadas, viram uma curva. Usa a Web Animations API, sem biblioteca.
+4. Ao pousar: o ícone da sacola pulsa, o contador pula e o **alerta lateral**
+   entra pela direita, em **cor sólida**, com o botão **"Ver sacola"**.
+5. O alerta tem uma barra de tempo; passar o mouse pausa o fechamento.
+
+A API do alerta para usar em qualquer lugar do tema:
+
+```js
+mostrarAlerta('Texto', 'positivo' /* ou 'negativo' */, 5000, { texto: 'Ver sacola', url: '/cart' })
+```
+
+### 12.6 Catálogo: 3 por linha, galeria com setas
+
+- **3 colunas** no desktop e 2 no celular (*Catálogo → Colunas*).
+- Cada card tem uma **mini-galeria** com até 6 fotos num trilho `scroll-snap`:
+  - **desktop:** setas laterais aparecem no hover, uma em cada extremidade;
+    depois da última foto volta para a primeira;
+  - **celular:** arrasta com o dedo (nativo) e os pontinhos ficam sempre visíveis;
+  - **swatch:** clicar no metal rola a galeria até a foto daquela variante.
+- O CSS do card saiu para [`assets/card-catalogo.css`](../assets/card-catalogo.css),
+  reaproveitado em **Produtos relacionados**. É o mesmo card, com setas e compra rápida.
+
+#### "No celular o botão de adicionar só aparece no hover?"
+
+**Não, e esse é o padrão correto.** O botão tem dois comportamentos:
+
+| Dispositivo | Comportamento |
+|---|---|
+| Mouse (`hover: hover`) e tela larga | Barra "Adicionar à sacola" **escondida**, sobe no hover ou no foco do teclado |
+| Toque (`hover: none`) **ou** tela < 750px | Círculo "+" **sempre visível** no canto da foto |
+
+A segunda condição (`max-width: 749px`) foi adicionada nesta fase. Antes, quem
+estreitava a janela do desktop (ou usava o DevTools sem o modo touch) via o
+comportamento de hover, o que parecia "só aparece no hover".
+
+### 12.7 Página de produto
+
+- **Galeria:** cada foto tem a altura útil da tela (`100svh − header − 2×margem`)
+  e a largura toda da coluna, até a margem padrão. As fotos ficam empilhadas.
+- **Informações:** ficam fixas ao lado (`sticky`), com altura mínima de uma tela
+  e o conteúdo centralizado, ou seja, 100vh de informações. A descrição vai num
+  **acordeão** para não estourar a altura.
+- **Trocar variante:** no desktop, a foto da variante sobe para o topo da galeria
+  (com fade) e a página rola até ela. No celular, o carrossel desliza até a foto.
+- **Swatches:** opções Metal ou Cor viram bolinhas de cor (mesmo mapa do
+  catálogo); as demais viram "pílulas". O valor escolhido aparece ao lado do
+  nome da opção, como em "Metal: Ouro rosé".
+- **Botões padronizados** (`assets/base.css`):
+
+  | Nível | Classe | Uso |
+  |---|---|---|
+  | Primário | `.button` | Adicionar à sacola, Ver catálogo |
+  | Secundário | `.button .button--secondary` | Nossas coleções, Ver todos os resultados |
+  | Terciário | `.button .button--tertiary` | Compartilhar |
+  | Modificadores | `--grande`, `--bloco`, `--claro` | Altura 56px, largura total, sobre foto escura |
+
+- **PayPal / Shop Pay:** desligados na página de produto e no carrinho. Aparecem
+  só no **checkout**, então a página tem um único botão principal.
+- **Compartilhar** (terciário): abre um painel com WhatsApp, Facebook, Pinterest,
+  X, e-mail e **Copiar link**. É um `<details>`, abre sem JS, e não carrega
+  nenhum script de rede social.
+- **Correção de bug da base:** o cálculo de "valor indisponível" usava
+  `forloop.parentloop`, que apontava para o laço errado. Agora usa `option.position`.
+
+### 12.8 Imagem do hero
+
+A foto **"Expensive golden ring displayed on rocks"** (anel de ouro sobre pedras
+brancas, tons creme) vem do banco gratuito do **Magnific/Freepik**. O original tem
+7990×5187 px e 20 MB. Ela foi redimensionada com `ffmpeg` em 3 tamanhos para o
+`srcset`: `hero-orvalho-900.jpg` (64 KB), `-1500` (140 KB) e `-2400` (286 KB).
+
+> **Licença:** imagens gratuitas do Freepik/Magnific normalmente **exigem
+> atribuição** ao autor. Para uso comercial real, confira a licença na página da
+> imagem e adicione o crédito (ex.: num bloco de texto do rodapé), ou troque por
+> uma foto própria em *Hero → Imagem de fundo*.
+
+### 12.9 Roteiro de testes (fase 2)
+
+| # | Ação | Esperado |
+|---|---|---|
+| 1 | Abrir a home | Barra de promoção alternando 3 mensagens; hero ocupa exatamente a tela restante |
+| 2 | Rolar | Barra some; header fica fixo e ganha sombra; hero com parallax |
+| 3 | Clicar na lupa (ou tecla `/`) | Popup desce; buscas populares; foco no campo |
+| 4 | Digitar "an" → "anel" | Linha de carregamento; produtos aparecem em cascata com preço em R$ |
+| 5 | Esc / clique fora / X | Popup fecha com animação |
+| 6 | Hover num card (desktop) | Setas nas laterais; pontinhos; botão "Adicionar" sobe |
+| 7 | Clicar nas setas | Foto desliza; depois da última volta à primeira |
+| 8 | Clicar em "Adicionar" | "+" voa em arco até a sacola → contador pula → alerta verde sólido com **Ver sacola** |
+| 9 | "Ver sacola" no alerta | Vai para /cart, **sem** PayPal no carrinho |
+| 10 | Celular (ou janela < 750px) | Círculo "+" sempre visível; swipe nas fotos; pontinhos visíveis |
+| 11 | Página de produto (desktop) | Foto ocupa a coluna até a margem; informações fixas e centralizadas |
+| 12 | Trocar o metal | "Metal: Ouro rosé"; foto da variante sobe para o topo; preço atualiza |
+| 13 | Compartilhar → Copiar link | Texto vira "Link copiado!"; clique fora fecha o painel |
+| 14 | Produtos relacionados | Mesmo card da home, com setas e compra rápida |

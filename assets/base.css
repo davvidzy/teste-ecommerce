@@ -67,48 +67,112 @@ summary:focus-visible,
   box-shadow: none;
 }
 
-/* Page width container */
+/* Page width container — a margem lateral (--gutter) é a MESMA no site todo */
 .page-width {
   width: 100%;
-  max-width: var(--page-width, 1200px);
+  max-width: var(--page-width, 1440px);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--gutter, 20px);
   box-sizing: border-box;
 }
 
-/* Shared button */
-.button,
-button.button {
+/*
+  ---------- Sistema de botões ----------
+  Três níveis, mesma altura, mesma tipografia:
+  .button                → primário   (fundo sólido na cor de destaque)
+  .button--secondary     → secundário (contorno)
+  .button--tertiary      → terciário  (só texto + sublinhado animado)
+  Modificadores: .button--grande (56px), .button--bloco (100% largura),
+                 .button--claro (para usar sobre imagens/fundos escuros).
+  As cores vêm de variáveis locais (--btn-*): cada variante só troca as
+  variáveis, e o :hover funciona igual para todas.
+*/
+.button {
+  --btn-fundo: var(--color-accent, #000);
+  --btn-texto: var(--color-accent-text, #fff);
+  --btn-borda: var(--btn-fundo);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 12px 24px;
-  font-family: var(--font-heading-family);
-  font-size: var(--f2);
-  color: var(--color-accent-text, #fff);
-  background-color: var(--color-accent, #000);
-  border: 1px solid var(--color-accent, #000);
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 28px;
+  font-family: var(--font-body-family);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--btn-texto);
+  background-color: var(--btn-fundo);
+  border: 1px solid var(--btn-borda);
   border-radius: var(--buttons-radius, 4px);
   cursor: pointer;
   text-decoration: none;
-  transition: opacity 0.15s ease;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.45s var(--ease-out, ease);
 }
 
-.button:hover {
-  opacity: 0.85;
+.button svg { width: 18px; height: 18px; flex-shrink: 0; transition: transform 0.45s var(--ease-out, ease); }
+.button:hover svg { transform: translateX(3px); }
+
+.button:hover:not([disabled]):not([aria-disabled='true']) {
+  --btn-fundo: color-mix(in srgb, var(--color-accent, #000) 86%, #000);
+  transform: translateY(-1px);
 }
 
 .button--secondary {
-  color: var(--color-text, #000);
-  background-color: transparent;
-  border-color: var(--color-border, #c2c2c2);
+  --btn-fundo: transparent;
+  --btn-texto: var(--color-text, #000);
+  --btn-borda: color-mix(in srgb, var(--color-text, #000) 35%, transparent);
 }
+.button.button--secondary:hover:not([disabled]):not([aria-disabled='true']) {
+  --btn-fundo: var(--color-text, #000);
+  --btn-texto: var(--color-background, #fff);
+  --btn-borda: var(--color-text, #000);
+}
+
+.button--claro {
+  --btn-fundo: var(--color-background, #fff);
+  --btn-texto: var(--color-text, #000);
+}
+.button.button--claro:hover:not([disabled]):not([aria-disabled='true']) {
+  --btn-fundo: var(--color-accent, #000);
+  --btn-texto: var(--color-accent-text, #fff);
+}
+
+.button--tertiary {
+  --btn-fundo: transparent;
+  --btn-borda: transparent;
+  --btn-texto: currentColor;
+  min-height: 44px;
+  padding: 0 2px;
+  border-radius: 0;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 calc(100% - 10px);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  transition: background-size 0.45s var(--ease-out, ease), opacity 0.2s ease;
+}
+/* .button.button--tertiary (2 classes) para vencer a especificidade do :hover do primário */
+.button.button--tertiary:hover:not([disabled]):not([aria-disabled='true']) {
+  --btn-fundo: transparent;
+  transform: none;
+  background-size: 0% 1px;
+  background-position: 100% calc(100% - 10px);
+}
+
+.button--grande { min-height: 56px; padding: 0 36px; }
+.button--bloco { width: 100%; }
 
 .button[disabled],
 .button[aria-disabled="true"] {
-  opacity: 0.5;
-  cursor: not-allowed;
+  opacity: 0.45;
+  cursor: not-allowed !important;
 }
 
 /* Shared form inputs */
@@ -116,8 +180,8 @@ button.button {
 .select__select,
 textarea.field__input {
   width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
+  min-height: 48px;
+  padding: 10px 14px;
   font-family: var(--font-body-family);
   font-size: var(--f2);
   color: var(--color-text, #000);

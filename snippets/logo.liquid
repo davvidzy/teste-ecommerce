@@ -1,0 +1,35 @@
+{%- comment -%}
+  ============================================================
+  logo — marca da loja (símbolo SVG + nome)
+  ============================================================
+
+  O QUE FAZ:
+  Desenha a logo em código: uma gota de orvalho com brilho
+  (símbolo) + o nome em caixa alta espaçada. Por ser SVG/texto,
+  fica nítida em qualquer tela, pesa ~1 KB e herda a cor do
+  elemento pai (currentColor) — serve em fundo claro ou escuro.
+
+  COMO USAR:
+  {% render 'logo' %}
+  {% render 'logo', nome: 'Orvalho', so_simbolo: true %}
+
+  PARÂMETROS:
+  - nome:       texto da marca (padrão: shop.name).
+  - so_simbolo: true = só a gota (ex: favicon, botões).
+
+  OBSERVAÇÕES:
+  Se o lojista enviar uma logo em imagem (Theme settings → Logo),
+  o header usa a imagem e este snippet não é chamado.
+  O mesmo símbolo existe como arquivo em assets/favicon.svg.
+{%- endcomment -%}
+{%- assign nome_logo = nome | default: shop.name -%}
+<span class="logo">
+  <svg class="logo__simbolo" width="24" height="32" viewBox="0 0 24 32" fill="none" aria-hidden="true" focusable="false">
+    <path d="M12 2.5S3.75 13.2 3.75 20a8.25 8.25 0 0 0 16.5 0C20.25 13.2 12 2.5 12 2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M7.9 20.6a4.3 4.3 0 0 0 4.1 3.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M19.5 1.5v4.5M17.25 3.75h4.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+  </svg>
+  {%- unless so_simbolo -%}
+    <span class="logo__nome">{{ nome_logo | escape }}</span>
+  {%- endunless -%}
+</span>

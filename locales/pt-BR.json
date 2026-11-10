@@ -1,12 +1,12 @@
 {
   "general": {
-    "meta": {
-      "tags": "Com a tag \"{{ tags }}\"",
-      "page": "Página {{ page }}"
-    },
     "404": {
       "title": "Página não encontrada",
       "subtext": "A página que você procura não existe."
+    },
+    "meta": {
+      "tags": "Com a tag \"{{ tags }}\"",
+      "page": "Página {{ page }}"
     },
     "password_page": {
       "password_label": "Senha",
@@ -129,6 +129,10 @@
     }
   },
   "templates": {
+    "404": {
+      "title": "Página não encontrada",
+      "subtext": "404"
+    },
     "search": {
       "no_results": "Nenhum resultado para \"{{ terms }}\". Confira a grafia ou tente outra palavra.",
       "results_with_count": "{{ count }} resultado para \"{{ terms }}\"",
@@ -155,10 +159,6 @@
         "post_success": "Obrigado pelo contato. Responderemos o quanto antes.",
         "error_heading": "Corrija os itens abaixo:"
       }
-    },
-    "404": {
-      "title": "Página não encontrada",
-      "subtext": "404"
     }
   },
   "sections": {
@@ -197,17 +197,21 @@
       "new_subtotal": "Novo subtotal",
       "update": "Atualizar",
       "remove": "Remover",
-      "added_to_cart": "Adicionado à sua sacola"
+      "added_to_cart": "Adicionado à sua sacola",
+      "view_cart": "Ver sacola"
     },
     "hero": {
-      "scroll": "Rolar para a próxima seção"
+      "scroll": "Rolar para a próxima seção",
+      "image_alt": "Anel de ouro sobre pedras brancas"
     },
     "catalogo": {
       "all": "Todas",
       "add_to_cart": "Adicionar à sacola",
       "added": "Adicionado",
       "new": "Novo",
-      "view_all": "Ver todas as {{ count }} peças"
+      "view_all": "Ver todas as {{ count }} peças",
+      "previous_image": "Imagem anterior de {{ product }}",
+      "next_image": "Próxima imagem de {{ product }}"
     },
     "rodape": {
       "email_label": "Seu melhor e-mail",
@@ -224,6 +228,19 @@
     "featured_collection": {
       "view_all": "Ver todos",
       "view_all_label": "Ver todos os produtos da coleção {{ collection_name }}"
+    },
+    "busca": {
+      "placeholder": "Busque anéis, brincos, colares…",
+      "popular": "Buscas populares",
+      "suggestions": "Sugestões",
+      "products": "Produtos",
+      "view_all": "Ver todos os resultados para “{{ terms }}”",
+      "no_results": "Nenhum resultado para “{{ terms }}”. Tente outro termo."
+    },
+    "compartilhar": {
+      "email": "E-mail",
+      "copy_link": "Copiar link",
+      "copied": "Link copiado!"
     }
   },
   "customer": {

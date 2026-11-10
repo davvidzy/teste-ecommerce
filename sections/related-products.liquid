@@ -14,7 +14,10 @@
   PRINCIPAIS PARTES:
   - data-url monta a requisição com section_id, product_id e limit
   - customElements 'product-recommendations': faz o fetch e injeta o HTML
-  - render 'card-product': card de cada produto recomendado
+  - render 'card-catalogo': o MESMO card da home (galeria com setas,
+    badges e compra rápida). A grade fica dentro de <catalogo-abas>
+    (assets/catalogo.js) só para reaproveitar o comportamento das
+    setas, swatches e do botão de compra — não há abas aqui.
   - Settings: enable, heading, products_to_show
 
   OBSERVAÇÕES:
@@ -22,26 +25,46 @@
   recommendations.performed e há produtos retornados.
 {%- endcomment -%}
 {%- if section.settings.enable -%}
+  {{ 'card-catalogo.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'catalogo.js' | asset_url }}" defer="defer"></script>
+
   <product-recommendations
     class="related-products page-width"
     data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.products_to_show }}"
   >
     {%- if recommendations.performed and recommendations.products_count > 0 -%}
       <h2 class="related-products__title">{{ section.settings.heading | escape }}</h2>
-      <ul class="product-grid" role="list">
-        {%- for product in recommendations.products -%}
-          <li>{% render 'card-product', card_product: product %}</li>
-        {%- endfor -%}
-      </ul>
+      <catalogo-abas class="related-products__grade-wrapper">
+        <ul class="related-products__grade" role="list" style="--colunas: {{ section.settings.products_to_show | at_most: 4 }};">
+          {%- for product in recommendations.products -%}
+            <li>{% render 'card-catalogo', produto: product, secao: section %}</li>
+          {%- endfor -%}
+        </ul>
+      </catalogo-abas>
     {%- endif -%}
   </product-recommendations>
+
+  <style>
+    .related-products { display: block; padding-top: var(--espaco-secao); padding-bottom: var(--espaco-secao); border-top: 1px solid var(--color-border); }
+    .related-products__title { font-size: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: 32px; }
+    .related-products__grade-wrapper { display: block; }
+    .related-products__grade {
+      display: grid;
+      grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
+      gap: 44px clamp(16px, 2vw, 28px);
+      list-style: none;
+    }
+    @media screen and (max-width: 1000px) {
+      .related-products__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 12px; }
+    }
+  </style>
 
   <script>
     if (!customElements.get('product-recommendations')) {
       customElements.define('product-recommendations', class extends HTMLElement {
         connectedCallback() {
           var el = this;
-          if (el.querySelector('.product-grid')) return;
+          if (el.querySelector('.related-products__grade')) return;
           fetch(el.dataset.url)
             .then(function (r) { return r.text(); })
             .then(function (text) {

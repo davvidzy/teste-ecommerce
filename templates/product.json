@@ -10,9 +10,9 @@
         "quantity": { "type": "quantity" },
         "buy_buttons": {
           "type": "buy_buttons",
-          "settings": { "show_dynamic_checkout": true }
+          "settings": { "show_dynamic_checkout": false }
         },
-        "description": { "type": "description" },
+        "description": { "type": "description", "settings": { "aberto": false } },
         "share": { "type": "share" }
       },
       "block_order": [
@@ -24,10 +24,15 @@
         "buy_buttons",
         "description",
         "share"
-      ]
+      ],
+      "settings": {
+        "opcoes_swatch": "metal, cor, color",
+        "mapa_cores": "Ouro amarelo: #E3C77A\nOuro branco: #E4E4E0\nOuro rosé: #E8B4A0\nPrata: #C8CBCF"
+      }
     },
     "related": {
-      "type": "related-products"
+      "type": "related-products",
+      "settings": { "heading": "Você também pode gostar", "products_to_show": 3 }
     }
   },
   "order": ["main", "related"]

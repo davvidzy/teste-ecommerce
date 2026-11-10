@@ -25,12 +25,15 @@
   assign body_font = settings.type_body_font
   assign header_font_bold = header_font | font_modify: 'weight', 'bold'
   assign body_font_bold = body_font | font_modify: 'weight', 'bold'
+  # Peso 500 do corpo: usado em botões, menu e preços (nem toda fonte tem — aí fica nil e não gera @font-face)
+  assign body_font_medium = body_font | font_modify: 'weight', '500'
 -%}
 <style>
   {{ header_font | font_face: font_display: 'swap' }}
   {{ header_font_bold | font_face: font_display: 'swap' }}
   {{ body_font | font_face: font_display: 'swap' }}
   {{ body_font_bold | font_face: font_display: 'swap' }}
+  {%- if body_font_medium -%}{{ body_font_medium | font_face: font_display: 'swap' }}{%- endif -%}
 
   :root {
     /* Colors */
@@ -78,6 +81,13 @@
     /* Layout */
     --page-width: {{ settings.page_width }}px;
     --spacing-sections: {{ settings.spacing_sections }}px;
+    /* Margem lateral padrão do site inteiro (16px no celular → 48px em telas grandes) */
+    --gutter: clamp(16px, 3.5vw, 48px);
+    /* Respiro vertical entre seções: escala com a tela e tem como teto a setting do editor */
+    --espaco-secao: clamp(40px, 6vw, {{ settings.spacing_sections }}px);
+    /* Alturas medidas pelo JS do header (sections/nav.liquid); valores iniciais evitam "pulo" */
+    --header-altura: 72px;
+    --topo-altura: 108px;
     --buttons-radius: {{ settings.buttons_radius }}px;
     --inputs-radius: {{ settings.inputs_radius }}px;
     --media-radius: {{ settings.media_radius }}px;
@@ -88,10 +98,15 @@
     font-weight: var(--font-body-weight);
     color: var(--color-text);
     background-color: var(--color-background);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading-family);
     font-weight: var(--font-heading-weight);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
   }
 </style>

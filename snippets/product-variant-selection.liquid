@@ -4,29 +4,69 @@
   ============================================================
 
   O QUE FAZ:
-  Script que controla a seleção de variante na página de produto, sem
-  depender de app: atualiza o id da variante (input hidden), o preço
-  (HTML pré-renderizado por variante), o estado do botão "adicionar ao
-  carrinho", troca a mídia em destaque e mantém ?variant na URL.
-  Também controla os botões +/- do seletor de quantidade.
+  Script da página de produto, sem app:
+  - Atualiza o id da variante (input hidden), o preço (HTML
+    pré-renderizado pelo Liquid para cada variante), o botão
+    "Adicionar" (disponível/esgotado/indisponível) e o nome do
+    valor escolhido ao lado de cada opção ("Metal: Ouro rosé").
+  - Mostra a foto da variante:
+      desktop → a foto vai para o TOPO da galeria (com um fade) e,
+                se a pessoa já rolou para baixo, a página sobe até ela;
+      celular → o carrossel rola até a foto.
+  - Pontinhos do carrossel (celular) acompanham o swipe.
+  - Mantém ?variant=ID na URL (link compartilhável).
+  - Botões +/− da quantidade.
 
   COMO USAR:
   {% render 'product-variant-selection', section_id: section.id, product_form_id: product_form_id %}
 
   PARÂMETROS:
-  - section_id: id da section (para achar [data-section-id] e a galeria).
-  - product_form_id: id do <form> de compra do produto.
+  - section_id: id da section.
+  - product_form_id: id do <form> de compra.
 
   OBSERVAÇÕES:
-  Depende de marcações no HTML da section: [data-variant-json] com o JSON
-  das variantes, .product__option com radios, .product-variant-id,
-  .product__add-to-cart, .product__price e a galeria #ProductMedia-{section_id}.
+  Depende das marcações de sections/main-product.liquid:
+  [data-variant-json], .product__option (radios), [data-valor-selecionado],
+  .product-variant-id, .product__add-to-cart, .product__price,
+  #ProductMedia-{section_id} e [data-pdp-pontos].
 {%- endcomment -%}
 <script>
   (function () {
     var section = document.querySelector('[data-section-id="{{ section_id }}"]');
     if (!section) return;
     var form = document.getElementById('{{ product_form_id }}');
+    var galeria = document.getElementById('ProductMedia-{{ section_id }}');
+    var pontos = section.querySelectorAll('.product__ponto');
+    var desktop = window.matchMedia('(min-width: 1001px)');
+    var reduzir = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    /* ---------- Pontinhos do carrossel (celular) ---------- */
+    function indiceAtual() {
+      return galeria ? Math.round(galeria.scrollLeft / (galeria.clientWidth || 1)) : 0;
+    }
+    if (galeria && pontos.length) {
+      var agendado = false;
+      galeria.addEventListener('scroll', function () {
+        if (agendado) return;
+        agendado = true;
+        requestAnimationFrame(function () {
+          agendado = false;
+          var atual = indiceAtual();
+          pontos.forEach(function (p, i) { p.classList.toggle('is-ativo', i === atual); });
+        });
+      }, { passive: true });
+    }
+
+    /* ---------- Quantidade +/− ---------- */
+    section.querySelectorAll('.quantity-selector').forEach(function (sel) {
+      var input = sel.querySelector('.quantity__input');
+      var plus = sel.querySelector('[name="plus"]');
+      var minus = sel.querySelector('[name="minus"]');
+      if (plus) plus.addEventListener('click', function () { input.value = parseInt(input.value || '1', 10) + 1; });
+      if (minus) minus.addEventListener('click', function () { input.value = Math.max(1, parseInt(input.value || '1', 10) - 1); });
+    });
+
+    /* ---------- Variantes ---------- */
     var jsonEl = section.querySelector('[data-variant-json]');
     if (!form || !jsonEl) return;
 
@@ -37,11 +77,10 @@
     var addButton = form.querySelector('.product__add-to-cart');
     var addButtonText = addButton ? addButton.querySelector('span') : null;
     var priceContainer = section.querySelector('.product__price');
-    var gallery = document.getElementById('ProductMedia-{{ section_id }}');
 
-    var ADD = '{{ 'products.product.add_to_cart' | t }}';
-    var SOLD_OUT = '{{ 'products.product.sold_out' | t }}';
-    var UNAVAILABLE = '{{ 'products.product.unavailable' | t }}';
+    var ADD = {{ 'products.product.add_to_cart' | t | json }};
+    var SOLD_OUT = {{ 'products.product.sold_out' | t | json }};
+    var UNAVAILABLE = {{ 'products.product.unavailable' | t | json }};
 
     function selectedOptions() {
       var opts = [];
@@ -65,6 +104,31 @@
       if (addButtonText && text) { addButtonText.textContent = text; }
     }
 
+    function mostrarMidia(mediaId) {
+      if (!galeria || !mediaId) return;
+      var alvo = galeria.querySelector('[data-media-id="' + mediaId + '"]');
+      if (!alvo) return;
+
+      if (desktop.matches) {
+        // Desktop: traz a foto da variante para o topo da galeria
+        if (alvo !== galeria.firstElementChild) {
+          galeria.prepend(alvo);
+          alvo.classList.remove('is-destaque');
+          void alvo.offsetWidth;
+          alvo.classList.add('is-destaque');
+        }
+        var topo = galeria.getBoundingClientRect().top;
+        var header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-altura')) || 0;
+        if (topo < header) {
+          window.scrollTo({ top: window.scrollY + topo - header - 16, behavior: reduzir.matches ? 'auto' : 'smooth' });
+        }
+      } else {
+        // Celular: rola o carrossel até a foto (sem mexer na rolagem da página)
+        var indice = Array.prototype.indexOf.call(galeria.children, alvo);
+        galeria.scrollTo({ left: indice * galeria.clientWidth, behavior: reduzir.matches ? 'auto' : 'smooth' });
+      }
+    }
+
     function updateUI() {
       var variant = findVariant(selectedOptions());
 
@@ -77,7 +141,7 @@
       if (idInput) { idInput.value = variant.id; idInput.removeAttribute('disabled'); }
       setButton(!variant.available, variant.available ? ADD : SOLD_OUT);
 
-      // Replace the whole price block with the store-formatted HTML for this variant.
+      // Preço: troca o bloco inteiro pelo HTML já formatado pelo Liquid para esta variante
       if (priceContainer && variant.price_html) {
         var existing = priceContainer.querySelector('.price');
         if (existing) {
@@ -88,13 +152,8 @@
         }
       }
 
-      // Swap the featured media to the one tied to this variant.
-      if (gallery && variant.featured_media_id) {
-        var target = gallery.querySelector('[data-media-id="' + variant.featured_media_id + '"]');
-        if (target) { target.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-      }
+      mostrarMidia(variant.featured_media_id);
 
-      // Keep the URL shareable.
       if (window.history && history.replaceState) {
         var url = new URL(window.location.href);
         url.searchParams.set('variant', variant.id);
@@ -108,16 +167,10 @@
         option.querySelectorAll('.product__swatch').forEach(function (l) { l.classList.remove('is-selected'); });
         var label = input.closest('.product__swatch');
         if (label) label.classList.add('is-selected');
+        var rotulo = option.querySelector('[data-valor-selecionado]');
+        if (rotulo) rotulo.textContent = input.value;
         updateUI();
       });
-    });
-
-    section.querySelectorAll('.quantity-selector').forEach(function (sel) {
-      var input = sel.querySelector('.quantity__input');
-      var plus = sel.querySelector('[name="plus"]');
-      var minus = sel.querySelector('[name="minus"]');
-      if (plus) plus.addEventListener('click', function () { input.value = parseInt(input.value || '1', 10) + 1; });
-      if (minus) minus.addEventListener('click', function () { input.value = Math.max(1, parseInt(input.value || '1', 10) - 1); });
     });
   })();
 </script>

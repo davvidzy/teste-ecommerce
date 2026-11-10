@@ -13,10 +13,11 @@
       },
       "block_order": ["sobrelinha", "titulo", "texto", "botoes", "selo_entrega", "selo_garantia", "selo_arvore"],
       "settings": {
+        "imagem_exemplo": true,
         "altura": "tela",
         "alinhamento": "esquerda",
-        "sobreposicao": 45,
-        "texto_claro": true,
+        "sobreposicao": 55,
+        "texto_claro": false,
         "parallax": true
       }
     },
@@ -32,8 +33,8 @@
       "settings": {
         "sobrelinha": "Curadoria",
         "titulo": "As mais desejadas",
-        "produtos_por_aba": 8,
-        "colunas": 4,
+        "produtos_por_aba": 6,
+        "colunas": 3,
         "colunas_mobile": "2",
         "opcoes_swatch": "metal, cor, color",
         "mapa_cores": "Ouro amarelo: #E3C77A\nOuro branco: #E4E4E0\nOuro rosé: #E8B4A0\nPrata: #C8CBCF"

@@ -1,0 +1,103 @@
+{%- comment -%}
+  ============================================================
+  BUSCA PREDITIVA — resultados renderizados para o popup de busca
+  ============================================================
+
+  O QUE FAZ:
+  Esta section NÃO aparece em nenhuma página. Ela existe só para
+  ser pedida pelo JavaScript via Section Rendering API:
+
+    GET /search/suggest?q=anel
+        &resources[type]=product,query
+        &resources[limit]=6
+        &section_id=busca-preditiva
+
+  O Shopify roda a busca, preenche o objeto `predictive_search` e
+  devolve o HTML desta section. Vantagem sobre pedir JSON: preço
+  formatado na moeda da loja, imagens com srcset e traduções saem
+  prontos do Liquid — o JS só cola o HTML.
+
+  PRINCIPAIS PARTES:
+  - predictive_search.resources.queries  → sugestões de termos
+    (styled_text já vem com <mark> no trecho digitado).
+  - predictive_search.resources.products → até 6 produtos.
+  - Botão "Ver todos os resultados" envia o formulário (/search).
+
+  OBSERVAÇÕES:
+  Sem "presets" no schema: o lojista não consegue adicioná-la pelo
+  editor (não faria sentido), mas a Section Rendering API funciona.
+{%- endcomment -%}
+<div class="busca-res" data-busca-conteudo>
+  {%- if predictive_search.performed -%}
+    {%- assign produtos = predictive_search.resources.products -%}
+    {%- assign sugestoes = predictive_search.resources.queries -%}
+
+    {%- if produtos.size > 0 or sugestoes.size > 0 -%}
+      <div class="busca-res__grade">
+        {%- if sugestoes.size > 0 -%}
+          <div class="busca-res__sugestoes">
+            <p class="busca__rotulo">{{ 'sections.busca.suggestions' | t }}</p>
+            <ul role="list">
+              {%- for sugestao in sugestoes -%}
+                <li>
+                  <a href="{{ sugestao.url }}" class="busca-res__sugestao">{{ sugestao.styled_text }}</a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+
+        {%- if produtos.size > 0 -%}
+          <div class="busca-res__produtos">
+            <p class="busca__rotulo">{{ 'sections.busca.products' | t }}</p>
+            <ul class="busca-res__lista" role="list">
+              {%- for produto in produtos -%}
+                <li class="busca-res__item" style="--i: {{ forloop.index0 }};">
+                  <a href="{{ produto.url }}" class="busca-res__produto">
+                    <span class="busca-res__midia">
+                      {%- if produto.featured_media -%}
+                        {{
+                          produto.featured_media
+                          | image_url: width: 240
+                          | image_tag: loading: 'lazy', widths: '120, 240', sizes: '120px', alt: produto.title | escape
+                        }}
+                      {%- else -%}
+                        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                      {%- endif -%}
+                    </span>
+                    <span class="busca-res__info">
+                      <span class="busca-res__titulo">{{ produto.title | escape }}</span>
+                      {%- if produto.type != blank -%}<span class="busca-res__tipo">{{ produto.type | escape }}</span>{%- endif -%}
+                      <span class="busca-res__preco">
+                        {%- if produto.price_varies -%}
+                          {{ 'products.product.price.from_price_html' | t: price: produto.price_min | money }}
+                        {%- else -%}
+                          {{ produto.price | money }}
+                        {%- endif -%}
+                        {%- unless produto.available %} · {{ 'products.product.sold_out' | t }}{% endunless -%}
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
+
+      <button type="submit" form="BuscaForm" class="button button--secondary busca-res__todos" data-busca-ver-todos>
+        {{ 'sections.busca.view_all' | t: terms: predictive_search.terms }}
+        {% render 'icon', name: 'seta' %}
+      </button>
+    {%- else -%}
+      <p class="busca-res__vazio">{{ 'sections.busca.no_results' | t: terms: predictive_search.terms }}</p>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Busca preditiva",
+  "settings": []
+}
+{% endschema %}

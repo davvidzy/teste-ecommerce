@@ -18,11 +18,17 @@
        cards do painel novo entram em cascata ([data-reveal]).
      - Indicador desliza até a aba ativa (só transform: translateX
        + scaleX, calculados a partir de offsetLeft/offsetWidth).
-  2. SWATCHES
+  2. MINI-GALERIA DO CARD
+     - Setas [data-seta] fazem scrollTo no trilho (scroll-snap);
+       no celular o próprio dedo arrasta. Depois do último volta ao 1º.
+     - Um listener de "scroll" em fase de captura atualiza os
+       pontinhos de todos os cards (1 por frame, via rAF).
+  3. SWATCHES
      - Clique no swatch lê os data-* do botão e atualiza o card:
-       imagem (pré-carregada antes de trocar), preço, preço "de",
-       badge de desconto, esgotado, variante do formulário e links.
-  3. COMPRA RÁPIDA
+       rola a galeria até a foto da variante (data-indice-midia),
+       preço, preço "de", badge de desconto, esgotado, variante do
+       formulário e links.
+  4. COMPRA RÁPIDA
      - O envio em si é do assets/carrinho.js (AJAX). Aqui só
        ouvimos os eventos dele para trocar o estado visual do botão:
        padrao → carregando → sucesso → padrao (ou esgotado).
@@ -55,8 +61,13 @@
       this.aoAdicionado = this.aoAdicionado.bind(this);
       this.aoErro = this.aoErro.bind(this);
 
+      this.aoRolarTrilho = this.aoRolarTrilho.bind(this);
+
       this.addEventListener('click', this.aoClicar);
       this.addEventListener('keydown', this.aoTeclar);
+      // "scroll" não borbulha, mas a fase de CAPTURA passa pelos ancestrais:
+      // um único listener aqui ouve o scroll de todos os trilhos dos cards.
+      this.addEventListener('scroll', this.aoRolarTrilho, { capture: true, passive: true });
       document.addEventListener('carrinho:adicionando', this.aoAdicionando);
       document.addEventListener('carrinho:adicionado', this.aoAdicionado);
       document.addEventListener('carrinho:erro', this.aoErro);
@@ -187,8 +198,46 @@
       var aba = evento.target.closest('[role="tab"]');
       if (aba) return this.ativar(aba, false);
 
+      var seta = evento.target.closest('[data-seta]');
+      if (seta) {
+        evento.preventDefault();
+        var trilhoDaSeta = seta.closest('[data-card]').querySelector('[data-trilho]');
+        return this.irParaSlide(trilhoDaSeta, this.slideAtual(trilhoDaSeta) + Number(seta.dataset.seta));
+      }
+
       var swatch = evento.target.closest('[data-swatch]');
       if (swatch) return this.selecionarSwatch(swatch);
+    }
+
+    /* =================== MINI-GALERIA DO CARD =================== */
+
+    slideAtual(trilho) {
+      return Math.round(trilho.scrollLeft / trilho.clientWidth);
+    }
+
+    // Vai para o slide `indice` (com volta: depois do último vem o primeiro)
+    irParaSlide(trilho, indice) {
+      if (!trilho) return;
+      var total = trilho.children.length;
+      var destino = ((indice % total) + total) % total;
+      trilho.scrollTo({
+        left: destino * trilho.clientWidth,
+        behavior: reduzirMovimento.matches ? 'auto' : 'smooth'
+      });
+    }
+
+    // Atualiza os pontinhos enquanto o trilho rola (seta, swipe ou swatch)
+    aoRolarTrilho(evento) {
+      var trilho = evento.target;
+      if (!trilho.matches || !trilho.matches('[data-trilho]')) return;
+      if (trilho._agendado) return;
+      trilho._agendado = true;
+      requestAnimationFrame(() => {
+        trilho._agendado = false;
+        var atual = this.slideAtual(trilho);
+        var pontos = trilho.closest('[data-card]').querySelectorAll('.card-cat__ponto');
+        pontos.forEach((p, i) => p.classList.toggle('is-ativo', i === atual));
+      });
     }
 
     /* =================== SWATCHES =================== */
@@ -199,10 +248,12 @@
       var d = botao.dataset;
 
       card.querySelectorAll('[data-swatch]').forEach((b) => b.setAttribute('aria-pressed', String(b === botao)));
-      card.classList.add('swatch-escolhido');
       card.style.setProperty('--card-tint', d.cor || 'transparent');
 
-      this.trocarImagem(card, d.imagem, d.srcset);
+      // Rola a mini-galeria até a foto desta variante (se ela tiver uma)
+      if (d.indiceMidia !== '' && d.indiceMidia !== undefined) {
+        this.irParaSlide(card.querySelector('[data-trilho]'), Number(d.indiceMidia));
+      }
 
       // Preço e desconto
       var precoAtual = card.querySelector('[data-preco-atual]');
@@ -234,26 +285,6 @@
 
       // Links do card abrem a página já com a variante (?variant=ID)
       if (d.url) card.querySelectorAll('[data-card-link]').forEach((a) => { a.href = d.url; });
-    }
-
-    trocarImagem(card, src, srcset) {
-      var img = card.querySelector('.card-cat__imagem--principal');
-      if (!img || img.tagName !== 'IMG' || !src || img.currentSrc === src) return;
-
-      // Pré-carrega: só troca quando a nova imagem já está decodificada,
-      // assim o card nunca pisca em branco.
-      card.classList.add('is-trocando');
-      var nova = new Image();
-      nova.sizes = img.sizes;
-      if (srcset) nova.srcset = srcset;
-      nova.src = src;
-
-      var aplicar = () => {
-        if (srcset) img.srcset = srcset;
-        img.src = src;
-        card.classList.remove('is-trocando');
-      };
-      (nova.decode ? nova.decode() : Promise.resolve()).then(aplicar, aplicar);
     }
 
     /* =================== COMPRA RÁPIDA =================== */

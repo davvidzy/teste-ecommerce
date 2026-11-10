@@ -138,6 +138,8 @@ cabeçalho/rodapé (permitem reordenar no editor).
 | `rodape.liquid` | **Orvalho** — rodapé em uso: newsletter com rótulo flutuante, colunas, assinatura gigante animada |
 | `hero.liquid` | **Orvalho** — hero da home: título palavra-a-palavra, ken burns, parallax, selos de confiança |
 | `catalogo.liquid` | **Orvalho** — catálogo com abas (uma coleção por aba), swatches e compra rápida |
+| `barra-anuncio.liquid` | **Orvalho** — barra de promoção acima do header (mensagens que se alternam) |
+| `busca-preditiva.liquid` | **Orvalho** — resultados da busca preditiva (só para a Section Rendering API) |
 | `main-product.liquid` | Página de produto: galeria, variantes, add-to-cart nativo, blocos |
 | `main-cart.liquid` | Carrinho: itens, quantidade, notas, checkout |
 | `main-collection.liquid` | Grade de produtos: ordenação, filtros, paginação |
@@ -168,6 +170,8 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 | `card-product.liquid` | Card de produto reutilizável (grades) |
 | `card-catalogo.liquid` | **Orvalho** — card com swatches, badges (desconto/novo/esgotado) e compra rápida |
 | `catalogo-painel.liquid` | **Orvalho** — grade de uma aba do catálogo + link "Ver todas" |
+| `logo.liquid` | **Orvalho** — logo em SVG (símbolo + nome), herda a cor do pai |
+| `busca-modal.liquid` | **Orvalho** — popup de busca (`<dialog>`) com resultados enquanto digita |
 | `icon.liquid` | Ícones SVG inline (busca, carrinho, conta, redes…) |
 | `pagination.liquid` | Paginação acessível |
 | `localization-form.liquid` | Seletores nativos de país/moeda e idioma |
@@ -187,7 +191,10 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 | `fontes.css` | Placeholder para fontes próprias (por padrão usa fontes do Shopify) |
 | `carrinho.js` | Add-to-cart via AJAX + contador animado + eventos `carrinho:adicionando/adicionado/erro` (com fallback nativo) |
 | `movimento.css` / `movimento.js` | Tokens de animação, revelar ao rolar (`[data-reveal]`), parallax, voltar ao topo |
-| `catalogo.js` | Web Component `<catalogo-abas>`: abas acessíveis, swatches, estados do botão de compra |
+| `catalogo.js` | Web Component `<catalogo-abas>`: abas acessíveis, mini-galeria com setas, swatches, estados do botão de compra |
+| `card-catalogo.css` | Estilos do card de produto (catálogo + produtos relacionados) |
+| `busca.js` | Web Component `<busca-modal>`: Predictive Search com debounce, cancelamento e cache |
+| `favicon.svg` / `hero-orvalho-*.jpg` | Favicon da marca e foto do hero em 3 tamanhos (900/1500/2400) |
 | `site.webmanifest` | Manifesto PWA |
 
 ### `config/`

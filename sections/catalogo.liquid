@@ -107,10 +107,11 @@
   </div>
 </catalogo-abas>
 
+{{ 'card-catalogo.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'catalogo.js' | asset_url }}" defer="defer"></script>
 
 <style>
-  .catalogo { display: block; padding-top: calc(var(--spacing-sections) * 2); padding-bottom: calc(var(--spacing-sections) * 2); }
+  .catalogo { display: block; padding-top: var(--espaco-secao); padding-bottom: var(--espaco-secao); }
 
   /* ---------- Topo: título + abas ---------- */
   .catalogo__topo { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 24px 48px; margin-bottom: 40px; }
@@ -161,7 +162,7 @@
   .catalogo__grade {
     display: grid;
     grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
-    gap: 48px 24px;
+    gap: 44px clamp(16px, 2vw, 28px);
     list-style: none;
   }
   .catalogo__rodape { display: flex; justify-content: center; margin-top: 56px; }
@@ -169,149 +170,7 @@
   .catalogo__ver-todos svg { transition: transform var(--dur-base) var(--ease-out); }
   .catalogo__ver-todos:hover svg { transform: translateX(4px); }
 
-  /* ---------- Card ---------- */
-  .card-cat { position: relative; }
-  .card-cat__media {
-    position: relative;
-    aspect-ratio: var(--ratio);
-    overflow: hidden;
-    border-radius: var(--media-radius);
-    /* --card-tint muda ao escolher um swatch: o fundo "pega" a cor do metal */
-    background-color: color-mix(in srgb, var(--card-tint) 30%, var(--color-background-contrast));
-    transition: background-color var(--dur-slow) var(--ease-out);
-  }
-  .card-cat__link-media { position: absolute; inset: 0; display: block; }
-  .card-cat__imagem {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: opacity 600ms var(--ease-out), transform 1200ms var(--ease-out);
-  }
-  .card-cat__imagem--secundaria { opacity: 0; }
-  .card-cat.is-trocando .card-cat__imagem--principal { opacity: 0.3; }
-  .card-cat .placeholder-svg { fill: color-mix(in srgb, var(--color-text) 22%, transparent); background: transparent; }
-
-  @media (hover: hover) {
-    .card-cat:hover .card-cat__imagem--principal { transform: scale(1.045); }
-    .card-cat:hover .card-cat__imagem--secundaria { opacity: 1; transform: scale(1.045); }
-    .card-cat.swatch-escolhido:hover .card-cat__imagem--secundaria { opacity: 0; }
-  }
-
-  /* Badges */
-  .card-cat__badges { position: absolute; top: 12px; left: 12px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
-  .card-cat__badge {
-    padding: 5px 10px;
-    font-size: var(--f0);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    border-radius: 999px;
-    color: var(--color-text);
-    background: var(--color-background);
-  }
-  .card-cat__badge--desconto { color: var(--color-accent-text); background: var(--color-accent); }
-  .card-cat__badge[hidden] { display: none; }
-
-  /* Compra rápida — no desktop desliza de baixo no hover */
-  .card-cat__form,
-  .card-cat__botao--opcoes { position: absolute; left: 12px; right: 12px; bottom: 12px; }
-  .card-cat__botao {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    min-height: 46px;
-    padding: 0 16px;
-    font-family: var(--font-body-family);
-    font-size: var(--f1);
-    color: var(--color-text);
-    background: var(--color-background);
-    border-radius: var(--buttons-radius);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
-    opacity: 0;
-    transform: translate3d(0, calc(100% + 16px), 0);
-    transition:
-      transform var(--dur-base) var(--ease-out),
-      opacity var(--dur-base) var(--ease-out),
-      background-color var(--dur-fast) ease,
-      color var(--dur-fast) ease;
-  }
-  .card-cat:hover .card-cat__botao,
-  .card-cat:focus-within .card-cat__botao,
-  .card-cat__botao[data-estado='carregando'],
-  .card-cat__botao[data-estado='sucesso'] { opacity: 1; transform: none; }
-  .card-cat__botao:hover:not(:disabled),
-  .card-cat__botao[data-estado='sucesso'] { color: var(--color-accent-text); background: var(--color-accent); }
-  .card-cat__botao:disabled { cursor: not-allowed !important; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
-
-  /* Os 4 estados ficam empilhados na mesma célula do grid; só o ativo aparece */
-  .card-cat__estado {
-    grid-area: 1 / 1;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    opacity: 0;
-    transform: translate3d(0, 10px, 0);
-    transition: opacity var(--dur-fast) ease, transform var(--dur-base) var(--ease-out);
-  }
-  .card-cat__botao[data-estado='padrao'] .card-cat__estado--padrao,
-  .card-cat__botao[data-estado='carregando'] .card-cat__estado--carregando,
-  .card-cat__botao[data-estado='sucesso'] .card-cat__estado--sucesso,
-  .card-cat__botao[data-estado='esgotado'] .card-cat__estado--esgotado { opacity: 1; transform: none; }
-  .card-cat__spinner {
-    width: 16px;
-    height: 16px;
-    border: 1.5px solid currentColor;
-    border-right-color: transparent;
-    border-radius: 50%;
-    animation: catalogo-gira 700ms linear infinite;
-  }
-
-  /* No toque não existe hover: vira um botão redondo sempre visível */
-  @media (hover: none) {
-    .card-cat__form,
-    .card-cat__botao--opcoes { left: auto; right: 10px; bottom: 10px; }
-    .card-cat__botao { width: 44px; min-height: 44px; height: 44px; padding: 0; border-radius: 50%; opacity: 1; transform: none; }
-    .card-cat__rotulo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    .card-cat__botao[data-estado='esgotado'] { display: none; }
-  }
-
-  /* Informações */
-  .card-cat__info { display: grid; gap: 6px; padding-top: 16px; }
-  .card-cat__swatches { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-  .card-cat__swatch {
-    position: relative;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--swatch-cor);
-    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
-    transition: transform var(--dur-base) var(--ease-spring);
-  }
-  .card-cat__swatch::before { content: ''; position: absolute; inset: -9px; } /* área de toque maior que o círculo */
-  .card-cat__swatch::after {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border: 1px solid var(--color-text);
-    border-radius: 50%;
-    opacity: 0;
-    transform: scale(0.6);
-    transition: opacity var(--dur-fast) ease, transform var(--dur-base) var(--ease-spring);
-  }
-  .card-cat__swatch:hover { transform: scale(1.12); }
-  .card-cat__swatch[aria-pressed='true']::after { opacity: 1; transform: scale(1); }
-  .card-cat__swatch-mais { font-size: var(--f0); color: inherit; opacity: 0.7; }
-
-  .card-cat__titulo { font-family: var(--font-body-family); font-size: var(--f2); line-height: 1.35; }
-  .card-cat__titulo-link { color: inherit; }
-  .card-cat__titulo-link:hover { text-decoration: underline; text-underline-offset: 3px; }
-  .card-cat__ficha { font-size: var(--f1); opacity: 0.62; }
-  .card-cat__preco { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; font-size: var(--f2); }
-  .card-cat__preco-de { font-size: var(--f1); opacity: 0.5; }
-  .card-cat__preco-de[hidden] { display: none; }
-
-  @keyframes catalogo-gira { to { transform: rotate(360deg); } }
+  /* Card: estilos em assets/card-catalogo.css (compartilhado com Produtos relacionados) */
 
   @media screen and (max-width: 1000px) {
     .catalogo__topo { margin-bottom: 28px; }
@@ -328,8 +187,8 @@
   "settings": [
     { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Curadoria" },
     { "type": "text", "id": "titulo", "label": "Título", "default": "As mais desejadas" },
-    { "type": "range", "id": "produtos_por_aba", "label": "Produtos por aba", "min": 2, "max": 16, "step": 1, "default": 8 },
-    { "type": "range", "id": "colunas", "label": "Colunas no desktop", "min": 2, "max": 5, "step": 1, "default": 4 },
+    { "type": "range", "id": "produtos_por_aba", "label": "Produtos por aba", "min": 2, "max": 16, "step": 1, "default": 6 },
+    { "type": "range", "id": "colunas", "label": "Colunas no desktop", "min": 2, "max": 5, "step": 1, "default": 3 },
     {
       "type": "select",
       "id": "colunas_mobile",

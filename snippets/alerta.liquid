@@ -1,267 +1,209 @@
 {%- comment -%}
   ============================================================
-  alerta — notificação global (toast) de sucesso/erro
+  alerta — notificação global (toast) lateral
   ============================================================
 
   O QUE FAZ:
-  Renderiza o toast global fixo no canto da tela (HTML + CSS + JS) e expõe
-  as funções globais mostrarAlerta() e fecharAlerta() no window. Suporta
-  tipo positivo/negativo, auto-fechamento e fechar com ESC.
+  Toast fixo no canto superior direito (logo abaixo do header),
+  em cor SÓLIDA, que entra deslizando pela lateral. Pode ter um
+  botão de ação (ex: "Ver sacola") e uma barra de tempo que mostra
+  quando ele vai fechar sozinho. Passar o mouse pausa o fechamento.
 
   COMO USAR:
-  {% render 'alerta' %}   (inclua uma vez no layout, ex: theme.liquid)
-  No JS da loja, dispare:
+  {% render 'alerta' %}   (uma vez, em layout/theme.liquid)
+  No JS:
     mostrarAlerta('Produto adicionado!', 'positivo')
-    mostrarAlerta('Algo deu errado', 'negativo', 5000)
+    mostrarAlerta('Sem estoque', 'negativo', 5000)
+    mostrarAlerta('Adicionado à sacola', 'positivo', 5000, { texto: 'Ver sacola', url: '/cart' })
 
-  PARÂMETROS:
-  Nenhum — renderizado diretamente. A interação é via funções JS globais:
-  - mostrarAlerta(mensagem, tipo = 'positivo', duracao = 4000)
-  - fecharAlerta()
+  PARÂMETROS (da função):
+  - mensagem: texto.
+  - tipo: 'positivo' (cor de destaque) | 'negativo' (vermelho escuro).
+  - duracao: ms até fechar (0 = não fecha sozinho). Padrão 4000.
+  - acao: { texto, url } opcional → vira um botão-link no toast.
 
-  OBSERVAÇÕES:
-  duracao em ms; use 0 para não fechar sozinho. Usa as variáveis de cor
-  --cor-verde, --cor-marca e --cor-branco (definidas em css-variables).
+  ACESSIBILIDADE:
+  role="status" + aria-live="polite": leitores de tela anunciam a
+  mensagem sem roubar o foco. Esc fecha.
 {%- endcomment -%}
-<div id="alerta" class="alerta-global">
-  <div class="conteudo">
-    <div class="icone"></div>
-    <div class="mensagem"></div>
-    <button class="fechar" onclick="fecharAlerta()">&times;</button>
+<div id="alerta" class="alerta" role="status" aria-live="polite" aria-atomic="true">
+  <div class="alerta__conteudo">
+    <span class="alerta__icone" aria-hidden="true">
+      <span class="alerta__icone--positivo">{% render 'icon', name: 'check' %}</span>
+      <span class="alerta__icone--negativo">!</span>
+    </span>
+    <p class="alerta__mensagem" data-alerta-mensagem></p>
+    <a href="#" class="alerta__acao" data-alerta-acao hidden></a>
+    <button type="button" class="alerta__fechar" aria-label="{{ 'accessibility.close' | t }}" data-alerta-fechar>
+      {% render 'icon', name: 'close' %}
+    </button>
+    <span class="alerta__tempo" aria-hidden="true"></span>
   </div>
 </div>
 
 <style>
-  .alerta-global {
+  .alerta {
+    --alerta-fundo: var(--color-accent);
+    --alerta-texto: var(--color-accent-text);
     position: fixed;
-    top: 50px;
-    right: 20px;
+    top: calc(var(--header-altura, 72px) + 12px);
+    right: var(--gutter, 20px);
     z-index: 10001;
-    opacity: 0;
+    width: min(400px, calc(100vw - 2 * var(--gutter, 20px)));
     visibility: hidden;
-    transform: translateX(100%);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    max-width: 400px;
-    width: 90%;
+    opacity: 0;
+    transform: translate3d(calc(100% + var(--gutter, 20px)), 0, 0);
+    transition:
+      transform 550ms var(--ease-out),
+      opacity 300ms ease,
+      visibility 0s linear 550ms;
   }
+  .alerta.negativo { --alerta-fundo: #8a3a32; --alerta-texto: #fbf6f2; }
+  .alerta.visivel { visibility: visible; opacity: 1; transform: none; transition: transform 550ms var(--ease-out), opacity 300ms ease; }
 
-  .alerta-global.visivel {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
-  }
-
-  .alerta-global .conteudo {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  .alerta__conteudo {
     position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 6px 14px;
+    padding: 16px 14px 16px 18px;
     overflow: hidden;
+    color: var(--alerta-texto);
+    background: var(--alerta-fundo);
+    border-radius: 4px;
+    box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.45);
   }
-
-  .alerta-global.positivo .conteudo {
-    background: linear-gradient(135deg, var(--cor-verde), #20bf6b);
-    color: var(--cor-branco);
-  }
-
-  .alerta-global.negativo .conteudo {
-    background: linear-gradient(135deg, var(--cor-marca), #ff4757);
-    color: var(--cor-branco);
-  }
-
-  .alerta-global .conteudo::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.8s ease;
-  }
-
-  .alerta-global.visivel .conteudo::before {
-    left: 100%;
-  }
-
-  .alerta-global .icone {
-    width: 24px;
-    height: 24px;
-    margin-right: 15px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 2;
-  }
-
-  .alerta-global.positivo .icone::before {
-    content: '✓';
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    font-family: var(--bold);
-    font-size: var(--f2);
-    font-weight: bold;
-  }
-
-  .alerta-global.negativo .icone::before {
-    content: '⚠';
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    font-family: var(--bold);
-    font-size: var(--f2);
-    font-weight: bold;
-  }
-
-  .alerta-global .mensagem {
-    flex: 1;
-    font-family: var(--bold);
-    font-size: var(--f2);
-    line-height: 1.4;
-    position: relative;
-    z-index: 2;
-  }
-
-  .alerta-global .fechar {
+  .alerta__icone {
+    display: grid;
+    place-items: center;
     width: 30px;
     height: 30px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
     border-radius: 50%;
-    color: var(--cor-branco);
-    font-family: var(--bold);
-    font-size: var(--f4);
-    cursor: pointer;
-    margin-left: 15px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 2;
-    transition: all 0.3s ease;
+    border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+    font-weight: 500;
   }
+  .alerta__icone svg { width: 16px; height: 16px; }
+  .alerta__icone--negativo, .alerta.negativo .alerta__icone--positivo { display: none; }
+  .alerta.negativo .alerta__icone--negativo { display: inline; }
+  .alerta__mensagem { font-size: 0.9375rem; line-height: 1.35; }
 
-  .alerta-global .fechar:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
+  /* Ação ("Ver sacola") — ocupa a linha de baixo, alinhada ao texto */
+  .alerta__acao {
+    grid-column: 2 / 3;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 16px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--alerta-fundo);
+    background: var(--alerta-texto);
+    border-radius: var(--buttons-radius, 40px);
+    transition: transform var(--dur-base) var(--ease-out);
   }
+  .alerta__acao:hover { transform: translateY(-1px); }
+  .alerta__acao[hidden] { display: none; }
 
-  /* Animação de entrada */
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
+  .alerta__fechar {
+    grid-row: 1;
+    grid-column: 3;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    color: inherit;
+    background: none;
+    border-radius: 50%;
+    opacity: 0.75;
+    transition: opacity var(--dur-fast), background-color var(--dur-fast);
   }
+  .alerta__fechar:hover { opacity: 1; background: color-mix(in srgb, currentColor 14%, transparent); }
+  .alerta__fechar svg { width: 18px; height: 18px; }
 
-  /* Animação de saída */
-  @keyframes slideOut {
-    from {
-      transform: translateX(0);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(100%);
-      opacity: 0;
-    }
+  /* Barra de tempo restante (encolhe da esquerda para a direita) */
+  .alerta__tempo {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: color-mix(in srgb, currentColor 45%, transparent);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
   }
-
-  /* Responsivo */
-  @media (max-width: 768px) {
-    .alerta-global {
-      top: 10px;
-      right: 10px;
-      left: 10px;
-      width: auto;
-      max-width: none;
-    }
-
-    .alerta-global .conteudo {
-      padding: 15px;
-    }
-
-    .alerta-global .mensagem {
-      font-size: var(--f1);
-    }
-  }
+  .alerta.contando .alerta__tempo { animation: alerta-tempo var(--alerta-duracao, 4000ms) linear forwards; }
+  .alerta.contando:hover .alerta__tempo { animation-play-state: paused; }
+  @keyframes alerta-tempo { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 </style>
 
 <script>
-  let alertaTimeout;
+  (function () {
+    var alerta = document.getElementById('alerta');
+    var mensagemEl = alerta.querySelector('[data-alerta-mensagem]');
+    var acaoEl = alerta.querySelector('[data-alerta-acao]');
+    var timer = null;
+    var restante = 0;
+    var inicio = 0;
 
-  function mostrarAlerta(mensagem, tipo = 'positivo', duracao = 4000) {
-    const alerta = document.getElementById('alerta');
-    const mensagemEl = alerta.querySelector('.mensagem');
-
-    // Limpar timeout anterior se existir
-    if (alertaTimeout) {
-      clearTimeout(alertaTimeout);
+    function iniciarContagem(ms) {
+      clearTimeout(timer);
+      inicio = Date.now();
+      restante = ms;
+      timer = setTimeout(fecharAlerta, ms);
     }
 
-    // Fechar alerta atual se estiver visível
-    if (alerta.classList.contains('visivel')) {
-      fecharAlerta();
-      // Aguardar a animação de fechamento antes de mostrar o novo
-      setTimeout(() => {
-        exibirNovoAlerta(alerta, mensagemEl, mensagem, tipo, duracao);
-      }, 400);
-    } else {
-      exibirNovoAlerta(alerta, mensagemEl, mensagem, tipo, duracao);
+    function mostrarAlerta(mensagem, tipo, duracao, acao) {
+      tipo = tipo || 'positivo';
+      duracao = duracao === undefined ? 4000 : duracao;
+
+      mensagemEl.textContent = mensagem;
+      alerta.classList.remove('positivo', 'negativo', 'contando');
+      alerta.classList.add(tipo);
+
+      if (acao && acao.texto && acao.url) {
+        acaoEl.textContent = acao.texto;
+        acaoEl.href = acao.url;
+        acaoEl.hidden = false;
+      } else {
+        acaoEl.hidden = true;
+      }
+
+      alerta.style.setProperty('--alerta-duracao', duracao + 'ms');
+      void alerta.offsetWidth; // reinicia a animação da barra de tempo
+      alerta.classList.add('visivel');
+
+      clearTimeout(timer);
+      if (duracao > 0) {
+        alerta.classList.add('contando');
+        iniciarContagem(duracao);
+      }
     }
-  }
 
-  function exibirNovoAlerta(alerta, mensagemEl, mensagem, tipo, duracao) {
-    // Definir conteúdo
-    mensagemEl.textContent = mensagem;
-
-    // Remover classes anteriores
-    alerta.classList.remove('positivo', 'negativo');
-
-    // Adicionar classe do tipo
-    alerta.classList.add(tipo);
-
-    // Mostrar alerta
-    alerta.classList.add('visivel');
-
-    // Auto-fechar após a duração especificada
-    if (duracao > 0) {
-      alertaTimeout = setTimeout(() => {
-        fecharAlerta();
-      }, duracao);
+    function fecharAlerta() {
+      clearTimeout(timer);
+      alerta.classList.remove('visivel', 'contando');
     }
-  }
 
-  function fecharAlerta() {
-    const alerta = document.getElementById('alerta');
-    alerta.classList.remove('visivel');
+    // Mouse em cima pausa o fechamento; ao sair, continua de onde parou.
+    alerta.addEventListener('mouseenter', function () {
+      if (!alerta.classList.contains('contando')) return;
+      clearTimeout(timer);
+      restante -= Date.now() - inicio;
+    });
+    alerta.addEventListener('mouseleave', function () {
+      if (alerta.classList.contains('contando')) iniciarContagem(Math.max(restante, 800));
+    });
 
-    // Limpar timeout se existir
-    if (alertaTimeout) {
-      clearTimeout(alertaTimeout);
-      alertaTimeout = null;
-    }
-  }
+    alerta.querySelector('[data-alerta-fechar]').addEventListener('click', fecharAlerta);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && alerta.classList.contains('visivel')) fecharAlerta();
+    });
 
-  // Fechar com tecla ESC
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      fecharAlerta();
-    }
-  });
-
-  // Tornar função global
-  window.mostrarAlerta = mostrarAlerta;
-  window.fecharAlerta = fecharAlerta;
+    window.mostrarAlerta = mostrarAlerta;
+    window.fecharAlerta = fecharAlerta;
+  })();
 </script>

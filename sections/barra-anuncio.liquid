@@ -1,0 +1,132 @@
+{%- comment -%}
+  ============================================================
+  BARRA DE ANÚNCIO — faixa de promoção acima do header
+  ============================================================
+
+  O QUE FAZ:
+  Faixa fina no topo do site com mensagens de promoção ("Frete
+  grátis acima de R$ 500", "10% off no Pix"...). Com mais de uma
+  mensagem, elas se alternam sozinhas com fade + leve deslize;
+  passar o mouse (ou focar com teclado) pausa a troca.
+
+  ONDE É USADA:
+  sections/header-group.json, ANTES do "nav". Ela não é fixa:
+  some ao rolar, e o header fixo assume o topo.
+
+  PRINCIPAIS PARTES:
+  - Blocks "mensagem": texto + link opcional (até 5).
+  - Settings: esquema de cor e intervalo da troca.
+  - Custom element <barra-anuncio> (script inline curto): só é
+    ativado quando há 2+ mensagens.
+
+  ACESSIBILIDADE:
+  aria-live="polite" na área das mensagens, e a rotação respeita
+  prefers-reduced-motion (sem animação; troca continua).
+{%- endcomment -%}
+{%- if section.blocks.size > 0 -%}
+  <barra-anuncio
+    class="barra-anuncio barra-anuncio--{{ section.settings.esquema }}"
+    data-intervalo="{{ section.settings.intervalo | times: 1000 }}"
+    role="region"
+    aria-label="{{ 'sections.header.announcement' | t }}"
+  >
+    <div class="barra-anuncio__trilho page-width" aria-live="polite">
+      {%- for block in section.blocks -%}
+        <p class="barra-anuncio__mensagem{% if forloop.first %} is-ativa{% endif %}" {{ block.shopify_attributes }} {% unless forloop.first %}aria-hidden="true"{% endunless %}>
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}" class="barra-anuncio__link" {% unless forloop.first %}tabindex="-1"{% endunless %}>
+              {{ block.settings.texto | escape }}
+              {% render 'icon', name: 'seta' %}
+            </a>
+          {%- else -%}
+            {{ block.settings.texto | escape }}
+          {%- endif -%}
+        </p>
+      {%- endfor -%}
+    </div>
+  </barra-anuncio>
+{%- endif -%}
+
+<style>
+  .barra-anuncio { display: block; font-size: 0.75rem; letter-spacing: 0.06em; }
+  .barra-anuncio--destaque { color: var(--color-accent-text); background: var(--color-accent); }
+  .barra-anuncio--claro { color: var(--color-text); background: var(--color-background-contrast); }
+  .barra-anuncio__trilho { display: grid; place-items: center; min-height: 36px; text-align: center; }
+  .barra-anuncio__mensagem {
+    grid-area: 1 / 1;                 /* todas as mensagens na mesma célula: só a ativa aparece */
+    padding: 8px 0;
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+    pointer-events: none;
+  }
+  .barra-anuncio__mensagem.is-ativa { opacity: 1; transform: none; pointer-events: auto; }
+  .barra-anuncio__link { display: inline-flex; align-items: center; gap: 6px; color: inherit; }
+  .barra-anuncio__link svg { width: 14px; height: 14px; transition: transform var(--dur-base) var(--ease-out); }
+  .barra-anuncio__link:hover svg { transform: translateX(3px); }
+</style>
+
+<script>
+  if (!customElements.get('barra-anuncio')) {
+    customElements.define('barra-anuncio', class extends HTMLElement {
+      connectedCallback() {
+        this.mensagens = Array.from(this.querySelectorAll('.barra-anuncio__mensagem'));
+        if (this.mensagens.length < 2) return;
+        this.atual = 0;
+        this.pausado = false;
+        var pausar = () => { this.pausado = true; };
+        var retomar = () => { this.pausado = false; };
+        this.addEventListener('mouseenter', pausar);
+        this.addEventListener('mouseleave', retomar);
+        this.addEventListener('focusin', pausar);
+        this.addEventListener('focusout', retomar);
+        this.timer = setInterval(() => { if (!this.pausado) this.proxima(); }, parseInt(this.dataset.intervalo, 10) || 4500);
+      }
+      disconnectedCallback() { clearInterval(this.timer); }
+      proxima() {
+        var antiga = this.mensagens[this.atual];
+        this.atual = (this.atual + 1) % this.mensagens.length;
+        var nova = this.mensagens[this.atual];
+        [antiga, nova].forEach((m, i) => {
+          var ativa = i === 1;
+          m.classList.toggle('is-ativa', ativa);
+          m.setAttribute('aria-hidden', String(!ativa));
+          var link = m.querySelector('a');
+          if (link) link.tabIndex = ativa ? 0 : -1;
+        });
+      }
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Barra de anúncio",
+  "class": "section-barra-anuncio",
+  "settings": [
+    {
+      "type": "select",
+      "id": "esquema",
+      "label": "Cor",
+      "options": [
+        { "value": "destaque", "label": "Cor de destaque" },
+        { "value": "claro", "label": "Fundo secundário" }
+      ],
+      "default": "destaque"
+    },
+    { "type": "range", "id": "intervalo", "label": "Trocar mensagem a cada", "min": 3, "max": 10, "step": 1, "unit": "s", "default": 5 }
+  ],
+  "blocks": [
+    {
+      "type": "mensagem",
+      "name": "Mensagem",
+      "limit": 5,
+      "settings": [
+        { "type": "text", "id": "texto", "label": "Texto", "default": "Frete grátis para todo o Brasil" },
+        { "type": "url", "id": "link", "label": "Link (opcional)" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Barra de anúncio", "blocks": [{ "type": "mensagem" }] }]
+}
+{% endschema %}
