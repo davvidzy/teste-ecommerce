@@ -53,9 +53,14 @@
       </div>
     </div>
 
-    <ul class="depoimentos__trilho" role="list" data-trilho>
+    {%- comment -%}
+      O reveal fica no TRILHO, não em cada card: cards fora da tela à direita nunca
+      "entram na tela" para o IntersectionObserver e ficariam deslocados para baixo —
+      isso criava sobra vertical e o trilho passava a rolar na vertical também.
+    {%- endcomment -%}
+    <ul class="depoimentos__trilho" role="list" data-trilho data-reveal style="--reveal-index: 1;">
       {%- for block in section.blocks -%}
-        <li class="depoimentos__item" data-reveal style="--reveal-index: {{ forloop.index0 | at_most: 3 }};" {{ block.shopify_attributes }}>
+        <li class="depoimentos__item" {{ block.shopify_attributes }}>
           <figure class="depoimento">
             <div class="depoimento__topo">
               <p class="depoimentos__estrelas" role="img" aria-label="{{ 'sections.depoimentos.stars' | t: count: block.settings.estrelas }}">
@@ -100,6 +105,12 @@
     display: flex;
     gap: clamp(16px, 2vw, 28px);
     overflow-x: auto;
+    /* Sem isto o navegador transforma overflow-y em "auto" (regra do CSS quando um eixo é
+       auto) e o trilho rouba a rolagem vertical: o dedo "trava" no celular e a roda do
+       mouse rola o trilho em vez da página. Só o arraste para o lado mexe aqui. */
+    overflow-y: hidden;
+    overscroll-behavior-x: contain; /* chegar na ponta não dispara o "voltar página" do navegador */
+    touch-action: pan-x pan-y;
     scroll-snap-type: x mandatory;
     list-style: none;
     margin: 0;

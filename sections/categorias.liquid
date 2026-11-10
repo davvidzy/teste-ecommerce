@@ -48,9 +48,10 @@
     </div>
   </div>
 
-  <ul class="categorias__trilho" role="list" data-trilho>
+  {%- comment -%} Reveal no trilho inteiro, não por card (ver comentário em depoimentos.liquid) {%- endcomment -%}
+  <ul class="categorias__trilho" role="list" data-trilho data-reveal style="--reveal-index: 1;">
     {%- for block in section.blocks -%}
-      <li class="categorias__item" data-reveal style="--reveal-index: {{ forloop.index0 }};" {{ block.shopify_attributes }}>
+      <li class="categorias__item" {{ block.shopify_attributes }}>
         {% render 'card-colecao',
           colecao: block.settings.colecao,
           imagem: block.settings.imagem,
@@ -84,6 +85,9 @@
     .categorias__trilho {
       display: flex;
       overflow-x: auto;
+      overflow-y: hidden; /* só rola para o lado: o gesto vertical vai para a página */
+      overscroll-behavior-x: contain;
+      touch-action: pan-x pan-y;
       scroll-snap-type: x mandatory;
       scroll-padding-inline: var(--gutter);
       /* o trilho "vaza" até a borda da tela; o primeiro card continua alinhado à margem */
