@@ -85,8 +85,10 @@
     --gutter: clamp(16px, 3.5vw, 48px);
     /* Respiro vertical entre seções: escala com a tela e tem como teto a setting do editor */
     --espaco-secao: clamp(40px, 6vw, {{ settings.spacing_sections }}px);
-    /* Alturas medidas pelo JS do header (sections/nav.liquid); valores iniciais evitam "pulo" */
-    --header-altura: 72px;
+    /* Alturas medidas pelo JS do header (sections/nav.liquid); valores iniciais evitam "pulo".
+       Barra de anúncio + header são fixos: --header-altura é a área fixa TOTAL. */
+    --barra-altura: 36px;
+    --header-altura: 108px;
     --topo-altura: 108px;
     --buttons-radius: {{ settings.buttons_radius }}px;
     --inputs-radius: {{ settings.inputs_radius }}px;

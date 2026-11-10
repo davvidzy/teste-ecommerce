@@ -144,7 +144,7 @@
   /* ---------- Fixo no topo ---------- */
   .section-header {
     position: sticky;
-    top: 0;
+    top: var(--barra-altura, 0px); /* gruda logo abaixo da barra de anúncio, que também é fixa */
     z-index: 50;
     background-color: var(--color-background);
     transition: box-shadow var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out);
@@ -324,16 +324,29 @@
       });
     }
 
-    /* --- Alturas em CSS vars (hero = 100svh - topo) --- */
+    /*
+      --- Alturas em CSS vars ---
+      Barra de anúncio e header são AMBOS fixos, então:
+      --barra-altura  → onde o header gruda (top)
+      --header-altura → área fixa TOTAL (barra + header): é o que cobre o topo
+                        da tela; usada por sticky da página de produto, barra
+                        de filtros, alerta e menu mobile.
+      --topo-altura   → igual (o hero ocupa 100svh menos isso).
+    */
+    var barra = document.querySelector('.section-barra-anuncio');
     function medir() {
-      var barra = document.querySelector('.section-barra-anuncio');
-      var alturaHeader = header.offsetHeight;
       var alturaBarra = barra ? barra.offsetHeight : 0;
-      raiz.style.setProperty('--header-altura', alturaHeader + 'px');
-      raiz.style.setProperty('--topo-altura', alturaHeader + alturaBarra + 'px');
+      var total = header.offsetHeight + alturaBarra;
+      raiz.style.setProperty('--barra-altura', alturaBarra + 'px');
+      raiz.style.setProperty('--header-altura', total + 'px');
+      raiz.style.setProperty('--topo-altura', total + 'px');
     }
     medir();
-    if ('ResizeObserver' in window) new ResizeObserver(medir).observe(header);
+    if ('ResizeObserver' in window) {
+      var observador = new ResizeObserver(medir);
+      observador.observe(header);
+      if (barra) observador.observe(barra);
+    }
     window.addEventListener('resize', medir, { passive: true });
 
     /* --- Estado "rolado" (sombra) --- */

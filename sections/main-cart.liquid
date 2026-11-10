@@ -38,8 +38,8 @@
     padding-bottom: var(--spacing-sections);
   }
   .cart__title {
-    font-size: var(--f7);
-    margin-bottom: 32px;
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 24px;
   }
 
   /* Empty state */
@@ -60,9 +60,11 @@
   }
   .cart__items { flex: 1 1 auto; min-width: 0; }
   .cart__summary {
-    flex: 0 0 320px;
+    flex: 0 0 360px;
     position: sticky;
-    top: 24px;
+    top: calc(var(--header-altura, 72px) + 24px);
+    padding: 28px;
+    background: var(--color-background-contrast);
   }
 
   /* Table */
@@ -95,7 +97,7 @@
 
   .cart-item__details { line-height: 1.5; }
   .cart-item__name {
-    font-size: var(--f3);
+    font-size: 1.1875rem;
     color: var(--color-text);
     text-decoration: none;
     font-family: var(--font-heading-family);
@@ -130,24 +132,28 @@
     align-items: flex-end;
     gap: 10px;
   }
+  /* Quantidade: mesma pílula da página de produto, porém compacta (é secundária aqui) */
   .cart-items .quantity-selector {
     display: inline-flex;
     align-items: center;
+    height: 40px;
     border: 1px solid var(--color-border);
-    border-radius: var(--inputs-radius);
+    border-radius: 999px;
     overflow: hidden;
   }
   .cart-items .quantity__button {
-    width: 40px; height: 40px;
+    width: 36px; height: 100%;
     background: none; border: none; cursor: pointer;
-    font-size: var(--f3); color: var(--color-text);
+    font-size: 1rem; color: var(--color-text);
+    transition: background-color var(--dur-fast);
   }
+  .cart-items .quantity__button:hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
   .cart-items .quantity__input {
-    width: 48px; height: 40px;
+    width: 32px; height: 100%;
     text-align: center; border: none;
     background: transparent; color: var(--color-text);
     -moz-appearance: textfield;
-    font-size: var(--f2);
+    font-size: 0.9375rem;
   }
   .cart-items .quantity__input::-webkit-outer-spin-button,
   .cart-items .quantity__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -155,10 +161,11 @@
     background: none;
     border: none;
     padding: 0;
-    font-size: var(--f0);
+    font-size: 0.8125rem;
     color: var(--color-text);
-    opacity: 0.7;
+    opacity: 0.65;
     text-decoration: underline;
+    text-underline-offset: 3px;
     cursor: pointer;
   }
   .cart-item__remove:hover { opacity: 1; }
@@ -206,8 +213,39 @@
   @media screen and (max-width: 1000px) {
     .cart__contents { flex-direction: column; gap: 32px; }
     .cart__summary { position: static; flex-basis: auto; width: 100%; }
-    .cart-item__media { width: 84px; padding-right: 14px !important; }
     .cart-items thead { display: none; }
+
+    /*
+      Celular: a tabela de 4 colunas espremia o nome do produto entre a
+      quantidade e o preço. Cada linha vira um grid de 2 andares:
+        [foto] [nome / variante]      [total]
+        [foto] [− 1 +]           [Remover]
+      A informação do produto ganha a largura toda; quantidade e remover
+      ficam numa faixa compacta abaixo.
+    */
+    .cart-items, .cart-items tbody { display: block; }
+    .cart-item {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr) auto;
+      grid-template-areas:
+        'media detalhes preco'
+        'media quantidade quantidade';
+      column-gap: 14px;
+      row-gap: 12px;
+      padding: 18px 0;
+    }
+    .cart-item > td { display: block; padding: 0 !important; }
+    .cart-item__media { grid-area: media; width: 76px; }
+    .cart-item__details { grid-area: detalhes; min-width: 0; }
+    .cart-item__price { grid-area: preco; font-size: 0.9375rem; }
+    .cart-item__quantity { grid-area: quantidade; align-self: end; }
+    .cart-item__quantity-wrapper { flex-direction: row; align-items: center; justify-content: space-between; }
+    .cart-item__name { font-size: 1.0625rem; line-height: 1.3; }
+    .cart-item__options { font-size: 0.8125rem; }
+    .cart-items .quantity-selector { height: 36px; }
+    .cart-items .quantity__button { width: 34px; }
+    .cart-items .quantity__input { width: 28px; font-size: 0.875rem; }
+    .cart__title { font-size: 2rem; margin-bottom: 8px; }
   }
 </style>
 
@@ -346,14 +384,19 @@
                   </td>
 
                   <td class="cart-item__price">
-                    {%- if item.original_price != item.final_price -%}
-                      <s>{{ item.original_price | money }}</s>
-                      <span class="cart-item__discounted">{{ item.final_price | money }}</span>
+                    {%- comment -%}
+                      A coluna é "Total": o número principal é o TOTAL DA LINHA
+                      (preço × quantidade). Com 2+ unidades, o preço unitário aparece
+                      pequeno embaixo. (Antes estava invertido.)
+                    {%- endcomment -%}
+                    {%- if item.original_line_price != item.final_line_price -%}
+                      <s>{{ item.original_line_price | money }}</s>
+                      <span class="cart-item__discounted">{{ item.final_line_price | money }}</span>
                     {%- else -%}
-                      <span>{{ item.final_price | money }}</span>
+                      <span>{{ item.final_line_price | money }}</span>
                     {%- endif -%}
                     {%- if item.quantity > 1 -%}
-                      <div class="cart-item__unit-price">{{ item.final_line_price | money }}</div>
+                      <div class="cart-item__unit-price">{{ item.final_price | money }} / {{ 'sections.cart.each' | t }}</div>
                     {%- endif -%}
                   </td>
                 </tr>

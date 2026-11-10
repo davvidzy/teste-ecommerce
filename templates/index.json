@@ -3,7 +3,6 @@
     "hero": {
       "type": "hero",
       "blocks": {
-        "sobrelinha": { "type": "sobrelinha", "settings": { "texto": "Coleção Orvalho · Primavera" } },
         "titulo": { "type": "titulo", "settings": { "titulo": "Joias que nascem da natureza" } },
         "texto": { "type": "texto", "settings": { "texto": "<p>Diamantes cultivados em laboratório, ouro 18k reciclado e formas inspiradas no que floresce. Feitas para durar gerações.</p>" } },
         "botoes": { "type": "botoes", "settings": { "rotulo_1": "Ver catálogo", "link_1": "", "rotulo_2": "Nossas coleções", "link_2": "" } },
@@ -11,14 +10,13 @@
         "selo_garantia": { "type": "selo", "settings": { "icone": "escudo", "texto": "Certificado e garantia vitalícia" } },
         "selo_arvore": { "type": "selo", "settings": { "icone": "folha", "texto": "Uma árvore plantada a cada pedido" } }
       },
-      "block_order": ["sobrelinha", "titulo", "texto", "botoes", "selo_entrega", "selo_garantia", "selo_arvore"],
+      "block_order": ["titulo", "texto", "botoes", "selo_entrega", "selo_garantia", "selo_arvore"],
       "settings": {
         "imagem_exemplo": true,
         "altura": "tela",
-        "alinhamento": "esquerda",
-        "sobreposicao": 55,
-        "texto_claro": false,
-        "parallax": true
+        "alinhamento": "centro",
+        "sobreposicao": 50,
+        "texto_claro": true
       }
     },
     "catalogo": {

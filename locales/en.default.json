@@ -201,7 +201,8 @@
       "update": "Update",
       "remove": "Remove",
       "added_to_cart": "Added to your bag",
-      "view_cart": "View bag"
+      "view_cart": "View bag",
+      "each": "each"
     },
     "hero": {
       "scroll": "Scroll to the next section",

@@ -10,8 +10,9 @@
   passar o mouse (ou focar com teclado) pausa a troca.
 
   ONDE É USADA:
-  sections/header-group.json, ANTES do "nav". Ela não é fixa:
-  some ao rolar, e o header fixo assume o topo.
+  sections/header-group.json, ANTES do "nav". Ela é FIXA (sticky)
+  no topo; o header gruda logo abaixo dela (top: --barra-altura).
+  Mensagens longas no celular: uma linha, cortada com reticências.
 
   PRINCIPAIS PARTES:
   - Blocks "mensagem": texto + link opcional (até 5).
@@ -48,6 +49,8 @@
 {%- endif -%}
 
 <style>
+  /* Fixa no topo junto com o header (o header gruda logo abaixo dela: top = --barra-altura) */
+  .section-barra-anuncio { position: sticky; top: 0; z-index: 51; }
   .barra-anuncio { display: block; font-size: 0.75rem; letter-spacing: 0.06em; }
   .barra-anuncio--destaque { color: var(--color-accent-text); background: var(--color-accent); }
   .barra-anuncio--claro { color: var(--color-text); background: var(--color-background-contrast); }
@@ -61,7 +64,13 @@
     pointer-events: none;
   }
   .barra-anuncio__mensagem.is-ativa { opacity: 1; transform: none; pointer-events: auto; }
-  .barra-anuncio__link { display: inline-flex; align-items: center; gap: 6px; color: inherit; }
+  .barra-anuncio__link { display: inline-flex; align-items: center; gap: 6px; color: inherit; max-width: 100%; }
+  /* Fixa no topo, a barra não pode crescer para 2 linhas no celular: corta com "…" */
+  @media screen and (max-width: 749px) {
+    .barra-anuncio { font-size: 0.6875rem; letter-spacing: 0.03em; }
+    .barra-anuncio__trilho { min-height: 32px; }
+    .barra-anuncio__mensagem { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 6px 0; }
+  }
   .barra-anuncio__link svg { width: 14px; height: 14px; transition: transform var(--dur-base) var(--ease-out); }
   .barra-anuncio__link:hover svg { transform: translateX(3px); }
 </style>

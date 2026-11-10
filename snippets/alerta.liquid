@@ -53,13 +53,46 @@
     visibility: hidden;
     opacity: 0;
     transform: translate3d(calc(100% + var(--gutter, 20px)), 0, 0);
+    /* SAÍDA: rápida e discreta */
     transition:
-      transform 550ms var(--ease-out),
+      transform 380ms cubic-bezier(0.4, 0, 1, 1),
       opacity 300ms ease,
-      visibility 0s linear 550ms;
+      visibility 0s linear 380ms;
   }
   .alerta.negativo { --alerta-fundo: #8a3a32; --alerta-texto: #fbf6f2; }
-  .alerta.visivel { visibility: visible; opacity: 1; transform: none; transition: transform 550ms var(--ease-out), opacity 300ms ease; }
+  /*
+    ENTRADA: desliza da direita com "ease-out cúbico" (0.22, 0.61, 0.36, 1).
+    A curva anterior (--ease-out = 0.22, 1, 0.36, 1) fazia ~60% do trajeto
+    nos primeiros 100ms — medimos quadro a quadro na loja — e parecia um
+    "tranco". Esta distribui o movimento: ~35% em 100ms, assentando suave.
+  */
+  .alerta.visivel {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      opacity 450ms ease;
+  }
+
+  /* O conteúdo entra em sequência, depois do cartão: ícone → texto → "Ver sacola" */
+  .alerta__icone,
+  .alerta__mensagem,
+  .alerta__acao {
+    opacity: 0;
+    transform: translate3d(14px, 0, 0);
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+  .alerta.visivel .alerta__icone,
+  .alerta.visivel .alerta__mensagem,
+  .alerta.visivel .alerta__acao {
+    opacity: 1;
+    transform: none;
+    transition: opacity 450ms ease, transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .alerta.visivel .alerta__icone { transition-delay: 160ms; }
+  .alerta.visivel .alerta__mensagem { transition-delay: 220ms; }
+  .alerta.visivel .alerta__acao { transition-delay: 300ms; }
 
   .alerta__conteudo {
     position: relative;
@@ -103,9 +136,8 @@
     color: var(--alerta-fundo);
     background: var(--alerta-texto);
     border-radius: var(--buttons-radius, 40px);
-    transition: transform var(--dur-base) var(--ease-out);
   }
-  .alerta__acao:hover { transform: translateY(-1px); }
+  .alerta.visivel .alerta__acao:hover { transform: translateY(-1px); transition-delay: 0ms; }
   .alerta__acao[hidden] { display: none; }
 
   .alerta__fechar {
