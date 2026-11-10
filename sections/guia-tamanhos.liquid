@@ -41,8 +41,8 @@
     .guia-secao .guia { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: clamp(40px, 6vw, 96px); align-items: start; }
     .guia-secao .guia__calculadora,
     .guia-secao .guia__tabela-wrapper { grid-column: 1; }
-    .guia-secao .guia__como { grid-column: 2; grid-row: 1; }
-    .guia-secao .guia__colares { grid-column: 2; grid-row: 2; }
+    /* a coluna lateral ocupa as duas linhas: assim ela não estica a linha da calculadora */
+    .guia-secao .guia__lateral { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: calc(var(--header-altura) + 32px); }
     .guia-secao .guia__tabela-wrapper { max-height: 520px; }
   }
 </style>

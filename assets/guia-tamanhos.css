@@ -38,7 +38,8 @@
 .guia__tabela tbody tr { transition: background-color 300ms ease; }
 .guia__tabela tbody tr.is-ativo { background: var(--color-accent); color: var(--color-accent-text); }
 
-/* ---------- Como medir / colares ---------- */
+/* ---------- Como medir / colares (coluna lateral na página; empilhado no pop-up) ---------- */
+.guia__lateral { display: grid; gap: 32px; align-content: start; }
 .guia__passos { display: grid; gap: 10px; margin: 0; padding-left: 1.3em; line-height: 1.6; }
 .guia__dica { margin: 14px 0 0; font-size: var(--f1); opacity: 0.75; }
 .guia__lista-colares { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; line-height: 1.5; }

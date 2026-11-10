@@ -786,19 +786,32 @@ Entre dois aros, a calculadora arredonda **para cima** (anel folgado entra; aper
 O campo é `type="text" inputmode="decimal"` e não `type="number"`: no Brasil se digita vírgula
 ("16,5") e alguns navegadores recusam vírgula em campo numérico. O teste na loja real pegou isso.
 
-### 14.6 WhatsApp
+### 14.6 Bug encontrado no teste: filtro no meio dos parâmetros
+
+No celular, o card de categoria ficou com 1200px de largura. A causa era esta linha:
+
+```liquid
+{{ foto | image_url: width: 1200 | image_tag: sizes: tamanhos | default: '33vw', class: 'card-colecao__imagem', alt: nome | escape }}
+```
+
+O `| default:` no meio da lista fez o `class:` virar argumento do `default`, não do `image_tag`.
+Sem a classe, a imagem não ficava `position: absolute` e a largura natural dela (1200px) esticava o card.
+No **último** parâmetro o filtro funciona (`alt: a | default: b | escape` é usado no tema todo).
+**Regra:** calcule com `assign` antes e passe só variáveis para o `image_tag`.
+
+### 14.7 WhatsApp
 
 *Editor de temas → Configurações do tema → WhatsApp*: número com DDI e DDD (ex.: `5511999999999`).
 Vazio = botão escondido. Na página de produto a mensagem já cita a peça e o link. Não aparece no
 carrinho (lá a ação principal é finalizar).
 
-### 14.7 Depoimentos de verdade
+### 14.8 Depoimentos de verdade
 
 Os depoimentos da home são blocos editados à mão: bons para começar. Com volume de vendas, o padrão
 é um app de avaliações (Judge.me, Yotpo…) que pede a nota por e-mail depois da entrega e injeta um
 bloco de app na página de produto — `main-product` já aceita blocos `@app`.
 
-### 14.8 Imagens novas
+### 14.9 Imagens novas
 
 `assets/atelie-orvalho-{800,1400}.jpg` (mãos de artesã com ferramentas) e
 `assets/presentes-orvalho-{800,1400}.jpg` (brincos dourados), do banco gratuito Magnific/Freepik,

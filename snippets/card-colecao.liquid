@@ -46,6 +46,12 @@
     assign link = routes.collections_url
   endif
 
+  # Filtro NO MEIO dos parâmetros do image_tag "rouba" os parâmetros seguintes:
+  # em "sizes: x | default: y, class: z" o class vira argumento do default e some.
+  # (No ÚLTIMO parâmetro funciona — ex.: alt: a | default: b | escape.) Por isso os assigns.
+  assign tamanhos_img = tamanhos | default: '(min-width: 1000px) 33vw, 80vw'
+  assign alt_img = nome | escape
+
   assign numero_placeholder = indice | default: 0 | modulo: 6 | plus: 1
   assign nome_placeholder = 'collection-' | append: numero_placeholder
 -%}
@@ -58,9 +64,9 @@
         | image_tag:
           loading: 'lazy',
           widths: '360, 540, 720, 900, 1200',
-          sizes: tamanhos | default: '(min-width: 1000px) 33vw, 80vw',
+          sizes: tamanhos_img,
           class: 'card-colecao__imagem',
-          alt: nome | escape
+          alt: alt_img
       }}
     {%- else -%}
       {{ nome_placeholder | placeholder_svg_tag: 'card-colecao__imagem placeholder-svg' }}

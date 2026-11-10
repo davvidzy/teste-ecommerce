@@ -38,6 +38,8 @@
   <div class="imagem-texto__grade page-width imagem-texto--{{ section.settings.posicao_imagem }}">
     <div class="imagem-texto__midia" data-reveal="fade">
       {%- if section.settings.imagem != blank -%}
+        {%- comment -%} alt calculado antes: deixa a chamada do image_tag sem filtros nos parâmetros (ver card-colecao) {%- endcomment -%}
+        {%- assign alt_img = section.settings.imagem.alt | default: section.settings.titulo | escape -%}
         {{
           section.settings.imagem
           | image_url: width: 1800
@@ -46,7 +48,7 @@
             widths: '600, 900, 1200, 1800',
             sizes: '(min-width: 1000px) 50vw, 100vw',
             class: 'imagem-texto__imagem',
-            alt: section.settings.imagem.alt | default: section.settings.titulo | escape
+            alt: alt_img
         }}
       {%- elsif exemplo != 'nenhuma' -%}
         {%- assign arquivo = exemplo | append: '-orvalho-' -%}
