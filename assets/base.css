@@ -184,6 +184,7 @@ summary:focus-visible,
 .button--grande { min-height: 56px; padding: 0 36px; }
 .button--pequeno { min-height: 40px; padding: 0 18px; font-size: 0.75rem; gap: 8px; }
 .button--pequeno svg { width: 16px; height: 16px; }
+.button--tertiary.button--pequeno { padding: 0 2px; } /* terciário não tem "caixa": o sublinhado = largura do texto */
 .button--bloco { width: 100%; }
 
 .button[disabled],
