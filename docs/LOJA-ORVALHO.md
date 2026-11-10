@@ -665,3 +665,20 @@ o Playwright usando o navegador já instalado:
    (hover no card, abrir a busca, adicionar à sacola) para conferir as animações.
 
 **Nunca** passe senha do admin, token de API ou código de verificação: nada disso é necessário.
+
+### 13.6 O que os testes na loja real encontraram
+
+Com prints e cliques automatizados (Playwright + Chrome) na loja publicada:
+
+| Problema | Causa | Lição |
+|---|---|---|
+| Título do hero sem espaços ("Joiasquenascemda") | `{% unless forloop.last %} {% endunless %}`: um bloco cujo conteúdo é **só espaço em branco** é tratado pelo Liquid como *vazio* e não imprime nada | Para imprimir um espaço condicional, use saída: `{{ ' ' }}` |
+| Esc não fechava a busca depois de digitar | Em `<input type="search">`, o 1º Esc do Chrome só **apaga o texto** e consome a tecla; o `<dialog>` nem recebe o `cancel` | Tratar `keydown` Escape no próprio campo |
+| Texto do hero ilegível no celular | Em tela vertical, o texto cobre quase toda a foto e cai sobre o anel dourado | Gradiente ("véu") mais alto só no celular |
+| Sublinhado do terciário longe do texto | Posição fixa em `100% - 10px` não acompanhava a altura do botão | Posicionar a partir do centro: `calc(50% + 0.85em)` |
+| `sort_by` padrão sempre na URL | O `<select>` sempre envia o valor | Omitir quando é a ordem padrão da coleção |
+
+Coisas que **não são do tema** e se resolvem no admin:
+- Menu em inglês ("Home / Catalog / Contact", "Search"): *Loja virtual → Navegação* → renomeie os itens.
+- "© My Store": *Configurações → Detalhes da loja* → nome da loja.
+- Erros de console de `shop.app` (403/401/CSP): vêm do iframe do Shop Pay que o próprio Shopify injeta, não do tema.

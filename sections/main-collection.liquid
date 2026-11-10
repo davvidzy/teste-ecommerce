@@ -98,7 +98,7 @@
         <div class="colecao__ordenar">
           <label for="Ordenar-{{ section.id }}" class="colecao__ordenar-rotulo">{{ 'products.facets.sort_by_label' | t }}</label>
           <div class="colecao__select">
-            <select name="sort_by" id="Ordenar-{{ section.id }}" form="{{ id_form }}" data-ordenar>
+            <select name="sort_by" id="Ordenar-{{ section.id }}" form="{{ id_form }}" data-ordenar data-padrao="{{ collection.default_sort_by }}">
               {%- for opcao in collection.sort_options -%}
                 <option value="{{ opcao.value }}" {% if opcao.value == ordem_atual %}selected{% endif %}>{{ opcao.name }}</option>
               {%- endfor -%}

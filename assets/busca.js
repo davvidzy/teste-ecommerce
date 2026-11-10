@@ -47,6 +47,15 @@
       document.addEventListener('keydown', this.aoTeclarDocumento);
 
       this.input.addEventListener('input', () => this.agendarBusca());
+
+      // Num <input type="search">, o 1º Esc do Chrome só APAGA o texto e "consome"
+      // a tecla — o <dialog> nem fica sabendo. Tratamos o Esc no próprio campo
+      // para um único Esc fechar o popup (bug encontrado no teste com Playwright).
+      this.input.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        e.preventDefault();
+        this.fechar();
+      });
       this.querySelector('[data-busca-fechar]').addEventListener('click', () => this.fechar());
 
       // Clique no "fundo" (fora do painel): o alvo é o próprio <dialog>

@@ -167,7 +167,8 @@ summary:focus-visible,
   padding: 0 2px;
   border-radius: 0;
   background-image: linear-gradient(currentColor, currentColor);
-  background-position: 0 calc(100% - 10px);
+  /* sublinhado colado no texto, qualquer que seja a altura do botão */
+  background-position: 0 calc(50% + 0.85em);
   background-repeat: no-repeat;
   background-size: 100% 1px;
   transition: background-size 0.45s var(--ease-out, ease), opacity 0.2s ease;
@@ -177,7 +178,7 @@ summary:focus-visible,
   --btn-fundo: transparent;
   transform: none;
   background-size: 0% 1px;
-  background-position: 100% calc(100% - 10px);
+  background-position: 100% calc(50% + 0.85em);
 }
 
 .button--grande { min-height: 56px; padding: 0 36px; }

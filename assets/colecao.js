@@ -161,7 +161,13 @@
     parametrosDoForm() {
       var dados = new FormData(this.form);
       var params = new URLSearchParams();
-      dados.forEach((valor, chave) => { if (valor !== '') params.append(chave, valor); });
+      var ordenar = this.querySelector('[data-ordenar]');
+      var ordemPadrao = ordenar ? ordenar.dataset.padrao : '';
+      dados.forEach((valor, chave) => {
+        if (valor === '') return;
+        if (chave === 'sort_by' && valor === ordemPadrao) return; // URL mais limpa: ordem padrão não precisa ir
+        params.append(chave, valor);
+      });
       return params.toString();
     }
 

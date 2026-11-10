@@ -101,7 +101,13 @@
             <h1 class="hero__titulo" {{ block.shopify_attributes }}>
               {%- for palavra in palavras -%}
                 <span class="hero__palavra"><span style="--i: {{ forloop.index0 }}; --d: {{ atraso }}ms;">{{ palavra | escape }}</span></span>
-                {%- unless forloop.last %} {% endunless -%}
+                {%- comment -%}
+                  O espaço entre palavras PRECISA ser uma saída {{ ' ' }}.
+                  Um bloco com só espaço em branco ({% unless %} {% endunless %}) é
+                  considerado "vazio" pelo Liquid e não imprime nada — era o bug
+                  que juntava as palavras ("Joiasquenascemda").
+                {%- endcomment -%}
+                {%- unless forloop.last -%}{{ ' ' }}{%- endunless -%}
               {%- endfor -%}
             </h1>
             {%- comment -%} Palavras do título "consomem" tempo: o próximo bloco espera elas subirem. {%- endcomment -%}
@@ -322,6 +328,21 @@
   @keyframes hero-aurora { to { transform: translate3d(12%, 10%, 0) scale(1.2); } }
 
   @media screen and (max-width: 1000px) {
+    /* No celular o texto ocupa quase a altura toda e cai em cima do assunto
+       da foto (o anel). O "véu" sobe bem mais para garantir a leitura,
+       deixando a foto aparecer só no topo. Visto nos prints do Playwright. */
+    .hero--texto-escuro::before {
+      background: linear-gradient(
+        to top,
+        var(--color-background) 0%,
+        color-mix(in srgb, var(--color-background) 88%, transparent) 45%,
+        color-mix(in srgb, var(--color-background) 40%, transparent) 72%,
+        transparent 92%
+      );
+    }
+    .hero--texto-claro::before {
+      background: linear-gradient(to top, rgb(0 0 0 / 0.75) 0%, rgb(0 0 0 / 0.55) 50%, transparent 90%);
+    }
     .hero__conteudo { padding-top: 96px; }
     .hero__rolar { display: none; }
     .hero__selos { gap: 12px 24px; }
