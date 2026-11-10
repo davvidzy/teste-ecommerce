@@ -267,15 +267,12 @@
     },
     "depoimentos": {
       "rating": "{{ nota }} out of 5",
-      "reviews": {
-        "one": "{{ count }} review",
-        "other": "{{ count }} reviews"
-      },
       "stars": {
         "one": "{{ count }} star out of 5",
         "other": "{{ count }} stars out of 5"
       },
-      "verified": "Verified purchase"
+      "verified": "Verified purchase",
+      "reviews_total": "{{ total }} reviews"
     },
     "guia": {
       "open": "Size guide",

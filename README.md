@@ -118,6 +118,11 @@ Cada arquivo define **quais seções** aparecem num tipo de página. São JSON
 | `article.json` | Post individual do blog |
 | `page.json` | Página institucional genérica |
 | `page.contact.json` | Página de contato (com formulário) |
+| `page.sobre.json` | **Orvalho** — Sobre: história, valores e processo |
+| `page.faq.json` | **Orvalho** — FAQ completo em três grupos (pedidos, trocas, materiais) |
+| `page.guia-de-tamanhos.json` | **Orvalho** — Guia de tamanhos com calculadora de aro |
+| `page.cuidados.json` | **Orvalho** — Cuidados com as joias |
+| `collection.campanha.json` | **Orvalho** — coleção de campanha (banner com imagem + grade + destaque + benefícios) |
 | `password.json` | Página de senha (loja fechada/em breve) |
 | `404.json` | Página de erro 404 |
 | `gift_card.liquid` | Vale-presente (QR code, Apple Wallet) — arquivo Liquid standalone |
@@ -136,7 +141,13 @@ cabeçalho/rodapé (permitem reordenar no editor).
 | `nav.liquid` | Cabeçalho: logo, menu multinível, busca, carrinho, seletor de país/idioma |
 | `footer.liquid` | Rodapé original da base: blocos (marca, menu, texto, newsletter), redes, ícones de pagamento |
 | `rodape.liquid` | **Orvalho** — rodapé em uso: newsletter com rótulo flutuante, colunas, assinatura gigante animada |
-| `hero.liquid` | **Orvalho** — hero da home: título palavra-a-palavra, ken burns, parallax, selos de confiança |
+| `hero.liquid` | **Orvalho** — hero da home: estático, centralizado, overlay escuro, selos de confiança |
+| `categorias.liquid` | **Orvalho** — "Compre por categoria": cards de coleção (grade no desktop, swipe no celular) |
+| `imagem-texto.liquid` | **Orvalho** — foto + texto editorial (ateliê, presentes, campanhas), com números de destaque |
+| `diferenciais.liquid` | **Orvalho** — "Por que Orvalho": colunas com ícone (também usada em Cuidados) |
+| `depoimentos.liquid` | **Orvalho** — carrossel de avaliações com estrelas e nota média |
+| `perguntas-frequentes.liquid` | **Orvalho** — FAQ em acordeão + dados estruturados FAQPage para o Google |
+| `guia-tamanhos.liquid` | **Orvalho** — página do guia: calculadora de aro, tabela e comprimentos de colar |
 | `catalogo.liquid` | **Orvalho** — catálogo com abas (uma coleção por aba), swatches e compra rápida |
 | `barra-anuncio.liquid` | **Orvalho** — barra de promoção acima do header (mensagens que se alternam) |
 | `busca-preditiva.liquid` | **Orvalho** — resultados da busca preditiva (só para a Section Rendering API) |
@@ -145,7 +156,7 @@ cabeçalho/rodapé (permitem reordenar no editor).
 | `main-collection.liquid` | Grade de produtos: ordenação, filtros, paginação |
 | `collection-banner.liquid` | Cabeçalho da coleção (título, descrição, imagem) |
 | `main-search.liquid` | Resultados de busca (produtos, artigos, páginas) |
-| `main-list-collections.liquid` | Grade de coleções |
+| `main-list-collections.liquid` | **Orvalho** — página /collections com o card de coleção (todas ou escolhidas) |
 | `main-blog.liquid` / `main-article.liquid` | Blog e post individual |
 | `main-page.liquid` | Página institucional |
 | `contact-form.liquid` | Formulário de contato nativo |
@@ -172,6 +183,9 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 | `catalogo-painel.liquid` | **Orvalho** — grade de uma aba do catálogo + link "Ver todas" |
 | `logo.liquid` | **Orvalho** — logo em SVG (símbolo + nome), herda a cor do pai |
 | `busca-modal.liquid` | **Orvalho** — popup de busca (`<dialog>`) com resultados enquanto digita |
+| `card-colecao.liquid` | **Orvalho** — card de coleção (foto → imagem da coleção → 1º produto → placeholder) |
+| `guia-tamanhos.liquid` | **Orvalho** — calculadora + tabela de aros (página e pop-up do produto) |
+| `whatsapp-flutuante.liquid` | **Orvalho** — botão fixo de WhatsApp (Configurações do tema › WhatsApp) |
 | `icon.liquid` | Ícones SVG inline (busca, carrinho, conta, redes…) |
 | `pagination.liquid` | Paginação acessível |
 | `localization-form.liquid` | Seletores nativos de país/moeda e idioma |

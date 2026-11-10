@@ -31,7 +31,12 @@
       </div>
       <label class="guia__entrada">
         <span class="visually-hidden">{{ 'sections.guia.measure_label' | t }}</span>
-        <input type="number" inputmode="decimal" min="10" max="80" step="0.1" placeholder="{{ 'sections.guia.placeholder' | t }}" data-medida>
+        {%- comment -%}
+          type="text" + inputmode="decimal" (e não type="number"): no Brasil se digita
+          vírgula ("16,5") e alguns navegadores recusam vírgula em campo numérico.
+          O teclado do celular continua sendo o numérico.
+        {%- endcomment -%}
+        <input type="text" inputmode="decimal" autocomplete="off" pattern="[0-9]+([,.][0-9]+)?" maxlength="5" placeholder="{{ 'sections.guia.placeholder' | t }}" data-medida>
         <span aria-hidden="true">mm</span>
       </label>
     </div>

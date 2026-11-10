@@ -695,3 +695,113 @@ Coisas que **não são do tema** e se resolvem no admin:
 - Menu em inglês ("Home / Catalog / Contact", "Search"): *Loja virtual → Navegação* → renomeie os itens.
 - "© My Store": *Configurações → Detalhes da loja* → nome da loja.
 - Erros de console de `shop.app` (403/401/CSP): vêm do iframe do Shop Pay que o próprio Shopify injeta, não do tema.
+
+---
+
+## 14. Fase 4 — o site completo
+
+O que uma joalheria online de verdade tem além de hero, catálogo e rodapé.
+
+### 14.1 Home, de cima para baixo
+
+| # | Seção | Arquivo | Por que existe |
+|---|---|---|---|
+| 1 | Hero | `hero.liquid` | Marca + promessa + 2 ações |
+| 2 | Categorias | `categorias.liquid` | Atalho para quem já sabe o que quer (Anéis, Brincos, Colares) |
+| 3 | Catálogo | `catalogo.liquid` | Os mais desejados, com compra rápida |
+| 4 | Nosso ateliê | `imagem-texto.liquid` | História e números: justifica o preço |
+| 5 | Por que Orvalho | `diferenciais.liquid` | Confiança: material, garantia, troca |
+| 6 | Presentes | `imagem-texto.liquid` (fundo verde) | Campanha / ocasião de compra |
+| 7 | Depoimentos | `depoimentos.liquid` | Prova social |
+| 8 | Perguntas frequentes | `perguntas-frequentes.liquid` | Tira a dúvida que trava a compra |
+
+O ritmo de fundos (creme → bege → verde → creme) divide a página em "capítulos" sem precisar de linhas.
+Todas as seções novas compartilham as classes de `assets/base.css`: `.secao`, `.secao--contraste`,
+`.secao--acento`, `.secao-topo`, `.secao-sobrelinha`, `.secao-titulo`, `.acordeao`, `.seta-botao`.
+
+### 14.2 Feito para a loja mudar (adicionar e remover produtos)
+
+Nada no tema guarda produto "fixo". Tudo aponta para **coleções**, e a coleção decide o que aparece:
+
+- **Catálogo** (abas) e **Categorias** apontam para os handles `aneis`, `brincos`, `colares`.
+  Coleção vazia ou inexistente → cards placeholder / "Em breve". Coleção com produtos → foto e
+  contagem aparecem sozinhas (foto: imagem escolhida no bloco → imagem da coleção → foto do
+  primeiro produto → placeholder; ver `snippets/card-colecao.liquid`).
+- **Página de coleção** sem produtos mostra "Peças a caminho" (diferente de "filtro sem resultado").
+- **/collections** lista todas as coleções publicadas, menos a técnica `frontpage` ("Home page").
+  Modo "Só as escolhidas" no editor para controlar ordem e quais aparecem.
+- Remover um produto (arquivar ou excluir) tira ele de todas as seções no próximo carregamento —
+  não há cache no tema.
+
+**Criar as coleções (admin → Produtos → Coleções → Criar coleção):**
+
+| Coleção | Handle (em "Mecanismo de pesquisa") | Tipo | Condição |
+|---|---|---|---|
+| Anéis | `aneis` | Automatizada | Tipo do produto é igual a `Anel` |
+| Brincos | `brincos` | Automatizada | Tipo do produto é igual a `Brinco` |
+| Colares | `colares` | Automatizada | Tipo do produto é igual a `Colar` |
+| Presentes | `presentes` | Manual ou por tag `presente` | Usada pelo botão "Ver presentes" da home |
+
+Coleção **automatizada** = você cadastra o produto com o Tipo certo e ele entra sozinho na coleção
+(e na aba/categoria da home). Manual = você escolhe produto a produto.
+Para campanhas (Dia das Mães, Noivas), crie a coleção e, no painel dela, em **Modelo de tema**,
+escolha `campanha` → banner com imagem, grade, bloco editorial e benefícios.
+
+### 14.3 Páginas institucionais (admin → Loja virtual → Páginas)
+
+O tema traz o **modelo**; a página precisa existir no admin. Crie cada uma, escolha o modelo
+no painel da direita e confira o handle:
+
+| Página | Handle | Modelo | Conteúdo |
+|---|---|---|---|
+| Sobre | `sobre` | `page.sobre` | Texto de abertura no editor da página; o resto vem das seções |
+| Perguntas frequentes | `faq` | `page.faq` | Três grupos de perguntas, editáveis no editor de temas |
+| Guia de tamanhos | `guia-de-tamanhos` | `page.guia-de-tamanhos` | Calculadora + tabela + dúvidas |
+| Cuidados com as joias | `cuidados` | `page.cuidados` | Dicas em colunas + dúvidas |
+
+Depois adicione-as ao menu do rodapé (*Navegação → Footer menu*). Os links da home já apontam para
+`/pages/sobre` e `/pages/guia-de-tamanhos`.
+Trocas, privacidade e termos são **políticas** (*Configurações → Políticas*): o Shopify gera as
+páginas `/policies/...` sozinho.
+
+> Dica para testar um modelo antes de criar a página: `/pages/contact?view=sobre` renderiza a página
+> de contato com o modelo `page.sobre`. Funciona para qualquer recurso (`/collections/all?view=campanha`).
+
+### 14.4 Página de produto — blocos novos
+
+| Bloco | O que faz |
+|---|---|
+| Guia de tamanhos | Link "Guia de tamanhos" que abre um pop-up lateral com a calculadora. Só aparece em produtos com opção chamada `Aro`, `Tamanho` ou `Size` (configurável). Sem JS, leva à página do guia. |
+| Benefícios | Três selos curtos abaixo do botão (frete, troca, garantia) |
+| Informação (acordeão) | Título + texto, **ou** o texto de uma página (ex.: reaproveitar a página de trocas). Vários seguidos formam uma lista única com a Descrição |
+
+O pop-up fica **fora** do `{% form 'product' %}`: se ficasse dentro, os campos da calculadora seriam
+enviados junto com o "Adicionar à sacola".
+Para anéis com tamanho, crie no produto a opção **Aro** com os valores (12, 14, 16…).
+
+### 14.5 Guia de tamanhos — a conta
+
+Aro brasileiro = circunferência interna (mm) − 40. Diâmetro = circunferência ÷ π.
+Entre dois aros, a calculadora arredonda **para cima** (anel folgado entra; apertado não).
+O campo é `type="text" inputmode="decimal"` e não `type="number"`: no Brasil se digita vírgula
+("16,5") e alguns navegadores recusam vírgula em campo numérico. O teste na loja real pegou isso.
+
+### 14.6 WhatsApp
+
+*Editor de temas → Configurações do tema → WhatsApp*: número com DDI e DDD (ex.: `5511999999999`).
+Vazio = botão escondido. Na página de produto a mensagem já cita a peça e o link. Não aparece no
+carrinho (lá a ação principal é finalizar).
+
+### 14.7 Depoimentos de verdade
+
+Os depoimentos da home são blocos editados à mão: bons para começar. Com volume de vendas, o padrão
+é um app de avaliações (Judge.me, Yotpo…) que pede a nota por e-mail depois da entrega e injeta um
+bloco de app na página de produto — `main-product` já aceita blocos `@app`.
+
+### 14.8 Imagens novas
+
+`assets/atelie-orvalho-{800,1400}.jpg` (mãos de artesã com ferramentas) e
+`assets/presentes-orvalho-{800,1400}.jpg` (brincos dourados), do banco gratuito Magnific/Freepik,
+redimensionadas com ffmpeg e sem metadados. Mesma observação de licença da imagem do hero (12.8):
+o plano gratuito pede atribuição ao autor; para uso comercial real, troque por fotos próprias pelo
+seletor de imagem da seção.

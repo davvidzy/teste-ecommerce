@@ -41,7 +41,8 @@
             </span>
             <span>
               {{- 'sections.depoimentos.rating' | t: nota: section.settings.nota -}}
-              {%- if section.settings.total != blank %} · {{ 'sections.depoimentos.reviews' | t: count: section.settings.total }}{% endif -%}
+              {%- comment -%} total é texto (não número) para aceitar "1.280" com ponto de milhar {%- endcomment -%}
+              {%- if section.settings.total != blank %} · {{ 'sections.depoimentos.reviews_total' | t: total: section.settings.total }}{% endif -%}
             </span>
           </p>
         {%- endif -%}
@@ -56,11 +57,16 @@
       {%- for block in section.blocks -%}
         <li class="depoimentos__item" data-reveal style="--reveal-index: {{ forloop.index0 | at_most: 3 }};" {{ block.shopify_attributes }}>
           <figure class="depoimento">
-            <p class="depoimentos__estrelas" role="img" aria-label="{{ 'sections.depoimentos.stars' | t: count: block.settings.estrelas }}">
-              {%- for i in (1..5) -%}
-                <span class="depoimentos__estrela{% if i > block.settings.estrelas %} is-vazia{% endif %}">{% render 'icon', name: 'estrela' %}</span>
-              {%- endfor -%}
-            </p>
+            <div class="depoimento__topo">
+              <p class="depoimentos__estrelas" role="img" aria-label="{{ 'sections.depoimentos.stars' | t: count: block.settings.estrelas }}">
+                {%- for i in (1..5) -%}
+                  <span class="depoimentos__estrela{% if i > block.settings.estrelas %} is-vazia{% endif %}">{% render 'icon', name: 'estrela' %}</span>
+                {%- endfor -%}
+              </p>
+              {%- if block.settings.verificado -%}
+                <span class="depoimento__verificado">{% render 'icon', name: 'check' %}{{ 'sections.depoimentos.verified' | t }}</span>
+              {%- endif -%}
+            </div>
             <blockquote class="depoimento__texto">{{ block.settings.texto }}</blockquote>
             <figcaption class="depoimento__autor">
               <span class="depoimento__inicial" aria-hidden="true">{{ block.settings.nome | slice: 0 }}</span>
@@ -70,9 +76,6 @@
                   <span class="depoimento__detalhe">{{ block.settings.detalhe | escape }}</span>
                 {%- endif -%}
               </span>
-              {%- if block.settings.verificado -%}
-                <span class="depoimento__verificado">{% render 'icon', name: 'check' %}{{ 'sections.depoimentos.verified' | t }}</span>
-              {%- endif -%}
             </figcaption>
           </figure>
         </li>
@@ -146,7 +149,8 @@
   }
   .secao--acento .depoimento__inicial { background: var(--color-accent-text); color: var(--color-accent); }
   .depoimento__detalhe { display: block; opacity: 0.65; }
-  .depoimento__verificado { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; font-size: 0.75rem; opacity: 0.65; white-space: nowrap; }
+  .depoimento__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .depoimento__verificado { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; opacity: 0.65; white-space: nowrap; }
   .depoimento__verificado svg { width: 14px; height: 14px; }
 
   @media screen and (max-width: 1000px) {
@@ -164,7 +168,7 @@
     { "type": "text", "id": "sobrelinha", "label": "Sobrelinha", "default": "Quem usa" },
     { "type": "text", "id": "titulo", "label": "Título", "default": "Histórias que brilham" },
     { "type": "text", "id": "nota", "label": "Nota média", "default": "4,9", "info": "Vazio = esconde a linha de nota." },
-    { "type": "number", "id": "total", "label": "Total de avaliações", "default": 1280 },
+    { "type": "text", "id": "total", "label": "Total de avaliações", "default": "1.280", "info": "Texto livre, ex.: 1.280" },
     {
       "type": "select",
       "id": "fundo",

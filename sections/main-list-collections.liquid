@@ -9,7 +9,8 @@
 
   QUAIS COLEÇÕES APARECEM:
   - "Todas" (padrão): todas as coleções publicadas, em ordem
-    alfabética (é o que o objeto collections do Shopify devolve).
+    alfabética (é o que o objeto collections do Shopify devolve),
+    menos a "frontpage" (coleção técnica "Home page" do Shopify).
   - "Escolhidas": só as marcadas no editor, na ordem escolhida —
     útil para esconder coleções técnicas (ex.: "Página inicial").
   Coleções sem produtos continuam aparecendo com "Em breve" se você
@@ -46,6 +47,8 @@
       {%- else -%}
         <ul class="lista-colecoes__grade" role="list">
           {%- for colecao in collections -%}
+            {%- comment -%} "frontpage" é a coleção técnica que o Shopify cria sozinho ("Home page"): não é vitrine {%- endcomment -%}
+            {%- if colecao.handle == 'frontpage' -%}{%- continue -%}{%- endif -%}
             <li data-reveal style="--reveal-index: {{ forloop.index0 | modulo: section.settings.colunas }};">
               {% render 'card-colecao', colecao: colecao, indice: forloop.index0, tamanhos: '(min-width: 1000px) 33vw, 50vw' %}
             </li>
