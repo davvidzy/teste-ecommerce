@@ -818,3 +818,29 @@ bloco de app na página de produto — `main-product` já aceita blocos `@app`.
 redimensionadas com ffmpeg e sem metadados. Mesma observação de licença da imagem do hero (12.8):
 o plano gratuito pede atribuição ao autor; para uso comercial real, troque por fotos próprias pelo
 seletor de imagem da seção.
+
+### 14.10 Escala de espaço (respiro e hierarquia)
+
+Todos os espaços saem de 5 tokens em `snippets/css-variables.liquid`. Mude ali e o site inteiro acompanha:
+
+| Token | Celular → Desktop | Onde |
+|---|---|---|
+| `--gutter` | 24px → 56px | Margem lateral de tudo (`.page-width`, trilhos que "vazam" até a borda) |
+| `--espaco-secao` | 72px → 112px | Respiro entre seções. O teto é a setting *Layout → Espaçamento entre seções* |
+| `--espaco-titulo` | 32px → 56px | Do cabeçalho da seção (sobrelinha + título) até o conteúdo |
+| `--grade-gap-y` | 44px → 64px | Entre linhas de cards (catálogo, coleção, relacionados, lista de coleções) |
+| `--grade-gap-x` | 16px → 28px | Entre colunas de cards |
+
+A regra de hierarquia: **cada nível é visivelmente maior que o de baixo** (seção > título→conteúdo >
+linhas > colunas). Assim o olho agrupa o que pertence junto sem precisar de linhas divisórias.
+
+Hero: título curto ("Nascidas da natureza") e maior no celular (40–52px), sempre em 2 linhas de
+320px a 430px; 1 linha no tablet e no desktop. Os selos ficaram só frete e garantia.
+
+### 14.11 Carrosséis: só arraste lateral
+
+`overflow-x: auto` faz o navegador computar `overflow-y: auto` também (regra do CSS). Se sobrar
+qualquer pixel na vertical, o trilho passa a rolar na vertical e "rouba" o dedo no celular e a roda
+do mouse no desktop. Todos os trilhos têm `overflow-y: hidden` + `overscroll-behavior-x: contain`,
+e o reveal fica no trilho inteiro (cards fora da tela nunca "entram na tela" para o observador e
+ficariam deslocados, criando a sobra).
