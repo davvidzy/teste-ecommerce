@@ -232,10 +232,12 @@
   .hero__selo svg { flex-shrink: 0; width: 20px; height: 20px; }
 
   @media screen and (max-width: 1000px) {
-    .hero__titulo { font-size: clamp(2.25rem, 9vw, 3rem); }
-    .hero__texto { font-size: 1rem; }
-    .hero__botoes { flex-direction: column; align-items: stretch; }
-    .hero__selos { flex-direction: column; align-items: center; gap: 8px; padding-top: 14px; padding-bottom: 14px; }
+    /* Título maior no celular = hierarquia clara (título ≫ texto ≫ botões). O texto do
+       título foi pensado para caber em 2 linhas até em telas de 320px. */
+    .hero__titulo { font-size: clamp(2.5rem, 11vw, 3.25rem); margin-bottom: 20px; }
+    .hero__texto { font-size: 1rem; margin-bottom: 36px; }
+    .hero__botoes { flex-direction: column; align-items: stretch; gap: 12px; }
+    .hero__selos { flex-direction: column; align-items: center; gap: 10px; padding-top: 18px; padding-bottom: 18px; }
     .hero__selo { font-size: 0.8125rem; }
     /* No celular o texto ocupa mais área da foto: escurece um pouco mais */
     .hero--texto-claro::before { background: rgb(18 22 20 / calc(var(--overlay) + 0.1)); }

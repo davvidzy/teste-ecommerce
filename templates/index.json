@@ -6,7 +6,7 @@
         "titulo": {
           "type": "titulo",
           "settings": {
-            "titulo": "Joias que nascem da natureza"
+            "titulo": "Nascidas da natureza"
           }
         },
         "texto": {
@@ -37,13 +37,6 @@
             "icone": "escudo",
             "texto": "Certificado e garantia vitalícia"
           }
-        },
-        "selo_arvore": {
-          "type": "selo",
-          "settings": {
-            "icone": "folha",
-            "texto": "Uma árvore plantada a cada pedido"
-          }
         }
       },
       "block_order": [
@@ -51,8 +44,7 @@
         "texto",
         "botoes",
         "selo_entrega",
-        "selo_garantia",
-        "selo_arvore"
+        "selo_garantia"
       ],
       "settings": {
         "imagem_exemplo": true,

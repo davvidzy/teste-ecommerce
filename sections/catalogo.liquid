@@ -114,8 +114,8 @@
   .catalogo { display: block; padding-top: var(--espaco-secao); padding-bottom: var(--espaco-secao); }
 
   /* ---------- Topo: título + abas ---------- */
-  .catalogo__topo { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 24px 48px; margin-bottom: 40px; }
-  .catalogo__sobrelinha { font-size: var(--f1); letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.65; margin-bottom: 12px; }
+  .catalogo__topo { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 24px 48px; margin-bottom: var(--espaco-titulo); }
+  .catalogo__sobrelinha { font-size: var(--f1); letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.65; margin-bottom: 16px; }
   .catalogo__titulo { font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.08; letter-spacing: -0.015em; }
 
   .catalogo__abas {
@@ -163,7 +163,7 @@
   .catalogo__grade {
     display: grid;
     grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
-    gap: 44px clamp(16px, 2vw, 28px);
+    gap: var(--grade-gap-y) var(--grade-gap-x);
     list-style: none;
   }
   .catalogo__rodape { display: flex; justify-content: center; margin-top: 56px; }
@@ -171,9 +171,8 @@
   /* Card: estilos em assets/card-catalogo.css (compartilhado com Produtos relacionados) */
 
   @media screen and (max-width: 1000px) {
-    .catalogo__topo { margin-bottom: 28px; }
     .catalogo__abas { width: 100%; gap: 22px; }
-    .catalogo__grade { grid-template-columns: repeat(var(--colunas-mobile), minmax(0, 1fr)); gap: 32px 12px; }
+    .catalogo__grade { grid-template-columns: repeat(var(--colunas-mobile), minmax(0, 1fr)); }
   }
 </style>
 

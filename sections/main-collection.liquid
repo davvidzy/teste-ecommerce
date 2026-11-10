@@ -394,7 +394,7 @@
   .colecao__grade {
     display: grid;
     grid-template-columns: repeat(var(--colunas, 3), minmax(0, 1fr));
-    gap: 44px clamp(16px, 2vw, 28px);
+    gap: var(--grade-gap-y) var(--grade-gap-x);
     list-style: none;
   }
   .colecao__vazio { display: grid; justify-items: center; gap: 12px; padding: 80px 0; text-align: center; }
@@ -529,7 +529,7 @@
   @keyframes colecao-chip { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
 
   @media screen and (max-width: 1000px) {
-    .colecao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 12px; }
+    .colecao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--grade-gap-y) var(--grade-gap-x); }
     .colecao__ordenar-rotulo { display: none; }
     .colecao__barra { min-height: 56px; }
     .colecao__barra-esq { gap: 12px; }

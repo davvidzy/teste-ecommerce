@@ -309,11 +309,11 @@ textarea.field__input {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 20px 48px;
-  margin-bottom: clamp(28px, 4vw, 44px);
+  margin-bottom: var(--espaco-titulo);
 }
 .secao-topo--centro { flex-direction: column; align-items: center; text-align: center; }
 .secao-sobrelinha {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   font-size: var(--f1);
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -325,7 +325,7 @@ textarea.field__input {
   line-height: 1.08;
   letter-spacing: -0.015em;
 }
-.secao-descricao { max-width: 52ch; margin: 14px 0 0; opacity: 0.8; line-height: 1.6; }
+.secao-descricao { max-width: 52ch; margin: 18px 0 0; opacity: 0.8; line-height: 1.6; }
 .secao-topo--centro .secao-descricao { margin-inline: auto; }
 
 /* ---------- Acordeão (FAQ e informações da página de produto) ----------

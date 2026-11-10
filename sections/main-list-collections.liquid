@@ -66,7 +66,7 @@
   .lista-colecoes__grade {
     display: grid;
     grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
-    gap: 44px clamp(16px, 2vw, 28px);
+    gap: var(--grade-gap-y) var(--grade-gap-x);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -75,7 +75,7 @@
   .lista-colecoes .pagination { margin-top: 48px; }
 
   @media screen and (max-width: 1000px) {
-    .lista-colecoes__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 12px; }
+    .lista-colecoes__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--grade-gap-y) var(--grade-gap-x); }
     .lista-colecoes .card-colecao__legenda { flex-direction: column; gap: 4px; padding-top: 12px; }
   }
 </style>

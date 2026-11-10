@@ -51,11 +51,11 @@
     .related-products__grade {
       display: grid;
       grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
-      gap: 44px clamp(16px, 2vw, 28px);
+      gap: var(--grade-gap-y) var(--grade-gap-x);
       list-style: none;
     }
     @media screen and (max-width: 1000px) {
-      .related-products__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 12px; }
+      .related-products__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--grade-gap-y) var(--grade-gap-x); }
     }
   </style>
 
