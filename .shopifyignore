@@ -1,0 +1,4 @@
+# Arquivos que o Shopify CLI NÃO envia para a loja (theme push / theme dev).
+# Documentação e dados de exemplo ficam só no repositório.
+docs/*
+README.md

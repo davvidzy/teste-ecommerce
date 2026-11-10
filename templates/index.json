@@ -1,19 +1,44 @@
 {
   "sections": {
     "hero": {
-      "type": "image-banner",
+      "type": "hero",
       "blocks": {
-        "heading": { "type": "heading", "settings": { "heading": "Welcome to your store" } },
-        "text": { "type": "text", "settings": { "text": "<p>Add your headline and shop link here.</p>" } },
-        "button": { "type": "button", "settings": { "button_label": "Shop now" } }
+        "sobrelinha": { "type": "sobrelinha", "settings": { "texto": "Coleção Orvalho · Primavera" } },
+        "titulo": { "type": "titulo", "settings": { "titulo": "Joias que nascem da natureza" } },
+        "texto": { "type": "texto", "settings": { "texto": "<p>Diamantes cultivados em laboratório, ouro 18k reciclado e formas inspiradas no que floresce. Feitas para durar gerações.</p>" } },
+        "botoes": { "type": "botoes", "settings": { "rotulo_1": "Ver catálogo", "link_1": "", "rotulo_2": "Nossas coleções", "link_2": "" } },
+        "selo_entrega": { "type": "selo", "settings": { "icone": "entrega", "texto": "Frete grátis e seguro para todo o Brasil" } },
+        "selo_garantia": { "type": "selo", "settings": { "icone": "escudo", "texto": "Certificado e garantia vitalícia" } },
+        "selo_arvore": { "type": "selo", "settings": { "icone": "folha", "texto": "Uma árvore plantada a cada pedido" } }
       },
-      "block_order": ["heading", "text", "button"],
-      "settings": { "height": "medium", "text_alignment": "center" }
+      "block_order": ["sobrelinha", "titulo", "texto", "botoes", "selo_entrega", "selo_garantia", "selo_arvore"],
+      "settings": {
+        "altura": "tela",
+        "alinhamento": "esquerda",
+        "sobreposicao": 45,
+        "texto_claro": true,
+        "parallax": true
+      }
     },
-    "featured": {
-      "type": "featured-collection",
-      "settings": { "heading": "Featured collection", "products_to_show": 4, "columns_desktop": 4 }
+    "catalogo": {
+      "type": "catalogo",
+      "blocks": {
+        "aba_todas": { "type": "aba", "settings": { "colecao": "", "rotulo": "Todas" } },
+        "aba_aneis": { "type": "aba", "settings": { "colecao": "aneis", "rotulo": "Anéis" } },
+        "aba_brincos": { "type": "aba", "settings": { "colecao": "brincos", "rotulo": "Brincos" } },
+        "aba_colares": { "type": "aba", "settings": { "colecao": "colares", "rotulo": "Colares" } }
+      },
+      "block_order": ["aba_todas", "aba_aneis", "aba_brincos", "aba_colares"],
+      "settings": {
+        "sobrelinha": "Curadoria",
+        "titulo": "As mais desejadas",
+        "produtos_por_aba": 8,
+        "colunas": 4,
+        "colunas_mobile": "2",
+        "opcoes_swatch": "metal, cor, color",
+        "mapa_cores": "Ouro amarelo: #E3C77A\nOuro branco: #E4E4E0\nOuro rosé: #E8B4A0\nPrata: #C8CBCF"
+      }
     }
   },
-  "order": ["hero", "featured"]
+  "order": ["hero", "catalogo"]
 }

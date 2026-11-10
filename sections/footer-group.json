@@ -2,9 +2,31 @@
   "type": "footer",
   "name": "t:section_groups.footer.name",
   "sections": {
-    "footer": {
-      "type": "footer"
+    "rodape": {
+      "type": "rodape",
+      "blocks": {
+        "menu_loja": { "type": "menu", "settings": { "titulo": "Loja", "menu": "main-menu" } },
+        "menu_ajuda": { "type": "menu", "settings": { "titulo": "Ajuda", "menu": "footer" } },
+        "atendimento": {
+          "type": "texto",
+          "settings": {
+            "titulo": "Atendimento",
+            "texto": "<p>Seg a sex, 9h às 18h<br>contato@orvalho.example<br>Ateliê em São Paulo — visitas com hora marcada</p>"
+          }
+        },
+        "social": { "type": "social", "settings": { "titulo": "Siga", "texto": "Bastidores do ateliê todo dia." } }
+      },
+      "block_order": ["menu_loja", "menu_ajuda", "atendimento", "social"],
+      "settings": {
+        "esquema": "escuro",
+        "mostrar_newsletter": true,
+        "titulo_newsletter": "Receba as novidades primeiro",
+        "texto_newsletter": "Lançamentos, bastidores do ateliê e convites para eventos. Sem spam.",
+        "marca": "Orvalho",
+        "mostrar_pagamentos": true,
+        "mostrar_localizacao": false
+      }
     }
   },
-  "order": ["footer"]
+  "order": ["rodape"]
 }

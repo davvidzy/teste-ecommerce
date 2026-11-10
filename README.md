@@ -26,6 +26,12 @@ Blocks · CSS · Vanilla JavaScript · i18n · SEO · Acessibilidade (WCAG).
 > Feita pela [Team Lecdt](https://lecdt.com). Use como ponto de partida para
 > qualquer nicho de loja (moda, eletrônicos, cosméticos, digital, etc.).
 
+> 🌿 **Projeto de estudo "Orvalho":** esta cópia da base traz uma loja fictícia
+> de joias com **hero animado**, **catálogo com abas, swatches e compra rápida**
+> e **rodapé animado** na home. Guia completo, passo a passo e roteiro de testes
+> em [`docs/LOJA-ORVALHO.md`](docs/LOJA-ORVALHO.md). Produtos de exemplo para
+> importar em [`docs/produtos-orvalho.csv`](docs/produtos-orvalho.csv).
+
 ## Recursos
 
 - 🛍️ **Página de produto nativa** — galeria de mídia, seletor de variantes,
@@ -128,7 +134,10 @@ cabeçalho/rodapé (permitem reordenar no editor).
 |---|---|
 | `header-group.json` / `footer-group.json` | Agrupadores de cabeçalho e rodapé |
 | `nav.liquid` | Cabeçalho: logo, menu multinível, busca, carrinho, seletor de país/idioma |
-| `footer.liquid` | Rodapé: blocos (marca, menu, texto, newsletter), redes, ícones de pagamento |
+| `footer.liquid` | Rodapé original da base: blocos (marca, menu, texto, newsletter), redes, ícones de pagamento |
+| `rodape.liquid` | **Orvalho** — rodapé em uso: newsletter com rótulo flutuante, colunas, assinatura gigante animada |
+| `hero.liquid` | **Orvalho** — hero da home: título palavra-a-palavra, ken burns, parallax, selos de confiança |
+| `catalogo.liquid` | **Orvalho** — catálogo com abas (uma coleção por aba), swatches e compra rápida |
 | `main-product.liquid` | Página de produto: galeria, variantes, add-to-cart nativo, blocos |
 | `main-cart.liquid` | Carrinho: itens, quantidade, notas, checkout |
 | `main-collection.liquid` | Grade de produtos: ordenação, filtros, paginação |
@@ -157,6 +166,8 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 | `structured-data-website.liquid` | JSON-LD do site/organização |
 | `price.liquid` | Renderiza preço (com preço "de/por" quando em promoção) |
 | `card-product.liquid` | Card de produto reutilizável (grades) |
+| `card-catalogo.liquid` | **Orvalho** — card com swatches, badges (desconto/novo/esgotado) e compra rápida |
+| `catalogo-painel.liquid` | **Orvalho** — grade de uma aba do catálogo + link "Ver todas" |
 | `icon.liquid` | Ícones SVG inline (busca, carrinho, conta, redes…) |
 | `pagination.liquid` | Paginação acessível |
 | `localization-form.liquid` | Seletores nativos de país/moeda e idioma |
@@ -174,7 +185,9 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 | `normalizar.css` | Reset/normalização de estilos do navegador |
 | `base.css` | Estilos base compartilhados (grid, botões, inputs, acessibilidade) |
 | `fontes.css` | Placeholder para fontes próprias (por padrão usa fontes do Shopify) |
-| `carrinho.js` | Add-to-cart via AJAX + atualização do contador (com fallback nativo) |
+| `carrinho.js` | Add-to-cart via AJAX + contador animado + eventos `carrinho:adicionando/adicionado/erro` (com fallback nativo) |
+| `movimento.css` / `movimento.js` | Tokens de animação, revelar ao rolar (`[data-reveal]`), parallax, voltar ao topo |
+| `catalogo.js` | Web Component `<catalogo-abas>`: abas acessíveis, swatches, estados do botão de compra |
 | `site.webmanifest` | Manifesto PWA |
 
 ### `config/`
@@ -187,6 +200,7 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 | Arquivo | Função |
 |---|---|
 | `en.default.json` | Textos traduzíveis exibidos na loja (idioma padrão: inglês) |
+| `pt-BR.json` | Tradução completa da loja para português (usada quando o idioma da loja é PT-BR) |
 | `en.default.schema.json` | Rótulos traduzíveis do editor de tema |
 
 ---

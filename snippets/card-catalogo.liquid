@@ -1,0 +1,268 @@
+{%- comment -%}
+  ============================================================
+  card-catalogo — card de produto com swatches e compra rápida
+  ============================================================
+
+  O QUE FAZ:
+  Card usado pela seção "Catálogo" (sections/catalogo.liquid):
+  - Imagem principal + segunda imagem no hover (crossfade + zoom leve).
+  - Badges: desconto (-X%), "Novo" (tag "novo") e "Esgotado".
+  - Linha de ficha técnica (metafield custom.ficha, senão o tipo).
+  - Swatches de cor/metal: trocar o swatch troca imagem, preço,
+    desconto e a variante que vai para o carrinho — sem recarregar.
+  - Compra rápida: formulário nativo {% form 'product' %} que o
+    assets/carrinho.js intercepta e envia via AJAX.
+
+  COMO USAR:
+  {% render 'card-catalogo', produto: product, secao: section, indice: forloop.index0 %}
+  {% render 'card-catalogo', produto: nil, indice: 2 %}  → card placeholder
+
+  PARÂMETROS:
+  - produto: objeto product (ou nil para placeholder).
+  - secao:   a section pai — lê dela opcoes_swatch e mapa_cores.
+  - indice:  posição na grade (usado só no placeholder).
+
+  QUANDO A COMPRA RÁPIDA APARECE?
+  Só quando um clique basta para escolher a variante certa:
+  produto sem variantes OU com uma única opção (ex: só "Metal").
+  Com mais de uma opção (Metal + Tamanho), o botão vira "Escolher
+  opções" e leva à página do produto — evita adicionar o tamanho
+  errado sem a pessoa perceber.
+
+  DE ONDE VEM A COR DO SWATCH (em ordem):
+  1. Swatch nativo do Shopify (valor.swatch.color — definido no
+     admin quando a opção está ligada a um metafield de categoria).
+  2. Mapa "nome: #hex" da setting mapa_cores da seção.
+  3. Cinza neutro.
+
+  DADOS PARA O JS:
+  Cada swatch carrega em data-* tudo o que o card precisa mostrar
+  para aquela variante (id, preço formatado, imagem, disponibilidade).
+  Assim o JS não formata dinheiro nem chama API — só troca textos.
+{%- endcomment -%}
+{%- if produto == blank -%}
+  {%- liquid
+    # O Shopify tem 6 ilustrações de produto: product-1 … product-6
+    assign numero_placeholder = indice | modulo: 6 | plus: 1
+    assign nome_placeholder = 'product-' | append: numero_placeholder
+  -%}
+  <article class="card-cat card-cat--placeholder">
+    <div class="card-cat__media" style="--ratio: 0.75;">
+      {{ nome_placeholder | placeholder_svg_tag: 'card-cat__imagem card-cat__imagem--principal placeholder-svg' }}
+    </div>
+    <div class="card-cat__info">
+      <h3 class="card-cat__titulo">{{ 'onboarding.product_title' | t }}</h3>
+      <p class="card-cat__ficha">0,5 ct · Ouro 18k</p>
+      <p class="card-cat__preco"><span>{{ 199900 | money }}</span></p>
+    </div>
+  </article>
+{%- else -%}
+  {%- liquid
+    assign variante = produto.selected_or_first_available_variant
+
+    # ---- Proporção da imagem (mesma setting global do card-product) ----
+    assign ratio = 0.75
+    case settings.card_image_ratio
+      when 'square'
+        assign ratio = 1
+      when 'adapt'
+        if produto.featured_media
+          assign ratio = produto.featured_media.aspect_ratio
+        endif
+    endcase
+
+    # ---- Qual opção vira swatch? (ex: "metal,cor,color") ----
+    assign nomes_swatch = secao.settings.opcoes_swatch | downcase | replace: ', ', ',' | split: ','
+    assign opcao_swatch = nil
+    for opcao in produto.options_with_values
+      assign nome_opcao = opcao.name | downcase | strip
+      if nomes_swatch contains nome_opcao
+        assign opcao_swatch = opcao
+        break
+      endif
+    endfor
+    assign linhas_mapa = secao.settings.mapa_cores | newline_to_br | split: '<br />'
+
+    # ---- Compra rápida só quando 1 clique define a variante ----
+    assign compra_rapida = false
+    if produto.has_only_default_variant or produto.options.size == 1
+      assign compra_rapida = true
+    endif
+
+    # ---- Preço inicial ----
+    assign mostrar_a_partir = false
+    if opcao_swatch == nil and produto.price_varies
+      assign mostrar_a_partir = true
+    endif
+    assign desconto = 0
+    if variante.compare_at_price > variante.price
+      assign desconto = variante.compare_at_price | minus: variante.price | times: 100 | divided_by: variante.compare_at_price
+    endif
+
+    assign ficha = produto.metafields.custom.ficha.value | default: produto.type
+    assign tamanho_imagem = '(min-width: 1000px) calc((100vw - 120px) / 4), 50vw'
+  -%}
+  <article class="card-cat{% if variante.available == false %} card-cat--esgotado{% endif %}" data-card style="--card-tint: transparent;">
+    <div class="card-cat__media" style="--ratio: {{ ratio }};">
+      <a href="{{ variante.url | default: produto.url }}" class="card-cat__link-media" data-card-link tabindex="-1" aria-hidden="true">
+        {%- if produto.featured_media -%}
+          {{
+            produto.featured_media
+            | image_url: width: 900
+            | image_tag:
+              loading: 'lazy',
+              class: 'card-cat__imagem card-cat__imagem--principal',
+              widths: '300, 450, 600, 900',
+              sizes: tamanho_imagem,
+              alt: produto.featured_media.alt | default: produto.title | escape
+          }}
+          {%- if settings.card_show_second_image and produto.media[1] -%}
+            {{
+              produto.media[1]
+              | image_url: width: 900
+              | image_tag:
+                loading: 'lazy',
+                class: 'card-cat__imagem card-cat__imagem--secundaria',
+                widths: '300, 450, 600, 900',
+                sizes: tamanho_imagem,
+                alt: ''
+            }}
+          {%- endif -%}
+        {%- else -%}
+          {{ 'product-1' | placeholder_svg_tag: 'card-cat__imagem card-cat__imagem--principal placeholder-svg' }}
+        {%- endif -%}
+      </a>
+
+      <div class="card-cat__badges">
+        <span class="card-cat__badge card-cat__badge--desconto" data-badge-desconto {% if desconto == 0 %}hidden{% endif %}>-{{ desconto }}%</span>
+        <span class="card-cat__badge card-cat__badge--esgotado" data-badge-esgotado {% if variante.available %}hidden{% endif %}>{{ 'products.product.sold_out' | t }}</span>
+        {%- if produto.tags contains 'novo' or produto.tags contains 'new' -%}
+          <span class="card-cat__badge card-cat__badge--novo">{{ 'sections.catalogo.new' | t }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- if compra_rapida -%}
+        {%- form 'product', produto, class: 'card-cat__form', data-type: 'add-to-cart-form' -%}
+          <input type="hidden" name="id" value="{{ variante.id }}" data-card-variante>
+          <input type="hidden" name="quantity" value="1">
+          <button
+            type="submit"
+            name="add"
+            class="card-cat__botao"
+            data-card-botao
+            data-estado="{% if variante.available %}padrao{% else %}esgotado{% endif %}"
+            {% unless variante.available %}disabled{% endunless %}
+          >
+            <span class="card-cat__estado card-cat__estado--padrao">
+              {% render 'icon', name: 'mais' %}
+              <span class="card-cat__rotulo">{{ 'sections.catalogo.add_to_cart' | t }}</span>
+            </span>
+            <span class="card-cat__estado card-cat__estado--carregando" aria-hidden="true">
+              <span class="card-cat__spinner"></span>
+            </span>
+            <span class="card-cat__estado card-cat__estado--sucesso">
+              {% render 'icon', name: 'check' %}
+              <span class="card-cat__rotulo">{{ 'sections.catalogo.added' | t }}</span>
+            </span>
+            <span class="card-cat__estado card-cat__estado--esgotado">
+              <span class="card-cat__rotulo">{{ 'products.product.sold_out' | t }}</span>
+            </span>
+          </button>
+        {%- endform -%}
+      {%- else -%}
+        <a href="{{ variante.url | default: produto.url }}" class="card-cat__botao card-cat__botao--opcoes" data-card-link data-estado="padrao">
+          <span class="card-cat__estado card-cat__estado--padrao">
+            {% render 'icon', name: 'seta' %}
+            <span class="card-cat__rotulo">{{ 'products.product.choose_options' | t }}</span>
+          </span>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="card-cat__info">
+      {%- if opcao_swatch -%}
+        {%- assign chave_opcao = 'option' | append: opcao_swatch.position -%}
+        <div class="card-cat__swatches" role="group" aria-label="{{ opcao_swatch.name | escape }}">
+          {%- for valor in opcao_swatch.values -%}
+            {%- liquid
+              # Variante que corresponde a este valor (ex: "Ouro rosé")
+              assign variante_valor = valor.variant
+              if variante_valor == blank
+                assign variante_valor = produto.variants | where: chave_opcao, valor.name | first
+              endif
+
+              # Cor: swatch nativo → mapa da seção → cinza
+              assign cor = valor.swatch.color
+              if cor == blank
+                assign nome_valor = valor.name | downcase | strip
+                for linha in linhas_mapa
+                  assign partes = linha | split: ':'
+                  assign nome_mapa = partes.first | strip | downcase
+                  if nome_mapa == nome_valor
+                    assign cor = partes.last | strip
+                    break
+                  endif
+                endfor
+              endif
+              if cor == blank
+                assign cor = '#c9c9c9'
+              endif
+
+              assign desconto_valor = ''
+              assign preco_de_valor = ''
+              if variante_valor.compare_at_price > variante_valor.price
+                assign desconto_valor = variante_valor.compare_at_price | minus: variante_valor.price | times: 100 | divided_by: variante_valor.compare_at_price
+                assign preco_de_valor = variante_valor.compare_at_price | money
+              endif
+              assign midia = variante_valor.featured_media
+            -%}
+            {%- if forloop.index <= 5 -%}
+              <button
+                type="button"
+                class="card-cat__swatch"
+                style="--swatch-cor: {{ cor }};"
+                aria-label="{{ valor.name | escape }}"
+                aria-pressed="{% if valor.selected %}true{% else %}false{% endif %}"
+                title="{{ valor.name | escape }}"
+                data-swatch
+                data-cor="{{ cor }}"
+                data-variante-id="{{ variante_valor.id }}"
+                data-disponivel="{{ variante_valor.available }}"
+                data-url="{{ variante_valor.url | default: produto.url }}"
+                data-preco="{{ variante_valor.price | money | escape }}"
+                data-preco-de="{{ preco_de_valor | escape }}"
+                data-desconto="{{ desconto_valor }}"
+                {%- if midia %}
+                  data-imagem="{{ midia | image_url: width: 600 }}"
+                  data-srcset="{{ midia | image_url: width: 300 }} 300w, {{ midia | image_url: width: 450 }} 450w, {{ midia | image_url: width: 600 }} 600w, {{ midia | image_url: width: 900 }} 900w"
+                {%- endif %}
+              ></button>
+            {%- elsif forloop.last -%}
+              <a href="{{ produto.url }}" class="card-cat__swatch-mais">+{{ forloop.length | minus: 5 }}</a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      <h3 class="card-cat__titulo">
+        <a href="{{ variante.url | default: produto.url }}" class="card-cat__titulo-link" data-card-link>{{ produto.title | escape }}</a>
+      </h3>
+      {%- if ficha != blank -%}
+        <p class="card-cat__ficha">{{ ficha | escape }}</p>
+      {%- endif -%}
+
+      <p class="card-cat__preco">
+        {%- if mostrar_a_partir -%}
+          <span>{{ 'products.product.price.from_price_html' | t: price: produto.price_min | money }}</span>
+        {%- else -%}
+          <span class="visually-hidden">{{ 'products.product.price.sale_price' | t }}</span>
+          <span data-preco-atual>{{ variante.price | money }}</span>
+          <span class="visually-hidden">{{ 'products.product.price.regular_price' | t }}</span>
+          <s class="card-cat__preco-de" data-preco-de {% if desconto == 0 %}hidden{% endif %}>
+            {%- if desconto > 0 -%}{{ variante.compare_at_price | money }}{%- endif -%}
+          </s>
+        {%- endif -%}
+      </p>
+    </div>
+  </article>
+{%- endif -%}

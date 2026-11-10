@@ -15,7 +15,9 @@
   - Open Graph / JSON-LD e demais tags via {% render 'meta-tags' %}.
   - CSS: index.css (ponto de entrada) + css-variables (variaveis
     do tema geradas pelas settings).
-  - Scripts: troca no-js -> js e carrega carrinho.js (defer).
+  - Scripts: troca no-js -> js, expõe window.themeStrings (textos
+    traduzidos usados pelo JS) e carrega carrinho.js e movimento.js
+    (ambos com defer: baixam em paralelo e rodam após o HTML).
   - {{ content_for_header }}: scripts obrigatorios do Shopify.
 
   NO <body> temos:
@@ -55,8 +57,15 @@
     {{ 'index.css' | asset_url | stylesheet_tag }}
     {% render 'css-variables' %}
 
-    <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
+    <script>
+      document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+      window.themeStrings = {
+        addedToCart: {{ 'sections.cart.added_to_cart' | t | json }},
+        cartError: {{ 'sections.cart.cart_error' | t | json }}
+      };
+    </script>
     <script src="{{ 'carrinho.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'movimento.js' | asset_url }}" defer="defer"></script>
 
     {{ content_for_header }}
   </head>

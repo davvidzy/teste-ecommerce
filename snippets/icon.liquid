@@ -14,7 +14,9 @@
   PARÂMETROS:
   - name: nome do ícone. Disponíveis:
     search, account, cart, close, chevron, trash,
-    instagram, facebook, linkedin.
+    instagram, facebook, linkedin,
+    entrega, folha, escudo, presente, diamante (selos de confiança),
+    seta, seta-cima, mais, check (botões e estados).
 
   OBSERVAÇÕES:
   Nome inexistente não renderiza nada (case sem when correspondente).
@@ -39,4 +41,23 @@
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M14 8h2V5h-2c-2 0-3 1.5-3 3.5V11H9v3h2v6h3v-6h2l.5-3H14V8.5c0-.3.2-.5.5-.5Z" fill="currentColor"/></svg>
   {%- when 'linkedin' -%}
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 10v6M7 7v.01M11 16v-3.5a1.5 1.5 0 0 1 3 0V16m-3-3.5V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  {%- comment -%} Ícones adicionados para a loja Orvalho (hero, catálogo e rodapé) {%- endcomment -%}
+  {%- when 'entrega' -%}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.75" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="17.5" r="1.75" stroke="currentColor" stroke-width="1.5"/></svg>
+  {%- when 'folha' -%}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14H5Zm0 0 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  {%- when 'escudo' -%}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 3 5 6v5c0 4.5 3 8.5 7 10 4-1.5 7-5.5 7-10V6l-7-3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  {%- when 'presente' -%}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3-5-1s3 1 5 1Zm0 0c1.5-3 5-3 5-1s-3 1-5 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+  {%- when 'diamante' -%}
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M7 4h10l4 5-9 11L3 9l4-5Zm-4 5h18M9.5 4 8 9l4 11 4-11-1.5-5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+  {%- when 'seta' -%}
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  {%- when 'seta-cima' -%}
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><path d="M10 16V4m-5 5 5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  {%- when 'mais' -%}
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  {%- when 'check' -%}
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false"><path d="m4.5 10.5 3.5 3.5 7.5-8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
 {%- endcase -%}

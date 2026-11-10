@@ -196,7 +196,22 @@
       "subtotal": "Subtotal",
       "new_subtotal": "New subtotal",
       "update": "Update",
-      "remove": "Remove"
+      "remove": "Remove",
+      "added_to_cart": "Added to your bag"
+    },
+    "hero": {
+      "scroll": "Scroll to the next section"
+    },
+    "catalogo": {
+      "all": "All",
+      "add_to_cart": "Add to bag",
+      "added": "Added",
+      "new": "New",
+      "view_all": "View all {{ count }} pieces"
+    },
+    "rodape": {
+      "email_label": "Your email",
+      "back_to_top": "Back to top"
     },
     "footer": {
       "payment": "Payment methods",

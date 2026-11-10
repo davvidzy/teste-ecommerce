@@ -1,0 +1,32 @@
+Handle,Title,Body (HTML),Vendor,Type,Tags,Published,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant SKU,Variant Grams,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Variant Fulfillment Service,Variant Price,Variant Compare At Price,Variant Requires Shipping,Variant Taxable,Image Src,Image Position,Image Alt Text,Status
+anel-orvalho-solitario,Anel Orvalho Solitário,"<p>Um diamante cultivado de 0,5 ct suspenso como uma gota de orvalho. Ouro 18k reciclado.</p>",Orvalho,Anel,"aneis, novo",TRUE,Metal,Ouro amarelo,,,ORV-ANELORVALH-1,8,shopify,10,deny,manual,4890.00,5890.00,TRUE,TRUE,,,,active
+anel-orvalho-solitario,,,,,,,,Ouro branco,,,ORV-ANELORVALH-2,8,shopify,10,deny,manual,4890.00,5890.00,TRUE,TRUE,,,,
+anel-orvalho-solitario,,,,,,,,Ouro rosé,,,ORV-ANELORVALH-3,8,shopify,10,deny,manual,4890.00,5890.00,TRUE,TRUE,,,,
+anel-folha-viva,Anel Folha Viva,"<p>Folha esculpida à mão envolvendo o dedo. Peça leve, para uso diário.</p>",Orvalho,Anel,aneis,TRUE,Metal,Ouro amarelo,,,ORV-ANELFOLHAV-1,8,shopify,10,deny,manual,3290.00,,TRUE,TRUE,,,,active
+anel-folha-viva,,,,,,,,Ouro branco,,,ORV-ANELFOLHAV-2,8,shopify,10,deny,manual,3290.00,,TRUE,TRUE,,,,
+anel-folha-viva,,,,,,,,Ouro rosé,,,ORV-ANELFOLHAV-3,8,shopify,0,deny,manual,3290.00,,TRUE,TRUE,,,,
+anel-raiz-eternity,Anel Raiz Eternity,"<p>Aro completo de diamantes cultivados, como raízes que se entrelaçam.</p>",Orvalho,Anel,aneis,TRUE,Metal,Ouro amarelo,Tamanho,14,ORV-ANELRAIZET-1,8,shopify,10,deny,manual,6990.00,,TRUE,TRUE,,,,active
+anel-raiz-eternity,,,,,,,,Ouro amarelo,,16,ORV-ANELRAIZET-2,8,shopify,10,deny,manual,6990.00,,TRUE,TRUE,,,,
+anel-raiz-eternity,,,,,,,,Ouro amarelo,,18,ORV-ANELRAIZET-3,8,shopify,10,deny,manual,6990.00,,TRUE,TRUE,,,,
+anel-raiz-eternity,,,,,,,,Ouro branco,,14,ORV-ANELRAIZET-4,8,shopify,10,deny,manual,6990.00,,TRUE,TRUE,,,,
+anel-raiz-eternity,,,,,,,,Ouro branco,,16,ORV-ANELRAIZET-5,8,shopify,10,deny,manual,6990.00,,TRUE,TRUE,,,,
+anel-raiz-eternity,,,,,,,,Ouro branco,,18,ORV-ANELRAIZET-6,8,shopify,10,deny,manual,6990.00,,TRUE,TRUE,,,,
+anel-semente,Anel Semente,<p>Aro fino com uma pequena esfera polida. Ouro amarelo 18k.</p>,Orvalho,Anel,aneis,TRUE,Title,Default Title,,,ORV-ANELSEMENT-1,8,shopify,10,deny,manual,1890.00,,TRUE,TRUE,,,,active
+brinco-gota-de-orvalho,Brinco Gota de Orvalho,"<p>Par de brincos com diamantes em lapidação gota de 0,25 ct cada.</p>",Orvalho,Brinco,brincos,TRUE,Metal,Ouro amarelo,,,ORV-BRINCOGOTA-1,8,shopify,10,deny,manual,2490.00,2990.00,TRUE,TRUE,,,,active
+brinco-gota-de-orvalho,,,,,,,,Ouro branco,,,ORV-BRINCOGOTA-2,8,shopify,10,deny,manual,2490.00,2990.00,TRUE,TRUE,,,,
+brinco-gota-de-orvalho,,,,,,,,Ouro rosé,,,ORV-BRINCOGOTA-3,8,shopify,10,deny,manual,2490.00,2990.00,TRUE,TRUE,,,,
+brinco-petala,Brinco Pétala,<p>Pétalas assimétricas que balançam com o movimento.</p>,Orvalho,Brinco,"brincos, novo",TRUE,Metal,Ouro amarelo,,,ORV-BRINCOPETA-1,8,shopify,10,deny,manual,1590.00,,TRUE,TRUE,,,,active
+brinco-petala,,,,,,,,Prata,,,ORV-BRINCOPETA-2,8,shopify,10,deny,manual,890.00,,TRUE,TRUE,,,,
+brinco-argola-ramo,Brinco Argola Ramo,<p>Argola média com textura de galho. Ouro amarelo 18k.</p>,Orvalho,Brinco,brincos,TRUE,Title,Default Title,,,ORV-BRINCOARGO-1,8,shopify,10,deny,manual,1290.00,,TRUE,TRUE,,,,active
+colar-ponto-de-luz,Colar Ponto de Luz,"<p>Um diamante cultivado de 0,3 ct em corrente veneziana de 45 cm.</p>",Orvalho,Colar,colares,TRUE,Metal,Ouro amarelo,,,ORV-COLARPONTO-1,8,shopify,10,deny,manual,2190.00,,TRUE,TRUE,,,,active
+colar-ponto-de-luz,,,,,,,,Ouro branco,,,ORV-COLARPONTO-2,8,shopify,10,deny,manual,2190.00,,TRUE,TRUE,,,,
+colar-ponto-de-luz,,,,,,,,Ouro rosé,,,ORV-COLARPONTO-3,8,shopify,10,deny,manual,2190.00,,TRUE,TRUE,,,,
+colar-galho,Colar Galho,<p>Pingente em forma de galho com três pequenos diamantes.</p>,Orvalho,Colar,colares,TRUE,Metal,Ouro amarelo,Comprimento,40 cm,ORV-COLARGALHO-1,8,shopify,10,deny,manual,2790.00,,TRUE,TRUE,,,,active
+colar-galho,,,,,,,,Ouro amarelo,,45 cm,ORV-COLARGALHO-2,8,shopify,10,deny,manual,2790.00,,TRUE,TRUE,,,,
+colar-galho,,,,,,,,Ouro rosé,,40 cm,ORV-COLARGALHO-3,8,shopify,10,deny,manual,2790.00,,TRUE,TRUE,,,,
+colar-galho,,,,,,,,Ouro rosé,,45 cm,ORV-COLARGALHO-4,8,shopify,10,deny,manual,2790.00,,TRUE,TRUE,,,,
+colar-flor-do-campo,Colar Flor do Campo,<p>Flor com miolo de diamante. Edição limitada.</p>,Orvalho,Colar,colares,TRUE,Title,Default Title,,,ORV-COLARFLORD-1,8,shopify,0,deny,manual,3490.00,,TRUE,TRUE,,,,active
+pulseira-trilha,Pulseira Trilha,<p>Riviera delicada com diamantes cultivados alternados.</p>,Orvalho,Pulseira,pulseiras,TRUE,Metal,Ouro amarelo,,,ORV-PULSEIRATR-1,8,shopify,10,deny,manual,2590.00,,TRUE,TRUE,,,,active
+pulseira-trilha,,,,,,,,Ouro branco,,,ORV-PULSEIRATR-2,8,shopify,10,deny,manual,2590.00,,TRUE,TRUE,,,,
+pulseira-trilha,,,,,,,,Ouro rosé,,,ORV-PULSEIRATR-3,8,shopify,10,deny,manual,2590.00,,TRUE,TRUE,,,,
+pulseira-musgo,Pulseira Musgo,<p>Elos orgânicos em prata 925 com banho de ouro.</p>,Orvalho,Pulseira,pulseiras,TRUE,Title,Default Title,,,ORV-PULSEIRAMU-1,8,shopify,10,deny,manual,990.00,1290.00,TRUE,TRUE,,,,active
