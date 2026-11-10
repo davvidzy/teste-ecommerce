@@ -241,6 +241,10 @@
     /* No celular o texto ocupa mais área da foto: escurece um pouco mais */
     .hero--texto-claro::before { background: rgb(18 22 20 / calc(var(--overlay) + 0.1)); }
   }
+  /* Telas bem estreitas (≤ 359px, ex.: iPhone SE 1ª geração): 1px a menos mantém as 2 linhas */
+  @media screen and (max-width: 359px) {
+    .hero__texto { font-size: 0.9375rem; }
+  }
 </style>
 
 {% schema %}
