@@ -6,13 +6,13 @@
         "titulo": {
           "type": "titulo",
           "settings": {
-            "titulo": "Nascidas da natureza"
+            "titulo": "Joias que nascem da natureza"
           }
         },
         "texto": {
           "type": "texto",
           "settings": {
-            "texto": "<p>Diamantes cultivados em laboratório, ouro 18k reciclado e formas inspiradas no que floresce. Feitas para durar gerações.</p>"
+            "texto": "<p>Ouro 18k reciclado e diamantes cultivados, feitos para durar gerações.</p>"
           }
         },
         "botoes": {

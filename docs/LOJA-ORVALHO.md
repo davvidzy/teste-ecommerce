@@ -834,8 +834,8 @@ Todos os espaços saem de 5 tokens em `snippets/css-variables.liquid`. Mude ali 
 A regra de hierarquia: **cada nível é visivelmente maior que o de baixo** (seção > título→conteúdo >
 linhas > colunas). Assim o olho agrupa o que pertence junto sem precisar de linhas divisórias.
 
-Hero: título curto ("Nascidas da natureza") e maior no celular (40–52px), sempre em 2 linhas de
-320px a 430px; 1 linha no tablet e no desktop. Os selos ficaram só frete e garantia.
+Hero: descrição curta (~70 caracteres: "Ouro 18k reciclado e diamantes cultivados, feitos para durar
+gerações.") para caber em 2 linhas no celular. Os selos ficaram só frete e garantia.
 
 ### 14.11 Carrosséis: só arraste lateral
 
