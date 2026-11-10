@@ -678,6 +678,19 @@ Com prints e cliques automatizados (Playwright + Chrome) na loja publicada:
 | Sublinhado do terciário longe do texto | Posição fixa em `100% - 10px` não acompanhava a altura do botão | Posicionar a partir do centro: `calc(50% + 0.85em)` |
 | `sort_by` padrão sempre na URL | O `<select>` sempre envia o valor | Omitir quando é a ordem padrão da coleção |
 
+### 13.7 Rodada de ajustes de UX (feedback de uso)
+
+| Pedido | O que mudou | Por quê |
+|---|---|---|
+| Animação do hero lenta | Removidas: título palavra a palavra, zoom lento, parallax e indicador de rolagem. O hero aparece pronto | A primeira dobra deve ser lida na hora; animação de entrada atrasa a mensagem principal |
+| Contraste do hero ruim (principalmente no celular) | Conteúdo **centralizado**, imagem escurecida **por igual** (50%) e texto claro. O primário vira botão **branco** sobre a foto | Véus parciais dependem de onde o texto cai na foto; escurecimento uniforme dá contraste previsível em qualquer tela |
+| Selos do hero sem contraste | Faixa translúcida escura com `backdrop-filter: blur` | Legível sobre qualquer parte da imagem |
+| "Coleção Orvalho · Primavera" | Bloco removido do `index.json` (o bloco "Sobrelinha" continua disponível no editor) | — |
+| Barra de anúncio fixa | Barra **e** header com `sticky`; o header gruda em `top: var(--barra-altura)` e `--header-altura` passa a ser a área fixa total. No celular, a barra fica em 1 linha (reticências) | Uma barra fixa de 2 linhas roubaria muito espaço da tela |
+| Carrinho no celular desproporcional | Cada item vira um grid de 2 andares: foto · nome · total / quantidade compacta · remover. Resumo em cartão | A tabela de 4 colunas espremia o nome entre quantidade e preço |
+| Bug no carrinho | A coluna "Total" mostrava o **preço unitário**; agora mostra o total da linha (unitário embaixo quando qtd > 1) | — |
+| Alerta "Ver sacola" entrando duro | Curva de entrada `cubic-bezier(0.22, 0.61, 0.36, 1)` em 700ms + ícone, texto e botão entrando em sequência | Medido quadro a quadro na loja: a curva antiga fazia **60%** do trajeto em 100ms (tranco); a nova faz **43%** e assenta suave |
+
 Coisas que **não são do tema** e se resolvem no admin:
 - Menu em inglês ("Home / Catalog / Contact", "Search"): *Loja virtual → Navegação* → renomeie os itens.
 - "© My Store": *Configurações → Detalhes da loja* → nome da loja.
