@@ -13,8 +13,8 @@
     meta description, URL canonica.
   - Favicon e apple-touch-icon (config settings.favicon).
   - Open Graph / JSON-LD e demais tags via {% render 'meta-tags' %}.
-  - CSS: index.css (ponto de entrada) + css-variables (variaveis
-    do tema geradas pelas settings).
+  - CSS: fontes, normalizar, base e movimento (cada um com asset_url,
+    versionado) + css-variables (variaveis geradas pelas settings).
   - Scripts: troca no-js -> js, expõe window.themeStrings (textos
     traduzidos usados pelo JS) e carrega carrinho.js e movimento.js
     (ambos com defer: baixam em paralelo e rodam após o HTML).
@@ -57,7 +57,19 @@
 
     {% render 'meta-tags' %}
 
-    {{ 'index.css' | asset_url | stylesheet_tag }}
+    {%- comment -%}
+      CSS global: 4 arquivos carregados DIRETO, cada um com asset_url.
+      Por quê não um index.css com @import?
+      - asset_url acrescenta ?v=<versão>: a cada deploy a URL muda e o
+        navegador/CDN baixa a versão nova. Um @import './base.css' não tem
+        versão → pode continuar servindo o CSS ANTIGO depois do deploy.
+      - <link> em paralelo é mais rápido que @import (que baixa em série).
+      A ordem importa: fontes → reset → base → movimento.
+    {%- endcomment -%}
+    {{ 'fontes.css' | asset_url | stylesheet_tag }}
+    {{ 'normalizar.css' | asset_url | stylesheet_tag }}
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'movimento.css' | asset_url | stylesheet_tag }}
     {% render 'css-variables' %}
 
     <script>

@@ -58,8 +58,9 @@
 
   {%- if colecao.products_count > limite -%}
     <div class="catalogo__rodape">
-      <a href="{{ colecao.url }}" class="catalogo__ver-todos">
-        <span class="link-anim">{{ 'sections.catalogo.view_all' | t: count: colecao.products_count }}</span>
+      {%- comment -%} Secundário: alternativa a comprar direto do card (que é a ação principal aqui) {%- endcomment -%}
+      <a href="{{ colecao.url }}" class="button button--secondary catalogo__ver-todos">
+        {{ 'sections.catalogo.view_all' | t: count: colecao.products_count }}
         {% render 'icon', name: 'seta' %}
       </a>
     </div>

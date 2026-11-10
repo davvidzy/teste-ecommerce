@@ -119,13 +119,16 @@
       "filter_by_label": "Filter:",
       "filter_button": "Filter",
       "clear": "Clear",
-      "clear_all": "Remove all",
+      "clear_all": "Clear all",
       "apply": "Apply",
       "reset": "Reset",
       "from": "From",
       "to": "To",
       "product_count": "{{ product_count }} of {{ count }} products",
-      "product_count_simple": "{{ count }} products"
+      "product_count_simple": "{{ count }} products",
+      "show_results": "Show {{ count }} products",
+      "remove_filter": "Remove filter: {{ filter }}",
+      "filters_title": "Filters"
     }
   },
   "templates": {

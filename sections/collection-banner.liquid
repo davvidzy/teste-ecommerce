@@ -52,8 +52,8 @@
 
 <style>
   #shopify-section-{{ section.id }} .collection-banner {
-    margin-top: 24px;
-    margin-bottom: 24px;
+    padding-top: clamp(32px, 5vw, 64px);
+    padding-bottom: clamp(24px, 3vw, 40px);
   }
   #shopify-section-{{ section.id }} .collection-banner__media {
     width: 100%;
@@ -73,15 +73,19 @@
     margin: 0 auto;
   }
   #shopify-section-{{ section.id }} .collection-banner__title {
-    font-size: var(--f7);
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    letter-spacing: -0.02em;
     margin: 0;
+    animation: banner-entra 900ms var(--ease-out) both;
   }
   #shopify-section-{{ section.id }} .collection-banner__description {
-    margin-top: 12px;
-    font-size: var(--f2);
-    color: var(--color-text, #000);
-    opacity: 0.8;
+    margin-top: 14px;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: color-mix(in srgb, var(--color-text, #000) 75%, transparent);
+    animation: banner-entra 900ms var(--ease-out) 120ms both;
   }
+  @keyframes banner-entra { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 </style>
 
 {% schema %}

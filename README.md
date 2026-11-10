@@ -185,7 +185,7 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 ### `assets/`
 | Arquivo | Função |
 |---|---|
-| `index.css` | Ponto de entrada do CSS (importa os demais) |
+| *(sem index.css)* | Os CSS globais são carregados um a um em `theme.liquid` com `asset_url` (versionado) — `@import` não tem versão e pode servir CSS antigo após deploy |
 | `normalizar.css` | Reset/normalização de estilos do navegador |
 | `base.css` | Estilos base compartilhados (grid, botões, inputs, acessibilidade) |
 | `fontes.css` | Placeholder para fontes próprias (por padrão usa fontes do Shopify) |
@@ -194,6 +194,7 @@ Pedaços reutilizáveis chamados via `{% render 'nome' %}`.
 | `catalogo.js` | Web Component `<catalogo-abas>`: abas acessíveis, mini-galeria com setas, swatches, estados do botão de compra |
 | `card-catalogo.css` | Estilos do card de produto (catálogo + produtos relacionados) |
 | `busca.js` | Web Component `<busca-modal>`: Predictive Search com debounce, cancelamento e cache |
+| `colecao.js` | Web Component `<colecao-filtros>`: gaveta de filtros, filtros ao vivo (Section Rendering API), chips, URL sincronizada |
 | `favicon.svg` / `hero-orvalho-*.jpg` | Favicon da marca e foto do hero em 3 tamanhos (900/1500/2400) |
 | `site.webmanifest` | Manifesto PWA |
 

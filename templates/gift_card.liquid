@@ -14,7 +14,7 @@
 
   PRINCIPAIS PARTES:
   - Documento HTML completo (tem <html>, <head>, <body>) — NÃO é uma
-    section OS 2.0; por isso carrega index.css e css-variables direto
+    section OS 2.0; por isso carrega os CSS globais e css-variables direto
   - gift_card.balance / .code / .expired / .pass_url: dados do cartão
   - Script inline: gerador de QR Code auto-contido (byte mode, EC M)
     que renderiza num <canvas> a partir da URL de verificação do QR
@@ -43,7 +43,9 @@
     {%- assign gift_card_value = gift_card.initial_value | money -%}
     <title>{{ 'gift_cards.issued.title' | t: value: gift_card_value, shop: shop.name }}</title>
 
-    {{ 'index.css' | asset_url | stylesheet_tag }}
+    {{ 'fontes.css' | asset_url | stylesheet_tag }}
+    {{ 'normalizar.css' | asset_url | stylesheet_tag }}
+    {{ 'base.css' | asset_url | stylesheet_tag }}
     {% render 'css-variables' %}
 
     {{ content_for_header }}

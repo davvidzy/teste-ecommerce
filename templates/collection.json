@@ -1,10 +1,19 @@
 {
   "sections": {
     "banner": {
-      "type": "collection-banner"
+      "type": "collection-banner",
+      "settings": { "show_description": true, "show_image": false }
     },
     "product-grid": {
-      "type": "main-collection"
+      "type": "main-collection",
+      "settings": {
+        "products_per_page": 12,
+        "columns_desktop": 3,
+        "enable_sorting": true,
+        "enable_filtering": true,
+        "opcoes_swatch": "metal, cor, color",
+        "mapa_cores": "Ouro amarelo: #E3C77A\nOuro branco: #E4E4E0\nOuro rosé: #E8B4A0\nPrata: #C8CBCF"
+      }
     }
   },
   "order": ["banner", "product-grid"]

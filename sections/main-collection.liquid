@@ -1,356 +1,538 @@
 {%- comment -%}
   ============================================================
-  MAIN COLLECTION — grade de produtos de uma coleção
+  MAIN COLLECTION — página de coleção (filtros + ordenação + grade)
   ============================================================
 
   O QUE FAZ:
-  Mostra a grade de produtos de uma coleção com ordenação,
-  filtros facetados e paginação nativos do Shopify. Tudo funciona
-  sem JavaScript, pois usa formulários GET.
+  Lista os produtos de uma coleção com o padrão de UX:
+
+  ┌ barra fixa ───────────────────────────────────────────────┐
+  │ [⚙ Filtrar (2)]  12 produtos            Ordenar por [▾]   │
+  └───────────────────────────────────────────────────────────┘
+  [Ouro rosé ×] [Anel ×] [Até R$ 3.000 ×]  Limpar tudo        ← chips
+  ┌ card ┐ ┌ card ┐ ┌ card ┐                                   ← grade
+                                                ┌ gaveta ────┐
+                                                │ Filtros  × │
+                                                │ ▾ Metal    │
+                                                │ ▾ Tipo     │
+                                                │ ▾ Preço    │
+                                                │ Limpar  [Ver 12 produtos] │
+                                                └────────────┘
+
+  POR QUE ASSIM (UX):
+  - UM ponto de entrada para filtrar ("Filtrar"), sempre no mesmo lugar,
+    em vez de vários dropdowns soltos competindo com a grade.
+  - Filtros se aplicam NA HORA (sem botão "Aplicar"): a grade, a
+    contagem e os chips atualizam enquanto a gaveta está aberta. O botão
+    primário da gaveta diz exatamente o resultado: "Ver 12 produtos".
+  - Chips mostram o que está filtrado e removem com um clique.
+  - Hierarquia: Ver N produtos = primário · Filtrar = secundário ·
+    Limpar tudo = terciário.
+
+  COMO FUNCIONA:
+  - Um único <form method="get"> contém filtros E ordenação (o <select>
+    de ordenar fica na barra, ligado ao form pelo atributo form="…").
+  - Sem JS: a gaveta vira um painel normal acima da grade e o form envia
+    por GET (recarrega a página) — tudo continua funcionando.
+  - Com JS (assets/colecao.js): cada mudança refaz a busca pela
+    Section Rendering API (?section_id=…) e troca só os pedaços da
+    página: grade, chips, contagem, contadores de cada filtro.
 
   ONDE É USADA:
-  No template de coleção (templates/collection.json), como section
-  principal que lista os produtos da coleção atual.
-
-  PRINCIPAIS PARTES:
-  - {% paginate %}: pagina collection.products conforme o setting
-    products_per_page.
-  - Toolbar de filtros (form GET): percorre collection.filters e
-    monta cada tipo (list/boolean com checkboxes e price_range com
-    inputs de mín/máx). Preserva o sort ativo via input hidden.
-  - Toolbar de ordenação (form GET): select com
-    collection.sort_options que faz submit no onchange; preserva
-    os filtros ativos via inputs hidden. Tem fallback <noscript>.
-  - Estado vazio (collection__empty) quando não há produtos.
-  - Grade: product-grid renderizando o snippet 'card-product'
-    para cada produto, seguida do snippet 'pagination'.
-
-  OBSERVAÇÕES:
-  - As colunas do desktop vêm do setting columns_desktop, aplicado
-    via variável CSS inline --grid-columns.
-  - Filtros e ordenação podem ser desligados pelos settings
-    enable_filtering e enable_sorting.
-  - Estilos ficam inline no <style>, escopados por
-    #shopify-section-{{ section.id }}.
+  templates/collection.json (seção "product-grid").
 {%- endcomment -%}
 
+{%- liquid
+  assign id_form = 'FiltrosForm-' | append: section.id
+  assign nomes_swatch = section.settings.opcoes_swatch | downcase | replace: ', ', ',' | split: ','
+  assign linhas_mapa = section.settings.mapa_cores | newline_to_br | split: '<br />'
+
+  # Quantos filtros estão ativos (badge no botão "Filtrar")
+  assign total_ativos = 0
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != nil or filter.max_value.value != nil
+        assign total_ativos = total_ativos | plus: 1
+      endif
+    else
+      assign total_ativos = total_ativos | plus: filter.active_values.size
+    endif
+  endfor
+
+  assign tem_filtros = false
+  if section.settings.enable_filtering and collection.filters.size > 0
+    assign tem_filtros = true
+  endif
+
+  assign ordem_atual = collection.sort_by | default: collection.default_sort_by
+  assign url_limpar = collection.url
+  if collection.sort_by != blank
+    assign url_limpar = collection.url | append: '?sort_by=' | append: collection.sort_by
+  endif
+-%}
+
 {%- paginate collection.products by section.settings.products_per_page -%}
-  <div
-    class="collection page-width"
-    data-section-id="{{ section.id }}"
-    style="--grid-columns: {{ section.settings.columns_desktop }};"
-  >
-    {%- if section.settings.enable_sorting or section.settings.enable_filtering -%}
-      <div class="collection__toolbar">
-        {%- if section.settings.enable_filtering and collection.filters.size > 0 -%}
-          <form method="get" class="collection__filters" id="CollectionFilters-{{ section.id }}">
-            {%- comment -%} Preserve current sort when filtering {%- endcomment -%}
-            {%- if collection.sort_by != blank -%}
-              <input type="hidden" name="sort_by" value="{{ collection.sort_by }}">
-            {%- endif -%}
-
-            {%- for filter in collection.filters -%}
-              <details class="collection__filter">
-                <summary class="collection__filter-summary">{{ filter.label | escape }}</summary>
-                <div class="collection__filter-content">
-                  {%- case filter.type -%}
-                    {%- when 'list', 'boolean' -%}
-                      <ul class="collection__filter-values" role="list">
-                        {%- for value in filter.values -%}
-                          <li class="collection__filter-value">
-                            <label>
-                              <input
-                                type="checkbox"
-                                name="{{ value.param_name }}"
-                                value="{{ value.value }}"
-                                {% if value.active %}checked{% endif %}
-                                {% if value.count == 0 and value.active == false %}disabled{% endif %}
-                              >
-                              <span>{{ value.label | escape }}</span>
-                              <span class="collection__filter-count">({{ value.count }})</span>
-                            </label>
-                          </li>
-                        {%- endfor -%}
-                      </ul>
-
-                    {%- when 'price_range' -%}
-                      <div class="collection__filter-price">
-                        <div class="collection__filter-price-field">
-                          <label
-                            class="field__label"
-                            for="Filter-{{ filter.label | escape }}-min-{{ section.id }}"
-                          >
-                            {{ 'products.facets.from' | t }}
-                          </label>
-                          <input
-                            class="field__input"
-                            type="number"
-                            name="{{ filter.min_value.param_name }}"
-                            id="Filter-{{ filter.label | escape }}-min-{{ section.id }}"
-                            min="0"
-                            max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
-                            {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
-                            placeholder="0"
-                          >
-                        </div>
-                        <div class="collection__filter-price-field">
-                          <label
-                            class="field__label"
-                            for="Filter-{{ filter.label | escape }}-max-{{ section.id }}"
-                          >
-                            {{ 'products.facets.to' | t }}
-                          </label>
-                          <input
-                            class="field__input"
-                            type="number"
-                            name="{{ filter.max_value.param_name }}"
-                            id="Filter-{{ filter.label | escape }}-max-{{ section.id }}"
-                            min="0"
-                            max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
-                            {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
-                            placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
-                          >
-                        </div>
-                      </div>
-                  {%- endcase -%}
-                </div>
-              </details>
-            {%- endfor -%}
-
-            <div class="collection__filter-actions">
-              <button type="submit" class="button">{{ 'products.facets.apply' | t }}</button>
-              <a href="{{ collection.url }}" class="button button--secondary">
-                {{ 'products.facets.clear_all' | t }}
-              </a>
-            </div>
-          </form>
+  <colecao-filtros class="colecao page-width" data-section-id="{{ section.id }}">
+    {%- comment -%} ---------- Barra fixa: Filtrar · contagem · Ordenar ---------- {%- endcomment -%}
+    <div class="colecao__barra">
+      <div class="colecao__barra-esq">
+        {%- if tem_filtros -%}
+          <button
+            type="button"
+            class="button button--secondary button--pequeno colecao__abrir"
+            aria-controls="Filtros-{{ section.id }}"
+            aria-expanded="false"
+            data-abrir-filtros
+          >
+            {% render 'icon', name: 'filtro' %}
+            {{ 'products.facets.filter_button' | t }}
+            <span class="colecao__badge" data-badge-filtros {% if total_ativos == 0 %}hidden{% endif %}>{{ total_ativos }}</span>
+          </button>
         {%- endif -%}
+        <p class="colecao__contagem" role="status" data-contagem>
+          {{- 'products.facets.product_count_simple' | t: count: collection.products_count -}}
+        </p>
+      </div>
 
-        <div class="collection__toolbar-bar">
-          <span class="collection__count">
-            {{- 'products.facets.product_count_simple' | t: count: collection.products_count -}}
-          </span>
-
-          {%- if section.settings.enable_sorting -%}
-            <form method="get" class="collection__sort">
-              {%- comment -%} Preserve active filters when sorting {%- endcomment -%}
-              {%- for filter in collection.filters -%}
-                {%- for value in filter.values -%}
-                  {%- if value.active -%}
-                    <input type="hidden" name="{{ value.param_name }}" value="{{ value.value }}">
-                  {%- endif -%}
-                {%- endfor -%}
-                {%- if filter.type == 'price_range' -%}
-                  {%- if filter.min_value.value -%}
-                    <input
-                      type="hidden"
-                      name="{{ filter.min_value.param_name }}"
-                      value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
-                    >
-                  {%- endif -%}
-                  {%- if filter.max_value.value -%}
-                    <input
-                      type="hidden"
-                      name="{{ filter.max_value.param_name }}"
-                      value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
-                    >
-                  {%- endif -%}
-                {%- endif -%}
+      {%- if section.settings.enable_sorting -%}
+        <div class="colecao__ordenar">
+          <label for="Ordenar-{{ section.id }}" class="colecao__ordenar-rotulo">{{ 'products.facets.sort_by_label' | t }}</label>
+          <div class="colecao__select">
+            <select name="sort_by" id="Ordenar-{{ section.id }}" form="{{ id_form }}" data-ordenar>
+              {%- for opcao in collection.sort_options -%}
+                <option value="{{ opcao.value }}" {% if opcao.value == ordem_atual %}selected{% endif %}>{{ opcao.name }}</option>
               {%- endfor -%}
-
-              <label class="field__label collection__sort-label" for="SortBy-{{ section.id }}">
-                {{ 'products.facets.sort_by_label' | t }}
-              </label>
-              <select
-                name="sort_by"
-                id="SortBy-{{ section.id }}"
-                class="select__select"
-                onchange="this.form.submit()"
-              >
-                {%- for option in collection.sort_options -%}
-                  <option
-                    value="{{ option.value }}"
-                    {% if option.value == collection.sort_by %}selected{% endif %}
-                  >
-                    {{ option.name }}
-                  </option>
-                {%- endfor -%}
-              </select>
-              <noscript>
-                <button type="submit" class="button button--secondary">
-                  {{ 'products.facets.apply' | t }}
-                </button>
-              </noscript>
-            </form>
-          {%- endif -%}
+            </select>
+            {% render 'icon', name: 'chevron' %}
+          </div>
+          <noscript>
+            <button type="submit" form="{{ id_form }}" class="button button--secondary button--pequeno">{{ 'products.facets.apply' | t }}</button>
+          </noscript>
         </div>
-      </div>
-    {%- endif -%}
+        {%- unless tem_filtros -%}
+          {%- comment -%} Sem filtros, o <select> ainda precisa de um form para enviar {%- endcomment -%}
+          <form method="get" action="{{ collection.url }}" id="{{ id_form }}" data-form-filtros hidden></form>
+        {%- endunless -%}
+      {%- endif -%}
+    </div>
 
-    {%- if collection.products.size == 0 -%}
-      <div class="collection__empty">
-        <p>{{ 'sections.main_collection.empty' | t }}</p>
-        <a href="{{ routes.all_products_collection_url }}" class="button button--secondary">
-          {{ 'sections.main_collection.use_fewer_filters' | t }}
-        </a>
-      </div>
-    {%- else -%}
-      <ul class="product-grid" role="list">
-        {%- for product in collection.products -%}
-          <li class="product-grid__item">
-            {% render 'card-product', card_product: product %}
-          </li>
-        {%- endfor -%}
-      </ul>
+    {%- comment -%} ---------- Chips dos filtros ativos ---------- {%- endcomment -%}
+    <div class="colecao__chips-area" data-chips>
+      {%- if total_ativos > 0 -%}
+        <ul class="colecao__chips" role="list">
+          {%- for filter in collection.filters -%}
+            {%- if filter.type == 'price_range' -%}
+              {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+                <li>
+                  <a href="{{ filter.url_to_remove }}" class="colecao__chip" data-link-filtro aria-label="{{ 'products.facets.remove_filter' | t: filter: filter.label }}">
+                    {%- if filter.min_value.value != nil -%}{{ filter.min_value.value | money_without_trailing_zeros }}{%- else -%}{{ 0 | money_without_trailing_zeros }}{%- endif -%}
+                    &ndash;
+                    {%- if filter.max_value.value != nil -%}{{ filter.max_value.value | money_without_trailing_zeros }}{%- else -%}{{ filter.range_max | money_without_trailing_zeros }}{%- endif -%}
+                    {% render 'icon', name: 'close' %}
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- else -%}
+              {%- for valor in filter.active_values -%}
+                <li>
+                  <a href="{{ valor.url_to_remove }}" class="colecao__chip" data-link-filtro aria-label="{{ 'products.facets.remove_filter' | t: filter: valor.label }}">
+                    {{ valor.label | escape }}
+                    {% render 'icon', name: 'close' %}
+                  </a>
+                </li>
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <li><a href="{{ url_limpar }}" class="button button--tertiary button--pequeno colecao__limpar" data-link-filtro>{{ 'products.facets.clear_all' | t }}</a></li>
+        </ul>
+      {%- endif -%}
+    </div>
 
-      {% render 'pagination', paginate: paginate %}
-    {%- endif -%}
-  </div>
+    <div class="colecao__corpo">
+      {%- comment -%} ---------- Gaveta de filtros (form único) ---------- {%- endcomment -%}
+      {%- if tem_filtros -%}
+        <div class="filtros" id="Filtros-{{ section.id }}" data-gaveta>
+          <div class="filtros__fundo" data-fechar-filtros></div>
+          <div class="filtros__painel" role="dialog" aria-modal="true" aria-labelledby="FiltrosTitulo-{{ section.id }}" tabindex="-1">
+            <div class="filtros__topo">
+              <h2 class="filtros__titulo" id="FiltrosTitulo-{{ section.id }}">{{ 'products.facets.filters_title' | t }}</h2>
+              <button type="button" class="filtros__fechar tap-target" aria-label="{{ 'accessibility.close' | t }}" data-fechar-filtros>
+                {% render 'icon', name: 'close' %}
+              </button>
+            </div>
+
+            <form method="get" action="{{ collection.url }}" class="filtros__form" id="{{ id_form }}" data-form-filtros>
+              <div class="filtros__grupos" data-grupos>
+                {%- for filter in collection.filters -%}
+                  {%- assign nome_filtro = filter.label | downcase | strip -%}
+                  {%- assign filtro_de_cor = false -%}
+                  {%- if nomes_swatch contains nome_filtro -%}{%- assign filtro_de_cor = true -%}{%- endif -%}
+                  <details class="filtros__grupo" {% if forloop.index <= 2 or filter.active_values.size > 0 %}open{% endif %}>
+                    <summary class="filtros__grupo-titulo">
+                      <span>
+                        {{ filter.label | escape }}
+                        {%- if filter.active_values.size > 0 %} <span class="filtros__grupo-ativos">({{ filter.active_values.size }})</span>{% endif -%}
+                      </span>
+                      <span class="filtros__mais" aria-hidden="true"></span>
+                    </summary>
+
+                    {%- case filter.type -%}
+                      {%- when 'list', 'boolean' -%}
+                        <ul class="filtros__valores{% if filtro_de_cor %} filtros__valores--cor{% endif %}" role="list">
+                          {%- for valor in filter.values -%}
+                            {%- liquid
+                              assign chave = valor.param_name | append: '=' | append: valor.value
+                              assign desabilitado = false
+                              if valor.count == 0 and valor.active == false
+                                assign desabilitado = true
+                              endif
+                              assign cor = ''
+                              if filtro_de_cor
+                                assign nome_valor = valor.label | downcase | strip
+                                for linha in linhas_mapa
+                                  assign partes = linha | split: ':'
+                                  assign nome_mapa = partes.first | strip | downcase
+                                  if nome_mapa == nome_valor
+                                    assign cor = partes.last | strip
+                                    break
+                                  endif
+                                endfor
+                              endif
+                            -%}
+                            <li>
+                              <label class="filtros__opcao{% if desabilitado %} is-desabilitado{% endif %}" data-opcao="{{ chave | escape }}">
+                                <input
+                                  type="checkbox"
+                                  name="{{ valor.param_name }}"
+                                  value="{{ valor.value }}"
+                                  {% if valor.active %}checked{% endif %}
+                                  {% if desabilitado %}disabled{% endif %}
+                                >
+                                {%- if cor != blank -%}
+                                  <span class="filtros__cor" style="--cor: {{ cor }};" aria-hidden="true"></span>
+                                {%- else -%}
+                                  <span class="filtros__check" aria-hidden="true">{% render 'icon', name: 'check' %}</span>
+                                {%- endif -%}
+                                <span class="filtros__rotulo">{{ valor.label | escape }}</span>
+                                <span class="filtros__qtd" data-qtd>{{ valor.count }}</span>
+                              </label>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+
+                      {%- when 'price_range' -%}
+                        {%- liquid
+                          # Os valores do filtro de preço vêm em centavos; o input espera reais.
+                          assign preco_max = filter.range_max | divided_by: 100.0 | ceil
+                          assign preco_de = ''
+                          assign preco_ate = ''
+                          if filter.min_value.value != nil
+                            assign preco_de = filter.min_value.value | divided_by: 100
+                          endif
+                          if filter.max_value.value != nil
+                            assign preco_ate = filter.max_value.value | divided_by: 100
+                          endif
+                        -%}
+                        <div class="filtros__preco">
+                          <label class="filtros__preco-campo">
+                            <span>{{ 'products.facets.from' | t }}</span>
+                            <span class="filtros__preco-input">
+                              <span aria-hidden="true">{{ cart.currency.symbol }}</span>
+                              <input type="number" inputmode="numeric" name="{{ filter.min_value.param_name }}" value="{{ preco_de }}" min="0" max="{{ preco_max }}" placeholder="0" data-preco>
+                            </span>
+                          </label>
+                          <span class="filtros__preco-traco" aria-hidden="true">&ndash;</span>
+                          <label class="filtros__preco-campo">
+                            <span>{{ 'products.facets.to' | t }}</span>
+                            <span class="filtros__preco-input">
+                              <span aria-hidden="true">{{ cart.currency.symbol }}</span>
+                              <input type="number" inputmode="numeric" name="{{ filter.max_value.param_name }}" value="{{ preco_ate }}" min="0" max="{{ preco_max }}" placeholder="{{ preco_max }}" data-preco>
+                            </span>
+                          </label>
+                        </div>
+                    {%- endcase -%}
+                  </details>
+                {%- endfor -%}
+              </div>
+
+              <div class="filtros__acoes">
+                <a href="{{ url_limpar }}" class="button button--tertiary filtros__limpar" data-link-filtro>{{ 'products.facets.clear_all' | t }}</a>
+                <button type="submit" class="button filtros__ver" data-ver-resultados>
+                  {{ 'products.facets.show_results' | t: count: collection.products_count }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} ---------- Resultados ---------- {%- endcomment -%}
+      <div class="colecao__resultados" data-resultados>
+        {%- if collection.products.size == 0 -%}
+          <div class="colecao__vazio">
+            <p class="colecao__vazio-titulo">{{ 'sections.main_collection.empty' | t }}</p>
+            {%- if total_ativos > 0 -%}
+              <p>{{ 'sections.main_collection.use_fewer_filters' | t }}</p>
+              <a href="{{ url_limpar }}" class="button button--secondary" data-link-filtro>{{ 'products.facets.clear_all' | t }}</a>
+            {%- else -%}
+              <a href="{{ routes.all_products_collection_url }}" class="button button--secondary">{{ 'general.continue_shopping' | t }}</a>
+            {%- endif -%}
+          </div>
+        {%- else -%}
+          <catalogo-abas class="colecao__grade-wrapper">
+            <ul class="colecao__grade" role="list" style="--colunas: {{ section.settings.columns_desktop }};">
+              {%- for product in collection.products -%}
+                <li class="colecao__item" data-reveal style="--reveal-index: {{ forloop.index0 | modulo: section.settings.columns_desktop }};">
+                  {% render 'card-catalogo', produto: product, secao: section %}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </catalogo-abas>
+          {% render 'pagination', paginate: paginate %}
+        {%- endif -%}
+      </div>
+    </div>
+  </colecao-filtros>
 {%- endpaginate -%}
 
+{{ 'card-catalogo.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'catalogo.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'colecao.js' | asset_url }}" defer="defer"></script>
+
 <style>
-  #shopify-section-{{ section.id }} .collection {
-    margin-bottom: var(--spacing-sections, 40px);
-  }
-  #shopify-section-{{ section.id }} .collection__toolbar {
-    margin-bottom: 24px;
-  }
-  #shopify-section-{{ section.id }} .collection__filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 12px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--color-border, #c2c2c2);
-  }
-  #shopify-section-{{ section.id }} .collection__filter {
-    position: relative;
-  }
-  #shopify-section-{{ section.id }} .collection__filter-summary {
-    cursor: pointer;
-    padding: 8px 12px;
-    font-size: var(--f2);
-    border: 1px solid var(--color-border, #c2c2c2);
-    border-radius: var(--inputs-radius, 4px);
-    list-style: none;
-    user-select: none;
-  }
-  #shopify-section-{{ section.id }} .collection__filter-summary::-webkit-details-marker {
-    display: none;
-  }
-  #shopify-section-{{ section.id }} .collection__filter-content {
-    margin-top: 8px;
-    padding: 12px;
-    border: 1px solid var(--color-border, #c2c2c2);
-    border-radius: var(--inputs-radius, 4px);
-    background-color: var(--color-background, #fff);
-  }
-  #shopify-section-{{ section.id }} .collection__filter-values {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    max-height: 260px;
-    overflow-y: auto;
-  }
-  #shopify-section-{{ section.id }} .collection__filter-value label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 0;
-    font-size: var(--f2);
-    cursor: pointer;
-  }
-  #shopify-section-{{ section.id }} .collection__filter-count {
-    opacity: 0.6;
-    font-size: var(--f1);
-  }
-  #shopify-section-{{ section.id }} .collection__filter-price {
-    display: flex;
-    gap: 12px;
-  }
-  #shopify-section-{{ section.id }} .collection__filter-price-field {
-    flex: 1;
-  }
-  #shopify-section-{{ section.id }} .collection__filter-actions {
-    display: flex;
-    gap: 8px;
-    align-items: flex-end;
-  }
-  #shopify-section-{{ section.id }} .collection__toolbar-bar {
+  .colecao { display: block; padding-bottom: var(--espaco-secao); }
+
+  /* ---------- Barra fixa ---------- */
+  .colecao__barra {
+    position: sticky;
+    top: var(--header-altura, 72px);
+    z-index: 6;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    flex-wrap: wrap;
-    margin-top: 16px;
+    min-height: 64px;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 10px var(--gutter);
+    background: var(--color-background);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
-  #shopify-section-{{ section.id }} .collection__count {
-    font-size: var(--f2);
-    opacity: 0.8;
+  .colecao__barra-esq { display: flex; align-items: center; gap: 20px; min-width: 0; }
+  .colecao__badge {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+    color: var(--color-accent-text);
+    background: var(--color-accent);
+    border-radius: 999px;
   }
-  #shopify-section-{{ section.id }} .collection__sort {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .colecao__badge[hidden] { display: none; }
+  .colecao__contagem { font-size: 0.875rem; opacity: 0.7; white-space: nowrap; }
+
+  .colecao__ordenar { display: flex; align-items: center; gap: 10px; }
+  .colecao__ordenar-rotulo { font-size: 0.875rem; opacity: 0.7; white-space: nowrap; }
+  .colecao__select { position: relative; display: inline-flex; align-items: center; }
+  .colecao__select select {
+    min-height: 40px;
+    padding: 0 32px 0 2px;
+    font-family: var(--font-body-family);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    background: transparent;
+    border-bottom: 1px solid currentColor;
+    cursor: pointer;
+    appearance: none;
   }
-  #shopify-section-{{ section.id }} .collection__sort-label {
-    margin-bottom: 0;
-    white-space: nowrap;
-  }
-  #shopify-section-{{ section.id }} .collection__sort .select__select {
-    width: auto;
-    min-width: 200px;
-  }
-  #shopify-section-{{ section.id }} .collection__empty {
-    text-align: center;
-    padding: 60px 0;
-    font-size: var(--f3);
-  }
-  #shopify-section-{{ section.id }} .collection__empty .button {
-    margin-top: 20px;
-  }
-  #shopify-section-{{ section.id }} .pagination {
-    margin-top: 40px;
-  }
-  #shopify-section-{{ section.id }} .pagination__list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  #shopify-section-{{ section.id }} .pagination__item {
+  .colecao__select svg { position: absolute; right: 4px; width: 14px; height: 14px; pointer-events: none; }
+
+  /* ---------- Chips ---------- */
+  .colecao__chips-area { min-height: 20px; }
+  .colecao__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 16px 0 4px; list-style: none; }
+  .colecao__chip {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    min-height: 40px;
-    padding: 0 8px;
-    font-size: var(--f2);
-    color: var(--color-text, #000);
-    text-decoration: none;
+    gap: 8px;
+    min-height: 34px;
+    padding: 0 10px 0 14px;
+    font-size: 0.8125rem;
+    color: inherit;
+    background: var(--color-background-contrast);
+    border-radius: 999px;
+    transition: background-color var(--dur-fast) ease;
+    animation: colecao-chip 350ms var(--ease-out);
+  }
+  .colecao__chip svg { width: 14px; height: 14px; opacity: 0.6; }
+  .colecao__chip:hover { background: color-mix(in srgb, var(--color-text) 12%, var(--color-background-contrast)); }
+  .colecao__limpar { margin-left: 4px; }
+
+  /* ---------- Grade ---------- */
+  .colecao__corpo { padding-top: 24px; }
+  .colecao__resultados { transition: opacity var(--dur-base) var(--ease-out); }
+  .colecao.is-carregando .colecao__resultados { opacity: 0.45; pointer-events: none; }
+  .colecao__grade-wrapper { display: block; }
+  .colecao__grade {
+    display: grid;
+    grid-template-columns: repeat(var(--colunas, 3), minmax(0, 1fr));
+    gap: 44px clamp(16px, 2vw, 28px);
+    list-style: none;
+  }
+  .colecao__vazio { display: grid; justify-items: center; gap: 12px; padding: 80px 0; text-align: center; }
+  .colecao__vazio-titulo { font-family: var(--font-heading-family); font-size: 1.75rem; }
+
+  /* Paginação */
+  .colecao .pagination { margin-top: 56px; }
+  .colecao .pagination__list { display: flex; justify-content: center; align-items: center; gap: 6px; list-style: none; }
+  .colecao .pagination__item {
+    display: inline-grid;
+    place-items: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    font-size: 0.9375rem;
+    color: inherit;
     border: 1px solid transparent;
-    border-radius: var(--inputs-radius, 4px);
+    border-radius: 999px;
+    transition: border-color var(--dur-fast) ease;
   }
-  #shopify-section-{{ section.id }} a.pagination__item:hover {
-    border-color: var(--color-border, #c2c2c2);
+  .colecao a.pagination__item:hover { border-color: var(--color-text); }
+  .colecao .pagination__item--current { color: var(--color-accent-text); background: var(--color-accent); }
+
+  /* ---------- Gaveta de filtros ---------- */
+  /* Sem JS: painel normal acima da grade (o form ainda funciona por GET) */
+  .filtros__fundo, .filtros__fechar { display: none; }
+  .filtros__painel { margin-bottom: 32px; border: 1px solid var(--color-border); }
+
+  /* Com JS: gaveta lateral fora da tela até abrir */
+  .js .colecao__corpo .filtros { position: fixed; inset: 0; z-index: 100; visibility: hidden; pointer-events: none; }
+  .js .filtros.is-aberta { visibility: visible; pointer-events: auto; }
+  .js .filtros__fundo {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: rgb(20 24 22 / 0.4);
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-out);
   }
-  #shopify-section-{{ section.id }} .pagination__item--current {
-    border-color: var(--color-accent, #000);
-    font-weight: bold;
+  .js .filtros.is-aberta .filtros__fundo { opacity: 1; }
+  .js .filtros__painel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    width: min(420px, 92vw);
+    margin: 0;
+    background: var(--color-background);
+    border: 0;
+    box-shadow: 24px 0 60px -30px rgb(0 0 0 / 0.4);
+    transform: translate3d(-100%, 0, 0);
+    transition: transform 500ms var(--ease-out);
   }
+  .js .filtros.is-aberta .filtros__painel { transform: none; }
+  .js .filtros__fechar { display: inline-flex; }
+
+  .filtros__topo { display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 0 24px; border-bottom: 1px solid var(--color-border); }
+  .filtros__titulo { font-size: 1.5rem; }
+  .filtros__fechar { color: inherit; background: none; border-radius: 50%; margin-right: -10px; transition: transform var(--dur-base) var(--ease-out); }
+  .filtros__fechar:hover { transform: rotate(90deg); }
+  .filtros__form { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .filtros__grupos { flex: 1; overflow-y: auto; padding: 0 24px; overscroll-behavior: contain; }
+
+  .filtros__grupo { border-bottom: 1px solid var(--color-border); }
+  .filtros__grupo-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 60px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    list-style: none;
+    cursor: pointer;
+  }
+  .filtros__grupo-titulo::-webkit-details-marker { display: none; }
+  .filtros__grupo-ativos { letter-spacing: 0; color: var(--color-accent); }
+  .filtros__mais { position: relative; width: 12px; height: 12px; }
+  .filtros__mais::before, .filtros__mais::after { content: ''; position: absolute; top: 50%; left: 0; width: 12px; height: 1px; background: currentColor; transition: transform var(--dur-base) var(--ease-out); }
+  .filtros__mais::after { transform: rotate(90deg); }
+  .filtros__grupo[open] .filtros__mais::after { transform: rotate(0deg); }
+
+  .filtros__valores { display: grid; gap: 2px; padding-bottom: 18px; list-style: none; }
+  .filtros__opcao {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 40px;
+    font-size: 0.9375rem;
+    cursor: pointer;
+  }
+  .filtros__opcao input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .filtros__check {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid color-mix(in srgb, var(--color-text) 45%, transparent);
+    transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease;
+  }
+  .filtros__check svg { width: 14px; height: 14px; opacity: 0; transform: scale(0.6); transition: opacity var(--dur-fast), transform var(--dur-base) var(--ease-spring); }
+  .filtros__opcao input:checked + .filtros__check { color: var(--color-accent-text); background: var(--color-accent); border-color: var(--color-accent); }
+  .filtros__opcao input:checked + .filtros__check svg { opacity: 1; transform: none; }
+  .filtros__opcao input:focus-visible + span { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+  .filtros__cor {
+    position: relative;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--cor);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12);
+  }
+  .filtros__cor::after { content: ''; position: absolute; inset: -4px; border: 1px solid var(--color-text); border-radius: 50%; opacity: 0; transform: scale(0.6); transition: opacity var(--dur-fast), transform var(--dur-base) var(--ease-spring); }
+  .filtros__opcao input:checked + .filtros__cor::after { opacity: 1; transform: none; }
+  .filtros__rotulo { flex: 1; }
+  .filtros__qtd { font-size: 0.8125rem; opacity: 0.5; }
+  .filtros__opcao.is-desabilitado { opacity: 0.35; cursor: not-allowed; }
+
+  .filtros__preco { display: flex; align-items: flex-end; gap: 10px; padding-bottom: 20px; }
+  .filtros__preco-campo { display: grid; gap: 6px; flex: 1; font-size: 0.8125rem; opacity: 0.9; }
+  .filtros__preco-input { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 1px solid var(--color-border); }
+  .filtros__preco-input:focus-within { border-color: var(--color-text); }
+  .filtros__preco-input input { width: 100%; min-width: 0; font-size: 0.9375rem; color: inherit; background: transparent; -moz-appearance: textfield; }
+  .filtros__preco-input input::-webkit-outer-spin-button,
+  .filtros__preco-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .filtros__preco-traco { padding-bottom: 12px; opacity: 0.5; }
+
+  .filtros__acoes {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-background);
+  }
+  .filtros__ver { width: 100%; }
+
+  @keyframes colecao-chip { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+
   @media screen and (max-width: 1000px) {
-    #shopify-section-{{ section.id }} .collection__toolbar-bar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    #shopify-section-{{ section.id }} .collection__sort .select__select {
-      min-width: 0;
-      flex: 1;
-    }
+    .colecao__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 12px; }
+    .colecao__ordenar-rotulo { display: none; }
+    .colecao__barra { min-height: 56px; }
+    .colecao__barra-esq { gap: 12px; }
+  }
+  @media screen and (max-width: 480px) {
+    .colecao__contagem { display: none; } /* a contagem aparece no botão "Ver N produtos" */
   }
 </style>
 
@@ -363,19 +545,19 @@
     {
       "type": "range",
       "id": "products_per_page",
-      "min": 8,
+      "min": 6,
       "max": 24,
-      "step": 4,
-      "default": 16,
+      "step": 3,
+      "default": 12,
       "label": "t:sections.main_collection.settings.products_per_page.label"
     },
     {
       "type": "range",
       "id": "columns_desktop",
       "min": 2,
-      "max": 5,
+      "max": 4,
       "step": 1,
-      "default": 4,
+      "default": 3,
       "label": "t:sections.main_collection.settings.columns_desktop.label"
     },
     {
@@ -388,7 +570,22 @@
       "type": "checkbox",
       "id": "enable_filtering",
       "default": true,
-      "label": "t:sections.main_collection.settings.enable_filtering.label"
+      "label": "t:sections.main_collection.settings.enable_filtering.label",
+      "info": "Os filtros disponíveis são configurados no app Search & Discovery da Shopify."
+    },
+    { "type": "header", "content": "Cores (swatches)" },
+    {
+      "type": "text",
+      "id": "opcoes_swatch",
+      "label": "Opções/filtros que viram bolinhas de cor",
+      "default": "metal, cor, color"
+    },
+    {
+      "type": "textarea",
+      "id": "mapa_cores",
+      "label": "Mapa de cores",
+      "default": "Ouro amarelo: #E3C77A\nOuro branco: #E4E4E0\nOuro rosé: #E8B4A0\nPrata: #C8CBCF",
+      "info": "Um por linha: Nome: #hex. Use os mesmos valores do Catálogo e da página de produto."
     }
   ]
 }

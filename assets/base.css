@@ -78,12 +78,26 @@ summary:focus-visible,
 
 /*
   ---------- Sistema de botões ----------
-  Três níveis, mesma altura, mesma tipografia:
-  .button                → primário   (fundo sólido na cor de destaque)
-  .button--secondary     → secundário (contorno)
-  .button--tertiary      → terciário  (só texto + sublinhado animado)
-  Modificadores: .button--grande (56px), .button--bloco (100% largura),
-                 .button--claro (para usar sobre imagens/fundos escuros).
+  Três níveis, mesma tipografia:
+  .button                → PRIMÁRIO   fundo sólido na cor de destaque
+  .button--secondary     → SECUNDÁRIO contorno fino em cor cheia, fundo transparente
+  .button--tertiary      → TERCIÁRIO  só texto + sublinhado
+  Modificadores: .button--grande (56px), .button--pequeno (40px),
+                 .button--bloco (100% largura), .button--claro (sobre foto escura).
+
+  REGRA DE HIERARQUIA (o que decide a classe é o PAPEL, não a aparência):
+  1. PRIMÁRIO = a ação que leva a pessoa adiante no objetivo daquela tela
+     (comprar, finalizar, ver resultados). NO MÁXIMO UM por área visível.
+       ex.: Adicionar à sacola · Finalizar compra · Ver N produtos (filtro)
+            · Ver catálogo (hero) · Enviar (contato)
+  2. SECUNDÁRIO = alternativa legítima ao primário, ou a ação principal de
+     uma área que não é de conversão.
+       ex.: Nossas coleções · Ver todas as peças · Filtrar · Buscar
+            · Continuar comprando · Ver todos os resultados
+  3. TERCIÁRIO = utilidade, desfazer, compartilhar.
+       ex.: Limpar filtros · Atualizar sacola · Remover · Compartilhar
+  Se duas ações parecem igualmente importantes, uma delas está errada.
+
   As cores vêm de variáveis locais (--btn-*): cada variante só troca as
   variáveis, e o :hover funciona igual para todas.
 */
@@ -128,7 +142,7 @@ summary:focus-visible,
 .button--secondary {
   --btn-fundo: transparent;
   --btn-texto: var(--color-text, #000);
-  --btn-borda: color-mix(in srgb, var(--color-text, #000) 35%, transparent);
+  --btn-borda: var(--color-text, #000);
 }
 .button.button--secondary:hover:not([disabled]):not([aria-disabled='true']) {
   --btn-fundo: var(--color-text, #000);
@@ -167,6 +181,8 @@ summary:focus-visible,
 }
 
 .button--grande { min-height: 56px; padding: 0 36px; }
+.button--pequeno { min-height: 40px; padding: 0 18px; font-size: 0.75rem; gap: 8px; }
+.button--pequeno svg { width: 16px; height: 16px; }
 .button--bloco { width: 100%; }
 
 .button[disabled],

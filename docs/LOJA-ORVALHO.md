@@ -28,6 +28,7 @@
 10. [Exercícios para praticar](#10-exercícios-para-praticar)
 11. [Problemas comuns](#11-problemas-comuns)
 12. [Fase 2 — refinamento de design e UX](#12-fase-2--refinamento-de-design-e-ux)
+13. [Fase 3 — hierarquia de botões e página de coleção](#13-fase-3--hierarquia-de-botões-e-página-de-coleção)
 
 ---
 
@@ -106,7 +107,7 @@ Todas as seções novas têm settings em português.
 | `config/settings_data.json` | Preset **Orvalho** (paleta creme/verde, Poppins, botões pílula) ativo; preset original mantido |
 | `assets/carrinho.js` | Emite eventos `carrinho:*`, anima o contador, mostra erro da API sem sair da página |
 | `layout/theme.liquid` | Carrega `movimento.js` e expõe `window.themeStrings` (textos traduzidos para o JS) |
-| `assets/index.css` | Importa `movimento.css` |
+| `assets/index.css` | **Removido na fase 3**: os CSS agora são carregados direto em `theme.liquid` (ver 13.4) |
 | `snippets/icon.liquid` | Ícones novos: entrega, folha, escudo, presente, diamante, seta, seta-cima, mais, check |
 | `snippets/localization-form.liquid` | **Correção de bug**: `{% form %}` não aceita filtros nos parâmetros |
 | `locales/en.default.json` | Chaves novas: `sections.hero`, `sections.catalogo`, `sections.rodape`, `cart.added_to_cart` |
@@ -575,3 +576,92 @@ brancas, tons creme) vem do banco gratuito do **Magnific/Freepik**. O original t
 | 12 | Trocar o metal | "Metal: Ouro rosé"; foto da variante sobe para o topo; preço atualiza |
 | 13 | Compartilhar → Copiar link | Texto vira "Link copiado!"; clique fora fecha o painel |
 | 14 | Produtos relacionados | Mesmo card da home, com setas e compra rápida |
+
+---
+
+## 13. Fase 3 — hierarquia de botões e página de coleção
+
+### 13.1 A regra (está também no topo do sistema de botões em `assets/base.css`)
+
+| Nível | Aparência | Quando usar |
+|---|---|---|
+| **Primário** `.button` | Fundo sólido verde | A ação que leva adiante o objetivo da tela. **No máximo um por área visível.** |
+| **Secundário** `.button--secondary` | Contorno fino em cor cheia | Alternativa legítima ao primário, ou a ação principal de uma área que não é de conversão |
+| **Terciário** `.button--tertiary` | Só texto sublinhado | Utilidade: limpar, atualizar, remover, compartilhar |
+
+> Se duas ações parecem igualmente importantes, uma delas está errada.
+
+### 13.2 Como ficou cada tela
+
+| Tela | Primário | Secundário | Terciário |
+|---|---|---|---|
+| Home / hero | Ver catálogo | Nossas coleções | — |
+| Home / catálogo | (compra rápida no card) | Ver todas as peças | — |
+| Coleção | Ver N produtos (na gaveta) | Filtrar | Limpar tudo · chips |
+| Produto | Adicionar à sacola | — | Compartilhar |
+| Sacola | **Finalizar compra** (agora em cima, grande) | — | Atualizar (some com JS: a quantidade atualiza sozinha) |
+| Sacola vazia | Continuar comprando | — | — |
+| Busca (página) | — | Buscar | — |
+| 404 | Continuar comprando | Buscar | — |
+
+Antes, a sacola tinha "Atualizar" **acima** de "Finalizar compra", e a busca e o
+404 usavam o primário para "Buscar". Além disso, o contorno do secundário tinha
+só 35% de opacidade e quase sumia no fundo marfim. Agora ele usa a cor cheia do texto.
+
+### 13.3 Página de coleção (filtros)
+
+O layout herdado da base tinha dropdowns soltos em linha, botões "Aplicar" e
+"Remover todos" sempre visíveis, e contagem e ordenação desalinhadas. Agora:
+
+```
+┌ barra fixa (gruda abaixo do header) ──────────────────────┐
+│ [⚙ Filtrar (2)]  12 produtos            Ordenar por [▾]   │
+└───────────────────────────────────────────────────────────┘
+[Ouro rosé ×] [Anel ×] [R$ 0 – R$ 3.000 ×]  Limpar tudo        ← chips
+```
+
+- **Uma entrada só:** "Filtrar" abre uma **gaveta lateral** com os grupos em
+  acordeão. Os dois primeiros e os que têm filtro ativo vêm abertos.
+- **Aplica na hora:** marcar um filtro atualiza a grade, a contagem e os chips
+  em ~0,3s, sem fechar a gaveta. O botão primário mostra o resultado
+  ("Ver 12 produtos") e só fecha a gaveta.
+- **Filtros de cor** (Metal) viram bolinhas de cor, com o mesmo mapa do catálogo.
+- **Chips** mostram o que está filtrado e removem com um clique.
+- **URL sincronizada:** dá para compartilhar o link filtrado, e o "voltar" do navegador funciona.
+- **Sem JS:** a gaveta vira um painel acima da grade e tudo funciona por GET.
+- A grade usa o **mesmo card** da home (setas, swatches, compra rápida).
+
+Como os dados chegam: pela **Section Rendering API**, igual à busca. A página
+pede `?filtros…&section_id=<id>` e o Shopify devolve só o HTML desta seção, já
+filtrada. O [`assets/colecao.js`](../assets/colecao.js) troca os pedaços marcados
+com `data-*`.
+
+> **Quais filtros aparecem?** Isso é configurado no app gratuito **Search & Discovery**
+> da Shopify (*Admin → Apps*): Disponibilidade, Preço, Tipo de produto, opção
+> "Metal" etc. O tema só desenha o que a loja ativou.
+
+### 13.4 Correção de cache do CSS
+
+O `assets/index.css` carregava os outros arquivos com `@import './base.css'`. Um
+`@import` **não tem a versão** (`?v=…`) que o `asset_url` acrescenta. Depois de
+um deploy, o navegador e a CDN podiam continuar servindo o CSS antigo, e o
+`@import` ainda baixa os arquivos em série. Agora o `theme.liquid` carrega
+`fontes`, `normalizar`, `base` e `movimento` um a um, com `asset_url`. O
+`index.css` foi removido.
+
+### 13.5 Como o Claude pode ver a loja
+
+Esta sessão roda dentro do VS Code e não tem um navegador próprio. Mas o
+computador tem **Chrome/Edge** e **Node**, então dá para tirar prints reais com
+o Playwright usando o navegador já instalado:
+
+1. Passe ao Claude a **URL da loja** e a **senha da vitrine**
+   (*Loja virtual → Preferências → Proteção por senha*). Essa senha só abre a
+   vitrine; **não é** a senha do admin.
+2. Para testar um tema **não publicado**, use o link de **preview**:
+   *Temas → … → Visualizar → Compartilhar prévia*.
+3. O Claude roda um script que abre a loja, digita a senha da vitrine, tira
+   prints em desktop (1440px) e celular (390px) e consegue interagir
+   (hover no card, abrir a busca, adicionar à sacola) para conferir as animações.
+
+**Nunca** passe senha do admin, token de API ou código de verificação: nada disso é necessário.

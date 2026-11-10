@@ -194,11 +194,9 @@
     margin-bottom: 20px;
   }
   .cart__tax-note a { color: inherit; }
-  .cart__checkout { width: 100%; }
-  .cart__update {
-    width: 100%;
-    margin-bottom: 12px;
-  }
+  .cart__checkout { width: 100%; margin-bottom: 8px; }
+  .cart__update { display: flex; margin: 0 auto; }
+  .js .cart__update { display: none; } /* com JS a quantidade atualiza sozinha */
   .cart__additional-checkout {
     margin-top: 12px;
     display: grid;
@@ -401,12 +399,17 @@
             {%- endif -%}
           </p>
 
-          <button type="submit" name="update" class="button button--secondary cart__update">
-            {{ 'sections.cart.update' | t }}
+          {%- comment -%}
+            Hierarquia: "Finalizar compra" é o ÚNICO primário da tela e vem primeiro.
+            "Atualizar sacola" é utilidade → terciário. Com JS ele nem é necessário:
+            mudar a quantidade já atualiza (script no fim desta section).
+          {%- endcomment -%}
+          <button type="submit" name="checkout" class="button button--grande button--bloco cart__checkout">
+            {{ 'sections.cart.checkout' | t }}
           </button>
 
-          <button type="submit" name="checkout" class="button cart__checkout">
-            {{ 'sections.cart.checkout' | t }}
+          <button type="submit" name="update" class="button button--tertiary cart__update" data-cart-atualizar>
+            {{ 'sections.cart.update' | t }}
           </button>
 
           {%- comment -%}

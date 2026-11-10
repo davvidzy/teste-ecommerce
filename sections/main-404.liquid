@@ -40,12 +40,13 @@
         spellcheck="false"
         autocomplete="off"
       >
-      <button type="submit" class="button notfound__search-submit">
+      <button type="submit" class="button button--secondary notfound__search-submit">
         {{ 'general.search.submit' | t }}
       </button>
     </form>
 
-    <a href="{{ routes.root_url }}" class="notfound__home">
+    {%- comment -%} Hierarquia: sair do erro e voltar a comprar é a ação principal (primário); buscar é alternativa (secundário). {%- endcomment -%}
+    <a href="{{ routes.root_url }}" class="button notfound__home">
       {{ 'general.continue_shopping' | t }}
     </a>
   </div>
@@ -95,10 +96,7 @@
     flex: 1;
   }
 
-  .notfound__home {
-    color: var(--color-accent);
-    text-decoration: underline;
-  }
+  .notfound__home { margin-top: 8px; }
 
   @media screen and (max-width: 1000px) {
     .notfound__title {
